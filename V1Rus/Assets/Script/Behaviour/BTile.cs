@@ -6,7 +6,9 @@ public class BTile : MonoBehaviour
 {
     #region ATTRIBUTES
 
-    // Enumerado para poder definir los distintos estados en los que puede estar una etiqueta
+    /// <summary>
+    /// Enumerado para poder definir los distintos estados en los que puede estar una casilla
+    /// </summary>
     public enum ETileState 
     {
         Empty,
@@ -16,23 +18,29 @@ public class BTile : MonoBehaviour
         Enemy
     }
 
-    // Estado de una casilla
+    /// <summary>
+    /// Estado de la casilla
+    /// </summary>
     public ETileState currentState;
 
-    // Atributos temporales
+    /// Atributos temporales
     private bool show = false;
     private bool hide = false;
     private float transparency;
+
     #endregion
 
     #region METHODS
-    // Start is called before the first frame update
+    /// Start is called before the first frame update
     void Start()
     {
         transparency = this.gameObject.GetComponent<Renderer>().material.GetFloat("_Transparency");
     }
 
-    // Cambio del estado de la Casilla
+    /// <summary>
+    /// La funcion cambia el estado de la casilla
+    /// </summary> 
+    /// <param name="newState"> ETileState estado que queremos aplicar a la casilla </param>
     void SwitchCurrentState(ETileState newState)
     {
         currentState = newState;
@@ -57,18 +65,14 @@ public class BTile : MonoBehaviour
         else if (show && transparency < 1)
         {
             transparency += 5 * Time.deltaTime;
-            this.gameObject.GetComponent<Renderer>().material.SetFloat("_Transparency", transparency);
+            this.gameObject.GetComponent<Renderer>().material.SetFloat("_Transparency", Mathf.Clamp(transparency, 0, 1));
         }
 
         if(hide && transparency > 0)
         {
             transform.position -= transform.up * Time.deltaTime;
             transparency -= 1 * Time.deltaTime;
-            if (transparency < 0)
-            {
-                transparency = 0;
-            }
-            this.gameObject.GetComponent<Renderer>().material.SetFloat("_Transparency", transparency);
+            this.gameObject.GetComponent<Renderer>().material.SetFloat("_Transparency", Mathf.Clamp(transparency,0,1));
         }
     }
 
