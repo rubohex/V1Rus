@@ -6,38 +6,30 @@ public class BCameraController : MonoBehaviour
 {
     #region ATRIBUTES
 
-    [Header("Opciones Camara")]
-    /// <summary>
-    /// Velocidad de movimiento transversal de la camara
-    /// </summary>
-    public float cameraSpeed = 20f;
+    [Header("Data")]
 
-    [Header("Control keys")]
+    /// Datos de la Camara
+    public DCameraInfo cameraInfo;
 
-    /// <sumary>
     /// Codigo de tecla para rotar -90º
-    /// </sumary>
-    public KeyCode rotateLeft = KeyCode.E;
-    /// <sumary>
+    private KeyCode rotateLeft;
     /// Codigo de tecla para rotar -90º
-    /// </sumary>
-    public KeyCode rotateRight = KeyCode.Q;
-    /// <sumary>
+    private KeyCode rotateRight;
+
     /// Codigo de tecla para mover hacia arriba
-    /// </sumary>
-    public KeyCode moveUp = KeyCode.UpArrow;
-    /// <sumary>
+    private KeyCode moveUp;
+
     /// Codigo de tecla para mover hacia abajo
-    /// </sumary>
-    public KeyCode moveDown = KeyCode.DownArrow;
-    /// <sumary>
+    private KeyCode moveDown;
+
     /// Codigo de tecla para mover a la izquierda
-    /// </sumary>
-    public KeyCode moveLeft = KeyCode.LeftArrow;
-    /// <sumary>
+    private KeyCode moveLeft;
+
     /// Codigo de tecla para rotar -90º
-    /// </sumary>
-    public KeyCode moveRight = KeyCode.RightArrow;
+    private KeyCode moveRight;
+
+    /// Velocidad de movimiento transversal de la camara
+    private float cameraSpeed;
 
     /// Borde a partir del que notamos el raton en el mapa
     private float mapBorderThickness = 10f;
@@ -57,6 +49,18 @@ public class BCameraController : MonoBehaviour
     #endregion
 
     #region METHODS
+
+    private void Awake()
+    {
+        // Inicializamos los valores en funcion de los datos
+        rotateLeft = cameraInfo.rotateLeft;
+        rotateRight = cameraInfo.rotateRight;
+        moveUp = cameraInfo.moveUp;
+        moveDown = cameraInfo.moveDown;
+        moveLeft = cameraInfo.moveLeft;
+        moveRight = cameraInfo.moveRight;
+        cameraSpeed = cameraInfo.cameraSpeed;
+    }
 
     /// Start is called before the first frame update
     void Start()
@@ -176,7 +180,7 @@ public class BCameraController : MonoBehaviour
         if (direction<0)
         {
             // Esperamos un frame en caso de ser 0 el angulo para evitar un problema con el giro
-            if (target.eulerAngles.y == 0f)
+            if (target.eulerAngles.y < 5f)
             {
                 yield return new WaitForSeconds(0.1f);
             }

@@ -9,7 +9,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 41584b40e43c8c64eae9445b96786572, type: 3}
-  m_Name: DemoBoardInfo
+  m_Script: {fileID: 11500000, guid: cf9ab8025aa5bfb42b357ee291a58f54, type: 3}
+  m_Name: BasicCameraInfo
   m_EditorClassIdentifier: 
-  startAP: 30
+  cameraSpeed: 20
+  rotateLeft: 101
+  rotateRight: 113
+  moveUp: 273
+  moveDown: 274
+  moveLeft: 276
+  moveRight: 275

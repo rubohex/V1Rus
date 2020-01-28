@@ -5,5 +5,9 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "BoardInfo", menuName = "ScriptableObjects/BoardInfo", order = 1)]
 public class DBoardInfo : ScriptableObject
 {
-    public byte startAP;
+    [Header("Opciones De Tablero")]
+    /// <summary>
+    /// Numero de AP asignados en el nivel
+    /// </summary>
+    public byte APNivel;
 }

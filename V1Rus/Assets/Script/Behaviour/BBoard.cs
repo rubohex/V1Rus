@@ -6,7 +6,6 @@ using UnityEngine;
 public class BBoard : MonoBehaviour
 {
     #region ATTRIBUTES
-
     
     [Header("Data")]
     [SerializeField]
