@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class BCameraController : MonoBehaviour
@@ -29,7 +28,10 @@ public class BCameraController : MonoBehaviour
     private KeyCode moveRight;
 
     /// Velocidad de movimiento transversal de la camara
-    private float cameraSpeed;
+    private float cameraMoveSpeed;
+
+    /// Velocidad de rotacion de la camara
+    private float cameraRotationSpeed;
 
     /// Borde a partir del que notamos el raton en el mapa
     private float mapBorderThickness = 10f;
@@ -59,7 +61,8 @@ public class BCameraController : MonoBehaviour
         moveDown = cameraInfo.moveDown;
         moveLeft = cameraInfo.moveLeft;
         moveRight = cameraInfo.moveRight;
-        cameraSpeed = cameraInfo.cameraSpeed;
+        cameraMoveSpeed = cameraInfo.moveSpeed;
+        cameraRotationSpeed = cameraInfo.rotationSpeed;
     }
 
     /// Start is called before the first frame update
@@ -92,7 +95,7 @@ public class BCameraController : MonoBehaviour
         if (Input.GetKeyDown(rotateLeft) && !isRotating)
         {
             // Añadimos una velocidad de giro
-            GetComponentInParent<Rigidbody>().angularVelocity = new Vector3(0f, -2f, 0f);
+            GetComponentInParent<Rigidbody>().angularVelocity = new Vector3(0f, -cameraRotationSpeed, 0f);
             isRotating = true;
             // Llamamos a una rutina paralela para que pare el giro
             StartCoroutine(stopRotation(-1));
@@ -102,7 +105,7 @@ public class BCameraController : MonoBehaviour
         if (Input.GetKeyDown(rotateRight) && !isRotating)
         {
             // Añadimos una velocidad de giro
-            GetComponentInParent<Rigidbody>().angularVelocity = new Vector3(0f, 2f, 0f);
+            GetComponentInParent<Rigidbody>().angularVelocity = new Vector3(0f, cameraRotationSpeed, 0f);
             isRotating = true;
             // Llamamos a una rutina paralela para que pare el giro
             StartCoroutine(stopRotation(1));
@@ -119,8 +122,8 @@ public class BCameraController : MonoBehaviour
             camFordward.y = 0;
             camFordward.Normalize();
 
-            pos.x += camFordward.x * cameraSpeed * Time.deltaTime;
-            pos.z += camFordward.z * cameraSpeed * Time.deltaTime;
+            pos.x += camFordward.x * cameraMoveSpeed * Time.deltaTime;
+            pos.z += camFordward.z * cameraMoveSpeed * Time.deltaTime;
         }
 
         if (Input.GetKey(moveDown) || Input.mousePosition.y <= mapBorderThickness)
@@ -128,20 +131,20 @@ public class BCameraController : MonoBehaviour
             camFordward.y = 0;
             camFordward.Normalize();
 
-            pos.x -= camFordward.x * cameraSpeed * Time.deltaTime;
-            pos.z -= camFordward.z * cameraSpeed * Time.deltaTime;
+            pos.x -= camFordward.x * cameraMoveSpeed * Time.deltaTime;
+            pos.z -= camFordward.z * cameraMoveSpeed * Time.deltaTime;
         }
 
         if (Input.GetKey(moveRight) || Input.mousePosition.x >= Screen.width - mapBorderThickness)
         {
-            pos.x += camRight.x * cameraSpeed * Time.deltaTime;
-            pos.z += camRight.z * cameraSpeed * Time.deltaTime;
+            pos.x += camRight.x * cameraMoveSpeed * Time.deltaTime;
+            pos.z += camRight.z * cameraMoveSpeed * Time.deltaTime;
         }
 
         if (Input.GetKey(moveLeft) || Input.mousePosition.x <= mapBorderThickness)
         {
-            pos.x -= camRight.x * cameraSpeed * Time.deltaTime;
-            pos.z -= camRight.z * cameraSpeed * Time.deltaTime;
+            pos.x -= camRight.x * cameraMoveSpeed * Time.deltaTime;
+            pos.z -= camRight.z * cameraMoveSpeed * Time.deltaTime;
         }
 
         // Acotamos los movimientos dentro del tablerro
@@ -176,22 +179,11 @@ public class BCameraController : MonoBehaviour
         // Guardamos la rotacion anterior
         Vector3 prevRotation = target.eulerAngles;
 
-        // Dependiendo del sentido de la rotacion esperamos un tiempo distinto
-        if (direction<0)
-        {
-            // Esperamos un frame en caso de ser 0 el angulo para evitar un problema con el giro
-            if (target.eulerAngles.y < 5f)
-            {
-                yield return new WaitForSeconds(0.1f);
-            }
-            // Esperamos hasta obtener el angulo deseado
-            yield return new WaitUntil(() => target.eulerAngles.y < Mathf.Clamp((360 + prevRotation.y - 90) % 360, 1, 359));
-        }
-        else
-        {
-            // Esperamos hasta obtener el angulo deseado
-            yield return new WaitUntil(() => target.eulerAngles.y > Mathf.Clamp(prevRotation.y + 90, 0, 359));
-        }
+        // Calculamos el tiempo que tenemos que esperar en funcion a la velocidad de rotacion
+        float timeToWait = (Mathf.PI / 2) / cameraRotationSpeed;
+        // Esperamos el tiempo necesario
+        yield return new WaitForSeconds(timeToWait);
+
         // Paramos el giro
         GetComponentInParent<Rigidbody>().angularVelocity = new Vector3(0, 0, 0);
         // Redondeamos la rotacion para que sea exacta

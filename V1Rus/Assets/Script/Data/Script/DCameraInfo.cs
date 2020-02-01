@@ -9,7 +9,11 @@ public class DCameraInfo : ScriptableObject
     /// <summary>
     /// Velocidad de movimiento transversal de la camara
     /// </summary>
-    public float cameraSpeed = 20f;
+    public float moveSpeed = 20f;
+    /// <summary>
+    /// Velocidad de rotacion de la camara
+    /// </summary>
+    public float rotationSpeed = 2f;
 
     [Header("Teclas control")]
 

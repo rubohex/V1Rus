@@ -13,7 +13,7 @@ public class BBoard : MonoBehaviour
     /// <summary>
     /// Datos del nivel
     /// </summary>
-    DBoardInfo boardInfo;
+    public DBoardInfo boardInfo;
 
     /// <summary>
     /// Prefab con la casilla basica
@@ -21,7 +21,10 @@ public class BBoard : MonoBehaviour
     public GameObject Tile;
     
     /// Diccionario para almacenar las localizaciones de las casillas en funcion de los indices de un array
-    private readonly Dictionary<int, Vector3> locations = new Dictionary<int, Vector3>();
+    private Dictionary<int, Vector2> locations = new Dictionary<int, Vector2>();
+
+    /// Diccionario para almacena los costes de los bordes con respecto a cada casilla
+    private Dictionary<int, Dictionary<int, int>> edges = new Dictionary<int, Dictionary<int, int>>();
 
     /// Indice de la casilla incial y de la casilla final
     private int startIndex;
@@ -80,7 +83,7 @@ public class BBoard : MonoBehaviour
 
             //Debug.Log("x " +xItemIndex + " z" + zItemIndex+ " " + position);
 
-            locations.Add((xItemIndex + zItemIndex), position);
+            locations.Add((xItemIndex + zItemIndex), new Vector2(position.x,position.z));
 
             //Guardamos el indice de la casilla inicial y final
             if(item.currentState == BTile.ETileState.Start)
@@ -96,7 +99,12 @@ public class BBoard : MonoBehaviour
 
         }
 
-        Debug.Log("StartIndex " + startIndex + " EndIndex " + endIndex);
+        // Para cada casilla almacenamos sus bordes usando como referente su indice en el array
+        foreach (int index in locations.Keys)
+        {
+            // Llamamos a la funcion getLocaledges que nos devuelve los bordes del indice
+            edges.Add(index, getLocalEdges(index));
+        }
     }
 
     /// <summary>
@@ -108,17 +116,124 @@ public class BBoard : MonoBehaviour
     {
         return new Vector4(minX,maxX,minZ,maxZ);
     }
+    
+    /// <summary>
+    /// Devolvemos el tamaño del tablero en casillas
+    /// </summary>
+    /// <returns> Vector2 que contiene xSize seguido de zSize </returns>
+    public Vector2 getBoardShape()
+    {
+        return new Vector2(xSize, zSize);
+    }
+    /// <summary>
+    /// Devuelve el Ap asignado en este nivel
+    /// </summary>
+    /// <returns></returns>
+    public int getBoardAp()
+    {
+        return boardInfo.APNivel;
+    }
 
     /// <summary>
     /// Transforma una coordenada en el indice dentro del tablero
     /// </summary>
     /// <param name="position"> Vector 3 debe ser el centro de una casilla </param>
-    /// <returns name="indice"> Indice correspondiente a la posicion </returns>
+    /// <returns> Indice correspondiente a la posicion </returns>
     public int positionToIndex(Vector3 position)
     {
-        return locations.FirstOrDefault(x => x.Value == position).Key;
+
+        return locations.FirstOrDefault(x => x.Value == new Vector2(position.x,position.z)).Key;
     }
 
+    /// <summary>
+    /// Transforma un indice en una posicion
+    /// </summary>
+    /// <param name="index"> Indice de la casilla </param>
+    /// <returns></returns>
+    public Vector2 indexToVector(int index)
+    {
+        return locations[index];
+    }
+
+    /// <summary>
+    /// Obtenemos un diccionario con los 4 indices que lo rodean y sus respectivos costes
+    /// </summary>
+    /// <param name="index"> Int indica el indice del que queremos obtener su diccionario</param>
+    /// <returns> Diccionario con los respectivos costes </returns>
+    private Dictionary<int,int> getLocalEdges(int index)
+    {
+        // Diccionario que llenaremos con la informacion pertinente
+        Dictionary<int, int> localEdges = new Dictionary<int, int>();
+        // Variable auxiliar para guardar el indice que estudiamos en cada momento
+        int auxIndex;
+
+        // En todos los casos observasmos si el indice calculado esta contenido en el diccionario de coolisiones
+        // En caso de no estar tiene un coste de 0 y en caso de si estar tendra el coste basico impuesto en board info
+        // Al sumarle al indice xSize obtenemos la casilla al Norte
+        auxIndex = index + xSize;
+        if (locations.ContainsKey(auxIndex))
+        {
+            localEdges.Add(auxIndex, boardInfo.BaseEdges[0]);
+        }
+        else
+        {
+            localEdges.Add(auxIndex, 0);
+        }
+
+        // Al sumarle uno obtenemos la casilla al este
+        auxIndex = index + 1;
+        if (locations.ContainsKey(auxIndex))
+        {
+            localEdges.Add(auxIndex, boardInfo.BaseEdges[1]);
+        }
+        else
+        {
+            localEdges.Add(auxIndex, 0);
+        }
+
+        // Al restar xSize obtenemos la casilla al sure
+        auxIndex = index - xSize;
+        if (locations.ContainsKey(auxIndex))
+        {
+            localEdges.Add(auxIndex, boardInfo.BaseEdges[2]);
+        }
+        else
+        {
+            localEdges.Add(auxIndex, 0);
+        }
+
+        // Al restar 1 obtenemos la casilla al oeste
+        auxIndex = index - 1;
+        if (locations.ContainsKey(auxIndex))
+        {
+            localEdges.Add(auxIndex, boardInfo.BaseEdges[3]);
+        }
+        else
+        {
+            localEdges.Add(auxIndex, 0);
+        }
+
+        return localEdges;
+    }
+
+    /// <summary>
+    /// Devuelve el coste de entrar a objectiveTile desde acutalTile
+    /// </summary>
+    /// <param name="actualTile"> Int indica el indice de la casilla actual</param>
+    /// <param name="objectiveTile"> Int indica el indice de la casilla objetivo </param>
+    /// <returns> Int que representa el coste del movimiento</returns>
+    public int costToEnter(int actualTile, int objectiveTile)
+    {
+        if (edges.ContainsKey(actualTile) && edges[actualTile].ContainsKey(objectiveTile))
+        {
+            return edges[actualTile][objectiveTile];
+        }
+        else
+        {
+            return 0;
+        }
+        
+    }
     #endregion
 
     #region Temporal hasta que decidamos como aparecen los niveles
