@@ -93,7 +93,7 @@ public class BPlayer : MonoBehaviour
         // Control movimiento
         if (Input.GetKeyDown(move) && !isMoving)
         {
-            int objectiveIndex = tileIndex + direction[(int) transform.eulerAngles.y];
+            int objectiveIndex = tileIndex + direction[Mathf.RoundToInt(transform.eulerAngles.y)];
             int cost = board.costToEnter(tileIndex,objectiveIndex);
             if (cost > 0)
             {

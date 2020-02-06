@@ -10,8 +10,13 @@ public class DBoardInfo : ScriptableObject
     /// Numero de AP asignados en el nivel
     /// </summary>
     public byte APNivel;
+
     /// <summary>
     /// Bordes basicos 1 para poder pasar 0 para no poder
     /// </summary>
-    public int[] BaseEdges = new int[4];
+    public int northEdge = 1;
+    public int eastEdge = 1;
+    public int southEdge = 1;
+    public int westEdge = 1;
+
 }

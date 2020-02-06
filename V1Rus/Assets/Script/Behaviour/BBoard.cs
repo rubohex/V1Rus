@@ -105,6 +105,9 @@ public class BBoard : MonoBehaviour
             // Llamamos a la funcion getLocaledges que nos devuelve los bordes del indice
             edges.Add(index, getLocalEdges(index));
         }
+
+        addWallEdges();
+
     }
 
     /// <summary>
@@ -156,6 +159,57 @@ public class BBoard : MonoBehaviour
     }
 
     /// <summary>
+    /// Recorre todos los muros y añade sus bordes a los del tablero
+    /// </summary>
+    private void addWallEdges()
+    {
+        // Buscamos todos los muros y los guardamos en un array
+        BMuro[] walls = FindObjectsOfType<BMuro>();
+
+        // Realizamos el mismo proceso para cada mur
+        foreach (BMuro wall in walls)
+        {
+            // Calculamos su indice
+            int index = positionToIndex(wall.transform.position);
+            int auxIndex;
+
+            // Para cada uno de las casillas que lo rodea actualizamos el eje en ambos sentidos
+            // Al sumarle xSize obtenemos la casilla norte
+            auxIndex = index + xSize;
+            if (locations.ContainsKey(auxIndex))
+            {
+                edges[index][auxIndex] *= wall.northEdge;
+                edges[auxIndex][index] *= wall.northEdge;
+            }
+
+            // Al sumarle uno obtenemos la casilla al este
+            auxIndex = index + 1;
+            if (locations.ContainsKey(auxIndex))
+            {
+                edges[index][auxIndex] *= wall.eastEdge;
+                edges[auxIndex][index] *= wall.eastEdge;
+            }
+
+            // Al restar xSize obtenemos la casilla al sur
+            auxIndex = index - xSize;
+            if (locations.ContainsKey(auxIndex))
+            {
+                edges[index][auxIndex] *= wall.southEdge;
+                edges[auxIndex][index] *= wall.southEdge;
+            }
+
+            // Al restar 1 obtenemos la casilla al oeste
+            auxIndex = index - 1;
+            if (locations.ContainsKey(auxIndex))
+            {
+                edges[index][auxIndex] *= wall.westEdge;
+                edges[auxIndex][index] *= wall.westEdge;
+            }
+
+        }
+    }
+
+    /// <summary>
     /// Obtenemos un diccionario con los 4 indices que lo rodean y sus respectivos costes
     /// </summary>
     /// <param name="index"> Int indica el indice del que queremos obtener su diccionario</param>
@@ -167,13 +221,12 @@ public class BBoard : MonoBehaviour
         // Variable auxiliar para guardar el indice que estudiamos en cada momento
         int auxIndex;
 
-        // En todos los casos observasmos si el indice calculado esta contenido en el diccionario de coolisiones
-        // En caso de no estar tiene un coste de 0 y en caso de si estar tendra el coste basico impuesto en board info
-        // Al sumarle al indice xSize obtenemos la casilla al Norte
+        // Calculamos todos los ejes a partir de los ejes basicos guardados en boardInfo
+        // Al sumarle xSize obtenemos la casilla norte
         auxIndex = index + xSize;
         if (locations.ContainsKey(auxIndex))
         {
-            localEdges.Add(auxIndex, boardInfo.BaseEdges[0]);
+            localEdges.Add(auxIndex, boardInfo.northEdge);
         }
         else
         {
@@ -184,18 +237,18 @@ public class BBoard : MonoBehaviour
         auxIndex = index + 1;
         if (locations.ContainsKey(auxIndex))
         {
-            localEdges.Add(auxIndex, boardInfo.BaseEdges[1]);
+            localEdges.Add(auxIndex, boardInfo.eastEdge);
         }
         else
         {
             localEdges.Add(auxIndex, 0);
         }
 
-        // Al restar xSize obtenemos la casilla al sure
+        // Al restar xSize obtenemos la casilla al sur
         auxIndex = index - xSize;
         if (locations.ContainsKey(auxIndex))
         {
-            localEdges.Add(auxIndex, boardInfo.BaseEdges[2]);
+            localEdges.Add(auxIndex, boardInfo.northEdge);
         }
         else
         {
@@ -206,7 +259,7 @@ public class BBoard : MonoBehaviour
         auxIndex = index - 1;
         if (locations.ContainsKey(auxIndex))
         {
-            localEdges.Add(auxIndex, boardInfo.BaseEdges[3]);
+            localEdges.Add(auxIndex, boardInfo.northEdge);
         }
         else
         {
