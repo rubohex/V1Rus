@@ -19,3 +19,4 @@ MonoBehaviour:
   rotateLeft: 97
   rotateRight: 100
   move: 119
+  recogerCable: 0

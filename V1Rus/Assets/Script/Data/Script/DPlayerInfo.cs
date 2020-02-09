@@ -43,4 +43,11 @@ public class DPlayerInfo : ScriptableObject {
     /// Codigo de tecla para mover hacia delante
     /// </sumary>
     public KeyCode move = KeyCode.W;
+
+    [Header("Habilidades")]
+
+    ///<summary>
+    /// Indica si el jugador posee la habilidad de Recoger Cable
+    /// </summary>
+    public bool recogerCable;
 }
