@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class BPlayer : MonoBehaviour
 {
@@ -39,6 +40,9 @@ public class BPlayer : MonoBehaviour
     
     /// Tablero del nivel
     private BBoard board;
+
+    /// Texto del canvas de prueba
+    public Text textAp;
     #endregion
 
     #region METHODS
@@ -64,6 +68,8 @@ public class BPlayer : MonoBehaviour
         direction.Add(90, 1);
         direction.Add(180, -xSize);
         direction.Add(270, -1);
+
+        textAp.text = "AP: " + Ap;
 
     }
 
@@ -91,7 +97,7 @@ public class BPlayer : MonoBehaviour
         }
 
         // Control movimiento
-        if (Input.GetKeyDown(move) && !isMoving)
+        if (Input.GetKeyDown(move) && !isMoving && Ap>0)
         {
             int objectiveIndex = tileIndex + direction[Mathf.RoundToInt(transform.eulerAngles.y)];
             int cost = board.costToEnter(tileIndex,objectiveIndex);
@@ -101,10 +107,16 @@ public class BPlayer : MonoBehaviour
                 GetComponent<Rigidbody>().velocity = transform.forward * moveSpeed;
                 StartCoroutine(stopMovement(objectiveIndex));
                 tileIndex = objectiveIndex;
-                changeAP(-1);
+                //Restamos al AP el coste de la casilla a la que se mueve(1 si es una casilla normal, -1 si recoge cable)
+                changeAP(-cost);
                 Debug.Log("Ap restante: "+ Ap );
+                textAp.text = "AP: " + Ap;
             }
 
+        }
+        if (Ap == 0)
+        {
+            textAp.color = Color.red;
         }
     }
 
