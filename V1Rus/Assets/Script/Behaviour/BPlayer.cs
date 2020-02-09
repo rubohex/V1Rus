@@ -19,6 +19,9 @@ public class BPlayer : MonoBehaviour
     /// Codigo de tecla para mover hacia arriba
     private KeyCode move;
 
+    /// Indica si tenemos activa la habilidad para recoger Cable
+    private bool recogerCable;
+
     /// Ap maximo del jugador
     private int maxAP;
     /// Ap actual del jugador
@@ -54,6 +57,7 @@ public class BPlayer : MonoBehaviour
         move = playerInfo.move;
         rotationSpeed = playerInfo.rotationSpeed;
         moveSpeed = playerInfo.moveSpeed;
+        recogerCable = playerInfo.recogerCable;
     }
 
     // Start is called before the first frame update
@@ -99,24 +103,62 @@ public class BPlayer : MonoBehaviour
         // Control movimiento
         if (Input.GetKeyDown(move) && !isMoving && Ap>0)
         {
+            // Obtenemos el indice de la casilla a la que queremos ir a partir de la casilla acutal y la casilla a la que miramos
             int objectiveIndex = tileIndex + direction[Mathf.RoundToInt(transform.eulerAngles.y)];
+
+            // Obtenemos tambien el coste de dicha casilla
             int cost = board.costToEnter(tileIndex,objectiveIndex);
-            if (cost > 0)
+            
+            // Obsevamos que el coste es distinto de cero
+            if (cost != 0 && cost <= Ap)
             {
+                // Informamos de que nos estamos moviendo
                 isMoving = true;
+
+                // Obtenemos el regidbody y le damos una velocidad
                 GetComponent<Rigidbody>().velocity = transform.forward * moveSpeed;
+                // Lanzamos una Corrutina para que pare al jugador al llegar al punto
                 StartCoroutine(stopMovement(objectiveIndex));
+
+                // Miramos si la casilla en la que entramos tiene particuals de datos o no esto lo podemos ver con el coste
+                if(cost > 0)
+                {
+                    // Spawneamos las particulas
+                    board.spawnParticle(tileIndex, recogerCable);
+                    
+                }
+                else if (cost < 0 && recogerCable)
+                {
+                    // Eliminamos la particula
+                    board.despawnParticle(objectiveIndex);
+                }
+
+                // Cambiamos a casilla en la que estamos y el coste
                 tileIndex = objectiveIndex;
+<<<<<<< HEAD
+                changeAP(-cost);
+
+=======
                 //Restamos al AP el coste de la casilla a la que se mueve(1 si es una casilla normal, -1 si recoge cable)
                 changeAP(-cost);
+>>>>>>> 8058bb86fc9f547eccbe3d9417f8cfa5732c4aa0
                 Debug.Log("Ap restante: "+ Ap );
                 textAp.text = "AP: " + Ap;
             }
 
         }
+<<<<<<< HEAD
+
+        //Temporal activacion de recogerDatos hasta que tengamos la habilidad util para pruebas
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            recogerCable = !recogerCable;
+            board.activateDataParticles();
+=======
         if (Ap == 0)
         {
             textAp.color = Color.red;
+>>>>>>> 8058bb86fc9f547eccbe3d9417f8cfa5732c4aa0
         }
     }
 
