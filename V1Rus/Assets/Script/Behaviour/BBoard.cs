@@ -198,32 +198,91 @@ public class BBoard : MonoBehaviour
         auxIndex = index + xSize;
         if (locations.ContainsKey(auxIndex))
         {
-            edges[index][auxIndex] *= wall.northEdge;
-            edges[auxIndex][index] *= wall.northEdge;
+            int sign = (int) Mathf.Sign(wall.northEdge);
+            edges[index][auxIndex] = sign * Mathf.Abs(wall.northEdge * edges[index][auxIndex]); 
+            edges[auxIndex][index] = sign * Mathf.Abs(wall.northEdge * edges[auxIndex][index]);
+            float debug = sign * Mathf.Abs(wall.northEdge * edges[index][auxIndex]);
+            float debug2 = sign * Mathf.Abs(wall.northEdge * edges[auxIndex][index]);
         }
 
         // Al sumarle uno obtenemos la casilla al este
         auxIndex = index + 1;
         if (locations.ContainsKey(auxIndex))
         {
-            edges[index][auxIndex] *= wall.eastEdge;
-            edges[auxIndex][index] *= wall.eastEdge;
+            int sign = (int)Mathf.Sign(wall.eastEdge);
+            edges[index][auxIndex] = sign * Mathf.Abs(wall.eastEdge * edges[index][auxIndex]);
+            edges[auxIndex][index] = sign * Mathf.Abs(wall.eastEdge * edges[auxIndex][index]);
+
+            float debug = sign * Mathf.Abs(wall.eastEdge * edges[index][auxIndex]);
+            float debug2 = sign * Mathf.Abs(wall.eastEdge * edges[auxIndex][index]);
         }
 
         // Al restar xSize obtenemos la casilla al sur
         auxIndex = index - xSize;
         if (locations.ContainsKey(auxIndex))
         {
-            edges[index][auxIndex] *= wall.southEdge;
-            edges[auxIndex][index] *= wall.southEdge;
+            int sign = (int)Mathf.Sign(wall.southEdge);
+            edges[index][auxIndex] = sign * Mathf.Abs(wall.southEdge * edges[index][auxIndex]);
+            edges[auxIndex][index] = sign * Mathf.Abs(wall.southEdge * edges[auxIndex][index]);
+
+            float debug = sign * Mathf.Abs(wall.southEdge * edges[index][auxIndex]);
+            float debug2 = sign * Mathf.Abs(wall.southEdge * edges[auxIndex][index]);
         }
 
         // Al restar 1 obtenemos la casilla al oeste
         auxIndex = index - 1;
         if (locations.ContainsKey(auxIndex))
         {
-            edges[index][auxIndex] *= wall.westEdge;
-            edges[auxIndex][index] *= wall.westEdge;
+            int sign = (int)Mathf.Sign(wall.westEdge);
+            edges[index][auxIndex] = sign * Mathf.Abs(wall.westEdge * edges[index][auxIndex]);
+            edges[auxIndex][index] = sign * Mathf.Abs(wall.westEdge * edges[auxIndex][index]);
+
+            float debug = sign * Mathf.Abs(wall.westEdge * edges[index][auxIndex]);
+            float debug2 = sign * Mathf.Abs(wall.westEdge * edges[auxIndex][index]);
+        }
+    }
+
+    /// <summary>
+    /// Añade los bordes de un muro a la casilla
+    /// </summary>
+    /// <param name="wall"> Muro del que obtenemos los bordes</param>
+    private void removeWallEdges(BMuro wall)
+    {
+        // Calculamos su indice
+        int index = positionToIndex(wall.transform.position);
+        int auxIndex;
+
+        // Para cada uno de las casillas que lo rodea actualizamos el eje en ambos sentidos
+        // Al sumarle xSize obtenemos la casilla norte
+        auxIndex = index + xSize;
+        if (locations.ContainsKey(auxIndex))
+        {
+            edges[index][auxIndex] = Mathf.Abs(edges[index][auxIndex] / wall.northEdge);
+            edges[auxIndex][index] = Mathf.Abs(edges[auxIndex][index] / wall.northEdge);
+        }
+
+        // Al sumarle uno obtenemos la casilla al este
+        auxIndex = index + 1;
+        if (locations.ContainsKey(auxIndex))
+        {
+            edges[index][auxIndex] = Mathf.Abs(edges[index][auxIndex] / wall.eastEdge);
+            edges[auxIndex][index] = Mathf.Abs(edges[auxIndex][index] / wall.eastEdge);
+        }
+
+        // Al restar xSize obtenemos la casilla al sur
+        auxIndex = index - xSize;
+        if (locations.ContainsKey(auxIndex))
+        {
+            edges[index][auxIndex] = Mathf.Abs(edges[index][auxIndex] / wall.southEdge);
+            edges[auxIndex][index] = Mathf.Abs(edges[auxIndex][index] / wall.southEdge);
+        }
+
+        // Al restar 1 obtenemos la casilla al oeste
+        auxIndex = index - 1;
+        if (locations.ContainsKey(auxIndex))
+        {
+            edges[index][auxIndex] = Mathf.Abs(edges[index][auxIndex] / wall.westEdge);
+            edges[auxIndex][index] = Mathf.Abs(edges[auxIndex][index] / wall.westEdge);
         }
     }
 
@@ -270,8 +329,8 @@ public class BBoard : MonoBehaviour
         GameObject particle = dataParticles[index];
         dataParticles.Remove(index);
 
-        // Añadimos los bordes de la particula al tablero lo que devolvera los bordes a su estado anterior
-        addWallEdges(particle.GetComponent<BMuro>());
+        // Devolvemos los bordes a su estado anterior
+        removeWallEdges(particle.GetComponent<BMuro>());
 
         // Eliminamos la particula de datos
         Destroy(particle);
