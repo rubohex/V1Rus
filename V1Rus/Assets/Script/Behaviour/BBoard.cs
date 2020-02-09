@@ -49,11 +49,12 @@ public class BBoard : MonoBehaviour
     private float minZ;
     private float maxZ;
 
-    
+
     #endregion
 
     #region METHODS
 
+    #region AWAKE START UPDATE
     private void Awake()
     {
         //Obtenemos el tamaño de la casilla base y lo guardamos para usarlo mas tarde
@@ -105,7 +106,7 @@ public class BBoard : MonoBehaviour
                 endIndex = xItemIndex + zItemIndex;
             }
 
-            Debug.Log("Indice " + (xItemIndex + zItemIndex) + " localizacion " + locations[(xItemIndex + zItemIndex)]);
+            //Debug.Log("Indice " + (xItemIndex + zItemIndex) + " localizacion " + locations[(xItemIndex + zItemIndex)]);
 
         }
 
@@ -119,6 +120,9 @@ public class BBoard : MonoBehaviour
         addWallsEdges();
 
     }
+    #endregion
+
+    #region GETTERS
 
     /// <summary>
     /// Devolvemos los limites del Tablero en un array de 4 componentes
@@ -127,9 +131,9 @@ public class BBoard : MonoBehaviour
     /// seguida de la minima coordenada de z y la maxima </returns>
     public Vector4 getBoardLimits()
     {
-        return new Vector4(minX,maxX,minZ,maxZ);
+        return new Vector4(minX, maxX, minZ, maxZ);
     }
-    
+
     /// <summary>
     /// Devolvemos el tamaño del tablero en casillas
     /// </summary>
@@ -155,7 +159,7 @@ public class BBoard : MonoBehaviour
     public int positionToIndex(Vector3 position)
     {
 
-        return locations.FirstOrDefault(x => x.Value == new Vector2(position.x,position.z)).Key;
+        return locations.FirstOrDefault(x => x.Value == new Vector2(position.x, position.z)).Key;
     }
 
     /// <summary>
@@ -169,190 +173,11 @@ public class BBoard : MonoBehaviour
     }
 
     /// <summary>
-    /// Recorre todos los muros y añade sus bordes a los del tablero
-    /// </summary>
-    private void addWallsEdges()
-    {
-        // Buscamos todos los muros y los guardamos en un array
-        BMuro[] walls = FindObjectsOfType<BMuro>();
-
-        // Realizamos el mismo proceso para cada mur
-        foreach (BMuro wall in walls)
-        {
-            addWallEdges(wall);
-        }
-    }
-
-    /// <summary>
-    /// Añade los bordes de un muro a la casilla
-    /// </summary>
-    /// <param name="wall"> Muro del que obtenemos los bordes</param>
-    private void addWallEdges(BMuro wall)
-    {
-        // Calculamos su indice
-        int index = positionToIndex(wall.transform.position);
-        int auxIndex;
-
-        // Para cada uno de las casillas que lo rodea actualizamos el eje en ambos sentidos
-        // Al sumarle xSize obtenemos la casilla norte
-        auxIndex = index + xSize;
-        if (locations.ContainsKey(auxIndex))
-        {
-            int sign = (int) Mathf.Sign(wall.northEdge);
-            edges[index][auxIndex] = sign * Mathf.Abs(wall.northEdge * edges[index][auxIndex]); 
-            edges[auxIndex][index] = sign * Mathf.Abs(wall.northEdge * edges[auxIndex][index]);
-            float debug = sign * Mathf.Abs(wall.northEdge * edges[index][auxIndex]);
-            float debug2 = sign * Mathf.Abs(wall.northEdge * edges[auxIndex][index]);
-        }
-
-        // Al sumarle uno obtenemos la casilla al este
-        auxIndex = index + 1;
-        if (locations.ContainsKey(auxIndex))
-        {
-            int sign = (int)Mathf.Sign(wall.eastEdge);
-            edges[index][auxIndex] = sign * Mathf.Abs(wall.eastEdge * edges[index][auxIndex]);
-            edges[auxIndex][index] = sign * Mathf.Abs(wall.eastEdge * edges[auxIndex][index]);
-
-            float debug = sign * Mathf.Abs(wall.eastEdge * edges[index][auxIndex]);
-            float debug2 = sign * Mathf.Abs(wall.eastEdge * edges[auxIndex][index]);
-        }
-
-        // Al restar xSize obtenemos la casilla al sur
-        auxIndex = index - xSize;
-        if (locations.ContainsKey(auxIndex))
-        {
-            int sign = (int)Mathf.Sign(wall.southEdge);
-            edges[index][auxIndex] = sign * Mathf.Abs(wall.southEdge * edges[index][auxIndex]);
-            edges[auxIndex][index] = sign * Mathf.Abs(wall.southEdge * edges[auxIndex][index]);
-
-            float debug = sign * Mathf.Abs(wall.southEdge * edges[index][auxIndex]);
-            float debug2 = sign * Mathf.Abs(wall.southEdge * edges[auxIndex][index]);
-        }
-
-        // Al restar 1 obtenemos la casilla al oeste
-        auxIndex = index - 1;
-        if (locations.ContainsKey(auxIndex))
-        {
-            int sign = (int)Mathf.Sign(wall.westEdge);
-            edges[index][auxIndex] = sign * Mathf.Abs(wall.westEdge * edges[index][auxIndex]);
-            edges[auxIndex][index] = sign * Mathf.Abs(wall.westEdge * edges[auxIndex][index]);
-
-            float debug = sign * Mathf.Abs(wall.westEdge * edges[index][auxIndex]);
-            float debug2 = sign * Mathf.Abs(wall.westEdge * edges[auxIndex][index]);
-        }
-    }
-
-    /// <summary>
-    /// Añade los bordes de un muro a la casilla
-    /// </summary>
-    /// <param name="wall"> Muro del que obtenemos los bordes</param>
-    private void removeWallEdges(BMuro wall)
-    {
-        // Calculamos su indice
-        int index = positionToIndex(wall.transform.position);
-        int auxIndex;
-
-        // Para cada uno de las casillas que lo rodea actualizamos el eje en ambos sentidos
-        // Al sumarle xSize obtenemos la casilla norte
-        auxIndex = index + xSize;
-        if (locations.ContainsKey(auxIndex))
-        {
-            edges[index][auxIndex] = Mathf.Abs(edges[index][auxIndex] / wall.northEdge);
-            edges[auxIndex][index] = Mathf.Abs(edges[auxIndex][index] / wall.northEdge);
-        }
-
-        // Al sumarle uno obtenemos la casilla al este
-        auxIndex = index + 1;
-        if (locations.ContainsKey(auxIndex))
-        {
-            edges[index][auxIndex] = Mathf.Abs(edges[index][auxIndex] / wall.eastEdge);
-            edges[auxIndex][index] = Mathf.Abs(edges[auxIndex][index] / wall.eastEdge);
-        }
-
-        // Al restar xSize obtenemos la casilla al sur
-        auxIndex = index - xSize;
-        if (locations.ContainsKey(auxIndex))
-        {
-            edges[index][auxIndex] = Mathf.Abs(edges[index][auxIndex] / wall.southEdge);
-            edges[auxIndex][index] = Mathf.Abs(edges[auxIndex][index] / wall.southEdge);
-        }
-
-        // Al restar 1 obtenemos la casilla al oeste
-        auxIndex = index - 1;
-        if (locations.ContainsKey(auxIndex))
-        {
-            edges[index][auxIndex] = Mathf.Abs(edges[index][auxIndex] / wall.westEdge);
-            edges[auxIndex][index] = Mathf.Abs(edges[auxIndex][index] / wall.westEdge);
-        }
-    }
-
-    /// <summary>
-    /// Spawnea particulas de datos en la casilla de index
-    /// </summary>
-    /// <param name="index"> Int index indica la casilla en la que spawneamos las particulas</param>
-    /// <param name="activeAbility"> Bool indica si tenemos la habilidad de recoger cable activa
-    /// ya que hasta que no la tengamos las particulas no deben cambiar la logica de los bordes 
-    /// </param>
-    public void spawnParticle(int index, bool activeAbility)
-    {
-
-        // Comprobamos que no haya una particula ya en esa posicion
-        if (!dataParticles.ContainsKey(index))
-        {
-            // Obtenemos la posicion en la que queremos spawnear
-            Vector2 position = indexToVector(index);
-
-            // Spawneamos las particulas de datos
-            GameObject particle = Instantiate(dataParticle, new Vector3(position.x, 0f, position.y), Quaternion.identity);
-
-            // Añadimos los bordes de la particula al tablero
-            if (activeAbility)
-            {
-                addWallEdges(particle.GetComponent<BMuro>());
-            }
-
-            // Guardamos las particulas
-            dataParticles.Add(index, particle);
-        }
-    }
-
-    /// <summary>
-    /// Destruye la particula en la casilla de index
-    /// </summary>
-    /// <param name="index">Int indica el indice de la casilla </param>
-    public void despawnParticle(int index)
-    {
-        // Obtenemos la posicion en la que queremos spawnear
-        Vector2 position = indexToVector(index);
-
-        // Obtenemos las particulas y la eliminamos del diccionario
-        GameObject particle = dataParticles[index];
-        dataParticles.Remove(index);
-
-        // Devolvemos los bordes a su estado anterior
-        removeWallEdges(particle.GetComponent<BMuro>());
-
-        // Eliminamos la particula de datos
-        Destroy(particle);
-    }
-
-    /// <summary>
-    /// Activa las particulas de datos inactivas hasta el momento activando los bordes
-    /// </summary>
-    public void activateDataParticles()
-    {
-        foreach (GameObject dataPart in dataParticles.Values)
-        {
-            addWallEdges(dataPart.GetComponent<BMuro>());
-        }
-    }
-
-    /// <summary>
     /// Obtenemos un diccionario con los 4 indices que lo rodean y sus respectivos costes
     /// </summary>
     /// <param name="index"> Int indica el indice del que queremos obtener su diccionario</param>
     /// <returns> Diccionario con los respectivos costes </returns>
-    private Dictionary<int,int> getLocalEdges(int index)
+    private Dictionary<int, int> getLocalEdges(int index)
     {
         // Diccionario que llenaremos con la informacion pertinente
         Dictionary<int, int> localEdges = new Dictionary<int, int>();
@@ -406,6 +231,67 @@ public class BBoard : MonoBehaviour
 
         return localEdges;
     }
+    #endregion
+
+    #region BOARD LOGIC
+    /// <summary>
+    /// Recorre todos los muros y añade sus bordes a los del tablero
+    /// </summary>
+    private void addWallsEdges()
+    {
+        // Buscamos todos los muros y los guardamos en un array
+        BMuro[] walls = FindObjectsOfType<BMuro>();
+
+        // Realizamos el mismo proceso para cada mur
+        foreach (BMuro wall in walls)
+        {
+            addWallEdges(wall);
+        }
+    }
+
+    /// <summary>
+    /// Añade los bordes de un muro a la casilla
+    /// </summary>
+    /// <param name="wall"> Muro del que obtenemos los bordes</param>
+    private void addWallEdges(BMuro wall)
+    {
+        // Calculamos su indice
+        int index = positionToIndex(wall.transform.position);
+        int auxIndex;
+
+        // Para cada uno de las casillas que lo rodea actualizamos el eje en ambos sentidos
+        // Al sumarle xSize obtenemos la casilla norte
+        auxIndex = index + xSize;
+        if (locations.ContainsKey(auxIndex))
+        {
+            edges[index][auxIndex] *= wall.northEdge;
+            edges[auxIndex][index] *= wall.northEdge;
+        }
+
+        // Al sumarle uno obtenemos la casilla al este
+        auxIndex = index + 1;
+        if (locations.ContainsKey(auxIndex))
+        {
+            edges[index][auxIndex] *= wall.eastEdge;
+            edges[auxIndex][index] *= wall.eastEdge;
+        }
+
+        // Al restar xSize obtenemos la casilla al sur
+        auxIndex = index - xSize;
+        if (locations.ContainsKey(auxIndex))
+        {
+            edges[index][auxIndex] *= wall.southEdge;
+            edges[auxIndex][index] *= wall.southEdge;
+        }
+
+        // Al restar 1 obtenemos la casilla al oeste
+        auxIndex = index - 1;
+        if (locations.ContainsKey(auxIndex))
+        {
+            edges[index][auxIndex] *= wall.westEdge;
+            edges[auxIndex][index] *= wall.westEdge;
+        }
+    }
 
     /// <summary>
     /// Devuelve el coste de entrar a objectiveTile desde acutalTile
@@ -423,8 +309,74 @@ public class BBoard : MonoBehaviour
         {
             return 0;
         }
-        
+
     }
+    #endregion
+
+    #region PARTICLES
+    /// <summary>
+    /// Spawnea particulas de datos en la casilla de index
+    /// </summary>
+    /// <param name="index"> Int index indica la casilla en la que spawneamos las particulas</param>
+    /// <param name="activeAbility"> Bool indica si tenemos la habilidad de recoger cable activa
+    /// ya que hasta que no la tengamos las particulas no deben cambiar la logica de los bordes 
+    /// </param>
+    public void spawnParticle(int index, bool activeAbility)
+    {
+
+        // Comprobamos que no haya una particula ya en esa posicion
+        if (!dataParticles.ContainsKey(index))
+        {
+            // Obtenemos la posicion en la que queremos spawnear
+            Vector2 position = indexToVector(index);
+
+            // Spawneamos las particulas de datos
+            GameObject particle = Instantiate(dataParticle, new Vector3(position.x, 0f, position.y), Quaternion.identity);
+
+            // Añadimos los bordes de la particula al tablero
+            if (activeAbility)
+            {
+                addWallEdges(particle.GetComponent<BMuro>());
+            }
+
+            // Guardamos las particulas
+            dataParticles.Add(index, particle);
+        }
+    }
+
+    /// <summary>
+    /// Destruye la particula en la casilla de index
+    /// </summary>
+    /// <param name="index">Int indica el indice de la casilla </param>
+    public void despawnParticle(int index)
+    {
+        // Obtenemos la posicion en la que queremos spawnear
+        Vector2 position = indexToVector(index);
+
+        // Obtenemos las particulas y la eliminamos del diccionario
+        GameObject particle = dataParticles[index];
+        dataParticles.Remove(index);
+
+        // Devolvemos los bordes a su estado anterior
+        addWallEdges(particle.GetComponent<BMuro>());
+
+        // Eliminamos la particula de datos
+        Destroy(particle);
+    }
+
+    /// <summary>
+    /// Activa las particulas de datos inactivas hasta el momento activando los bordes
+    /// </summary>
+    public void activateDataParticles()
+    {
+        foreach (GameObject dataPart in dataParticles.Values)
+        {
+            addWallEdges(dataPart.GetComponent<BMuro>());
+        }
+    }
+
+    #endregion
+    
     #endregion
 
     #region Temporal hasta que decidamos como aparecen los niveles

@@ -50,6 +50,7 @@ public class BPlayer : MonoBehaviour
 
     #region METHODS
 
+    #region AWAKE START UPDATE
     private void Awake()
     {
         rotateLeft = playerInfo.rotateLeft;
@@ -101,14 +102,14 @@ public class BPlayer : MonoBehaviour
         }
 
         // Control movimiento
-        if (Input.GetKeyDown(move) && !isMoving && Ap > 0)
+        if (Input.GetKeyDown(move) && !isMoving)
         {
             // Obtenemos el indice de la casilla a la que queremos ir a partir de la casilla acutal y la casilla a la que miramos
             int objectiveIndex = tileIndex + direction[Mathf.RoundToInt(transform.eulerAngles.y)];
 
             // Obtenemos tambien el coste de dicha casilla
             int cost = board.costToEnter(tileIndex, objectiveIndex);
-
+            Debug.Log("Coste: " + cost);
             // Obsevamos que el coste es distinto de cero
             if (cost != 0 && cost <= Ap)
             {
@@ -125,13 +126,11 @@ public class BPlayer : MonoBehaviour
                 {
                     // Spawneamos las particulas
                     board.spawnParticle(tileIndex, recogerCable);
-                    Debug.Log("Pongo");
                 }
                 else if (cost < 0 && recogerCable)
                 {
                     // Eliminamos la particula
                     board.despawnParticle(objectiveIndex);
-                    Debug.Log("Quito");
                 }
 
                 // Cambiamos a casilla en la que estamos y el coste
@@ -155,7 +154,8 @@ public class BPlayer : MonoBehaviour
             board.activateDataParticles();
         }
     }
-
+    #endregion
+    
     /// <summary>
     /// Sumamos al Ap actual los puntos que introducimos por parametros
     /// </summary>
@@ -165,6 +165,7 @@ public class BPlayer : MonoBehaviour
         Ap = Mathf.Clamp(Ap + actionPoints, 0, maxAP);
     }
 
+    #region COROUTINES STOP 
     /// <summary>
     /// Corrutina encargada de controlar que la rotacion sea de 90 grados
     /// </summary>
@@ -209,6 +210,8 @@ public class BPlayer : MonoBehaviour
         // Informamos que ha parado la rotacion
         isMoving = false;
     }
+
+    #endregion
     #endregion
 
 }
