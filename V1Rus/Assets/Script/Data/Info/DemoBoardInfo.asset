@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 41584b40e43c8c64eae9445b96786572, type: 3}
   m_Name: DemoBoardInfo
   m_EditorClassIdentifier: 
-  APNivel: 12
+  APNivel: 27
   northEdge: 1
   eastEdge: 1
   southEdge: 1
