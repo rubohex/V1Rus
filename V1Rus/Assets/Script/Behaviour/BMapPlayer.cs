@@ -9,7 +9,7 @@ public class BMapPlayer : MonoBehaviour
     [Header("Data")]
 
     /// Datos de la Camara
-    public DPlayerInfo playerInfo;
+    public DMapPlayerInfo mapPlayerInfo;
 
     /// Codigo de tecla para rotar -90º
     private KeyCode rotateLeft;
@@ -29,6 +29,9 @@ public class BMapPlayer : MonoBehaviour
     /// Diccionario para guardar la relacion entre la rotacion y la casilla a la que apuntamos
     private Dictionary<int, int> direction = new Dictionary<int, int>();
 
+    public bool CanMove = true;
+
+
 
     #endregion
 
@@ -36,22 +39,43 @@ public class BMapPlayer : MonoBehaviour
 
     private void Awake()
     {
-        rotateLeft = playerInfo.rotateLeft;
-        rotateRight = playerInfo.rotateRight;
-        move = playerInfo.move;
-        rotationSpeed = playerInfo.rotationSpeed;
-        moveSpeed = playerInfo.moveSpeed;
+        rotateLeft = mapPlayerInfo.rotateLeft;
+        rotateRight = mapPlayerInfo.rotateRight;
+        move = mapPlayerInfo.move;
+        rotationSpeed = mapPlayerInfo.rotationSpeed;
+        moveSpeed = mapPlayerInfo.moveSpeed;
     }
-        // Start is called before the first frame update
-        void Start()
+    // Start is called before the first frame update
+    void Start()
     {
-        
+
     }
+    
 
     // Update is called once per frame
     void Update()
     {
-        
+        //Si el trigger del Scanner detecta que esta en una plataforma
+        if (CanMove)
+        {
+            //Control de movimiento hacia adelante
+            if (Input.GetKey(move))
+            {
+                this.transform.Translate(Vector3.forward * moveSpeed * Time.deltaTime);
+            }
+            
+        }
+        //Control de giro a la izquierda
+        if (Input.GetKey(rotateLeft))
+        {
+            this.transform.Rotate(Vector3.down * rotationSpeed * Time.deltaTime);
+        }
+        //Control de giro a la derecha.
+        if (Input.GetKey(rotateRight))
+        {
+            this.transform.Rotate(Vector3.up * rotationSpeed * Time.deltaTime);
+        }
+
     }
 
     #endregion
