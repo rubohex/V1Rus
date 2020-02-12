@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 41584b40e43c8c64eae9445b96786572, type: 3}
+  m_Name: Sala08BoardInfo
+  m_EditorClassIdentifier: 
+  APNivel: 35
+  northEdge: 1
+  eastEdge: 1
+  southEdge: 1
+  westEdge: 1

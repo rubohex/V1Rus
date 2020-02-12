@@ -111,7 +111,7 @@ public class BPlayer : MonoBehaviour
             int cost = board.costToEnter(tileIndex, objectiveIndex);
             Debug.Log("Coste: " + cost);
             // Obsevamos que el coste es distinto de cero
-            if (cost != 0 && cost <= Ap)
+            if (cost != 0 && (cost <= Ap || maxAP == 0))
             {
                 // Informamos de que nos estamos moviendo
                 isMoving = true;
@@ -135,12 +135,19 @@ public class BPlayer : MonoBehaviour
 
                 // Cambiamos a casilla en la que estamos y el coste
                 tileIndex = objectiveIndex;
-                changeAP(-cost);
+                if(maxAP != 0)
+                {
+                    changeAP(-cost);
+                }
 
                 // Temporal para debugear ap hasta tener un IU
                 textAp.text = "AP: " + Ap;
 
-                if (Ap == 0)
+                if(maxAP == 0)
+                {
+                    textAp.text = "AP: " + "inf";
+                }
+                else if (Ap == 0)
                 {
                     textAp.color = Color.red;
                 }

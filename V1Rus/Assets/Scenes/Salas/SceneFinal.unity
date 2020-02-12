@@ -2068,7 +2068,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dd6e2d3d968ef9844a359fd8462d064a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  boardInfo: {fileID: 11400000, guid: 975f82225f7bf7f4d8fb60db20da5cde, type: 2}
+  boardInfo: {fileID: 11400000, guid: 2b3647bf1e471614b897100ac77df71d, type: 2}
   Tile: {fileID: 7668470989950785439, guid: d9933f9260440634bb88fe4efd9dda24, type: 3}
   dataParticle: {fileID: 1701537868353255867, guid: ae5cd76f331be6b40a8dbc51e986335d,
     type: 3}
