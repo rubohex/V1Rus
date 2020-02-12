@@ -118,6 +118,7 @@ public class BBoard : MonoBehaviour
         }
 
         addWallsEdges();
+        setBorderEdges();
 
     }
     #endregion
@@ -310,6 +311,54 @@ public class BBoard : MonoBehaviour
             return 0;
         }
 
+    }
+    /// <summary>
+    /// Cambia los valores de los bordes de las casillas a los bordes a 0
+    /// </summary>
+    private void setBorderEdges()
+    {
+        foreach (int index in edges.Keys)
+        {
+            if((index / xSize) == 0)
+            {
+                int auxIndex = index - xSize;
+                edges[index][auxIndex] = 0;
+                if (edges.ContainsKey(auxIndex))
+                {
+                    edges[auxIndex][index] = 0;
+                }
+            }
+
+            if ((index % xSize) == 0)
+            {
+                int auxIndex = index - 1;
+                edges[index][auxIndex] = 0;
+                if (edges.ContainsKey(auxIndex))
+                {
+                    edges[auxIndex][index] = 0;
+                }
+            }
+
+            if ((index / xSize) == zSize)
+            {
+                int auxIndex = index + xSize;
+                edges[index][auxIndex] = 0;
+                if (edges.ContainsKey(auxIndex))
+                {
+                    edges[auxIndex][index] = 0;
+                }
+            }
+
+            if ((index % xSize) == xSize-1)
+            {
+                int auxIndex = index + 1;
+                edges[index][auxIndex] = 0;
+                if (edges.ContainsKey(auxIndex))
+                {
+                    edges[auxIndex][index] = 0;
+                }
+            }
+        }
     }
     #endregion
 
