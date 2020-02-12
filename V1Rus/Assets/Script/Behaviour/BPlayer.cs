@@ -111,6 +111,7 @@ public class BPlayer : MonoBehaviour
             int cost = board.costToEnter(tileIndex, objectiveIndex);
             Debug.Log("Coste: " + cost);
             // Obsevamos que el coste es distinto de cero
+            //maxAP == 0 sería considerado AP infinito(sala del boss)
             if (cost != 0 && (cost <= Ap || maxAP == 0))
             {
                 // Informamos de que nos estamos moviendo
