@@ -106,7 +106,7 @@ public class BBoard : MonoBehaviour
                 endIndex = xItemIndex + zItemIndex;
             }
 
-            //Debug.Log("Indice " + (xItemIndex + zItemIndex) + " localizacion " + locations[(xItemIndex + zItemIndex)]);
+            Debug.Log("Indice " + (xItemIndex + zItemIndex) + " localizacion " + locations[(xItemIndex + zItemIndex)]);
 
         }
 
@@ -159,7 +159,7 @@ public class BBoard : MonoBehaviour
     /// <returns> Indice correspondiente a la posicion </returns>
     public int positionToIndex(Vector3 position)
     {
-
+        Debug.Log(locations[45]);
         return locations.FirstOrDefault(x => x.Value == new Vector2(position.x, position.z)).Key;
     }
 
