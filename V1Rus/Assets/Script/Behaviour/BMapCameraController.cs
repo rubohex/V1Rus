@@ -152,8 +152,10 @@ public class BMapCameraController : MonoBehaviour
     /// <param name="vec"> vector con el sentido de rotación </param>
     IEnumerator stopRotation(Vector3 vec)
     {
-        // Guardamos la rotacion anterior
-        Vector3 prevRotation = target.eulerAngles;
+        // Calculamos la nueva rotación.
+        
+        // Redondeamos el vector de rotación
+        
 
         // Calculamos el tiempo que tenemos que esperar en funcion a la velocidad de rotacion
         float timeToWait = (Mathf.PI / 2) / cameraRotationSpeed;
@@ -163,7 +165,12 @@ public class BMapCameraController : MonoBehaviour
         // Paramos el giro
         GetComponentInParent<Rigidbody>().angularVelocity = new Vector3(0, 0, 0);
         // Redondeamos la rotacion para que sea exacta
-        transform.parent.transform.eulerAngles = new Vector3(Mathf.Round(transform.parent.transform.eulerAngles.x), Mathf.Round(transform.parent.transform.eulerAngles.y), Mathf.Round(transform.parent.transform.eulerAngles.z));
+        Vector3 newRotation = transform.parent.eulerAngles;
+        Vector3 RoundedRotation = new Vector3(
+            Mathf.Round(newRotation.x * 4 / 360) * 90,
+            Mathf.Round(newRotation.y * 4 / 360) * 90,
+            Mathf.Round(newRotation.z * 4 / 360) * 90);
+        transform.parent.transform.eulerAngles = RoundedRotation;
         // Informamos que ha parado la rotacion
         isRotating = false;
     }
