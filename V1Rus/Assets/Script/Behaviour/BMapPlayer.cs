@@ -11,11 +11,11 @@ public class BMapPlayer : MonoBehaviour
     /// Datos de la Camara
     public DMapPlayerInfo mapPlayerInfo;
 
-    /// Codigo de tecla para rotar -90º
+    /// Codigo de tecla para rotar a la izquierda
     private KeyCode rotateLeft;
-    /// Codigo de tecla para rotar -90º
+    /// Codigo de tecla para rotar a la derecha
     private KeyCode rotateRight;
-    /// Codigo de tecla para mover hacia arriba
+    /// Codigo de tecla para mover hacia adelante
     private KeyCode move;
 
     /// Velocidad de rotacion del jugador
@@ -23,14 +23,8 @@ public class BMapPlayer : MonoBehaviour
     /// Velocidad de movimiento del jugador
     private float moveSpeed;
 
-    /// Indica si el jugador esta rotando o moviendose
-    private bool isMoving = false;
-
-    /// Diccionario para guardar la relacion entre la rotacion y la casilla a la que apuntamos
-    private Dictionary<int, int> direction = new Dictionary<int, int>();
-
+    /// Tester para ver si se puede mover hacia adelante
     public bool CanMove = true;
-
 
 
     #endregion
@@ -55,6 +49,7 @@ public class BMapPlayer : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+
         //Si el trigger del Scanner detecta que esta en una plataforma
         if (CanMove)
         {
