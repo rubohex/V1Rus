@@ -24,7 +24,23 @@ public class BBoard : MonoBehaviour
     /// Prefab de la particula de datos
     /// </summary>
     public GameObject dataParticle;
-    
+
+    /// <summary>
+    /// Enumerado para definir el tipo de coordenada que vamos a usar
+    /// </summary>
+    public enum ECord
+    {
+        XY,
+        XZ,
+        YZ
+    }
+
+    /// Guardamos los valores que tenemos que sumarle al indice actual para conseguir el indice asociado al string
+    public Dictionary<string, int> indexDirections = new Dictionary<string, int>();
+
+    /// Guardamos el valor del systema de coordenadas
+    private ECord cordSys;
+
     /// Diccionario para almacenar las localizaciones de las casillas en funcion de los indices de un array
     private Dictionary<int, Vector2> locations = new Dictionary<int, Vector2>();
 
@@ -39,16 +55,19 @@ public class BBoard : MonoBehaviour
     private int endIndex;
 
     /// Tamaño en casillas del tablero en X 
-    private int xSize;
+    private int size1;
     /// Tamaño en casillas del tablero en Z
-    private int zSize;
+    private int size2;
 
     /// Limites del mapa en Eje X y Z
-    private float minX;
-    private float maxX;
-    private float minZ;
-    private float maxZ;
+    private float min1;
+    private float max1;
+    private float min2;
+    private float max2;
 
+    /// Tamaño de las casillas 
+    private float tileSize1;
+    private float tileSize2;
 
     #endregion
 
@@ -57,56 +76,117 @@ public class BBoard : MonoBehaviour
     #region AWAKE START UPDATE
     private void Awake()
     {
+        // Primero observamos el sistema de coordenadas que vamos a utilizar
+        // El sistema elegido dependera de las coordenadas que provengan del boardInfo
+        if(boardInfo.x && boardInfo.y)
+        {
+            cordSys = ECord.XY;
+        }
+        else if(boardInfo.x && boardInfo.z)
+        {
+            cordSys = ECord.XZ;
+        }
+        else if(boardInfo.y && boardInfo.z)
+        {
+            cordSys = ECord.YZ;
+        }
+        else
+        {
+            Debug.LogError("Por favor indique en la informacion del tablero dos coordenadas para el systema de coordenadas");
+        }
+
         //Obtenemos el tamaño de la casilla base y lo guardamos para usarlo mas tarde
         Vector3 tileSize = Tile.GetComponent<Renderer>().bounds.size;
-        float tileSizeX = tileSize.x;
-        float tileSizeZ = tileSize.z;
+        tileSize1 = tileSize.x;
+        tileSize2 = tileSize.z;
 
-        //Obtenemos todas las casillas de la escena
+        //Obtenemos todas las casillas de la escena activas
         Object[] boardTiles = FindObjectsOfType(typeof(BTile));
         
-        //A partir de todas estas casillas obtenemos sus posiciones en x y z
-        List<float> xPositions = new List<float>();
-        List<float> zPositions = new List<float>();
+        //A partir de todas estas casillas obtenemos sus posiciones en el sistema
+        List<float> firstPositions = new List<float>();
+        List<float> secondPositions = new List<float>();
         foreach (BTile item in boardTiles)
         {
-            xPositions.Add(item.gameObject.transform.position.x);
-            zPositions.Add(item.gameObject.transform.position.z);
+            // Dependiendo del sistema de coordenadas guardamos unos valores diferentes
+            switch (cordSys)
+            {
+                case ECord.XY:
+                    firstPositions.Add(item.gameObject.transform.position.x);
+                    secondPositions.Add(item.gameObject.transform.position.y);
+                    break;
+                case ECord.XZ:
+                    firstPositions.Add(item.gameObject.transform.position.x);
+                    secondPositions.Add(item.gameObject.transform.position.z);
+                    break;
+                case ECord.YZ:
+                    firstPositions.Add(item.gameObject.transform.position.y);
+                    secondPositions.Add(item.gameObject.transform.position.z);
+                    break;
+                default:
+                    break;
+            }
         }
 
         //Guardamos la posicion minima para usarla mas tarde
-        minX = xPositions.Min();
-        minZ = zPositions.Min();
-        maxX = xPositions.Max();
-        maxZ = zPositions.Max();
+        min1 = firstPositions.Min();
+        min2 = secondPositions.Min();
+        max1 = firstPositions.Max();
+        max2 = secondPositions.Max();
 
         //Calculamos el tamaño del tablero a partir de las posiciones y de los tamaños
-        xSize = (int)((maxX - minX) / tileSizeX) + 1;
-        zSize = (int)((maxZ - minZ) / tileSizeZ) + 1;
+        size1 = (int)((max1 - min1) / tileSize1) + 1;
+        size2 = (int)((max2 - min2) / tileSize2) + 1;
 
         //Para cada casilla almacenamos su posicion y como referente guardamos su indice en el array
         foreach (BTile item in boardTiles)
         {
             //Calculamos el nuevo indice para guardar en el diccionario de localizaciones
             Vector3 position = item.gameObject.transform.position;
-            int xItemIndex = (int) (position.x - minX / tileSizeX);
-            int zItemIndex = (int) (position.z - minZ / tileSizeZ) * xSize;
+            int firstIndex = 0;
+            int secondIndex = 0; 
 
-            //Debug.Log("x " +xItemIndex + " z" + zItemIndex+ " " + position);
+            switch (cordSys)
+            {
+                case ECord.XY:
 
-            locations.Add((xItemIndex + zItemIndex), new Vector2(position.x,position.z));
+                    // Calculamos los indices respecto a las posiciones
+                    firstIndex = (int)(position.x - min1 / tileSize1);
+                    secondIndex = (int)(position.y - min2 / tileSize2) * size1;
+                    // Guardamos en el diccionario el index con su respectiva posicion
+                    locations.Add((firstIndex + secondIndex), new Vector2(position.x, position.y));
+                    break;
+                case ECord.XZ:
+
+                    // Calculamos los indices respecto a las posiciones
+                    firstIndex = (int)(position.x - min1 / tileSize1);
+                    secondIndex = (int)(position.z - min2 / tileSize2) * size1;
+                    // Guardamos en el diccionario el index con su respectiva posicion
+                    locations.Add((firstIndex + secondIndex), new Vector2(position.x, position.z));
+                    break;
+                case ECord.YZ:
+
+                    // Calculamos los indices respecto a las posiciones
+                    firstIndex = (int)(position.y - min1 / tileSize1);
+                    secondIndex = (int)(position.z - min2 / tileSize2) * size1;
+                    // Guardamos en el diccionario el index con su respectiva posicion
+                    locations.Add((firstIndex + secondIndex), new Vector2(position.y, position.z));
+                    break;
+                default:
+                    break;
+            }
 
             //Guardamos el indice de la casilla inicial y final
             if(item.currentState == BTile.ETileState.Start)
             {
-                startIndex = xItemIndex + zItemIndex;
+                startIndex = firstIndex + secondIndex;
 
             }else if (item.currentState == BTile.ETileState.End)
             {
-                endIndex = xItemIndex + zItemIndex;
+                endIndex = firstIndex + secondIndex;
             }
 
-            Debug.Log("Indice " + (xItemIndex + zItemIndex) + " localizacion " + locations[(xItemIndex + zItemIndex)]);
+            Debug.Log("Indice " + (firstIndex + secondIndex) + " localizacion " + locations[(firstIndex + secondIndex)]);
 
         }
 
@@ -117,32 +197,48 @@ public class BBoard : MonoBehaviour
             edges.Add(index, getLocalEdges(index));
         }
 
+        // Añadimos los bordes de las paredes
         addWallsEdges();
+
+        // Ponemos a 0 los bordes del tablero
         setBorderEdges();
 
+        // Premaramos el diccionario con las diferentes direcciones
+        indexDirections.Add("Up", size1);
+        indexDirections.Add("Down", -size1);
+        indexDirections.Add("Left", -1);
+        indexDirections.Add("Right", 1);
+    }
+
+    private void Start()
+    {
+        ShowBoard();
     }
     #endregion
-
+    
     #region GETTERS
 
     /// <summary>
     /// Devolvemos los limites del Tablero en un array de 4 componentes
     /// </summary>
-    /// <returns> Vector4 que contiene la minima coordenada de x y la maxima 
-    /// seguida de la minima coordenada de z y la maxima </returns>
+    /// <returns> 
+    /// Vector4 que contiene la minima coordenada de la primera coordenada y la maxima 
+    /// seguida de la minima coordenada de la segunda coordenada y la maxima de la misma 
+    /// </returns>
     public Vector4 getBoardLimits()
     {
-        return new Vector4(minX, maxX, minZ, maxZ);
+        return new Vector4(min1, max1, min2, max2);
     }
 
     /// <summary>
     /// Devolvemos el tamaño del tablero en casillas
     /// </summary>
-    /// <returns> Vector2 que contiene xSize seguido de zSize </returns>
+    /// <returns> Vector2 que contiene size1 seguido de size2 </returns>
     public Vector2 getBoardShape()
     {
-        return new Vector2(xSize, zSize);
+        return new Vector2(size1, size2);
     }
+
     /// <summary>
     /// Devuelve el Ap asignado en este nivel
     /// </summary>
@@ -155,12 +251,21 @@ public class BBoard : MonoBehaviour
     /// <summary>
     /// Transforma una coordenada en el indice dentro del tablero
     /// </summary>
-    /// <param name="position"> Vector 3 debe ser el centro de una casilla </param>
+    /// <param name="position"> Vector 3 Posicion que queremos pasar a index </param>
     /// <returns> Indice correspondiente a la posicion </returns>
     public int positionToIndex(Vector3 position)
     {
-        Debug.Log(locations[45]);
-        return locations.FirstOrDefault(x => x.Value == new Vector2(position.x, position.z)).Key;
+        switch (cordSys)
+        {
+            case ECord.XY:
+                return Mathf.RoundToInt((position.x - min1) / tileSize1) + Mathf.RoundToInt((position.y - min2) / tileSize2) * size1;
+            case ECord.XZ:
+                return Mathf.RoundToInt((position.x - min1) / tileSize1) + Mathf.RoundToInt((position.z - min2) / tileSize2) * size1;
+            case ECord.YZ:
+                return Mathf.RoundToInt((position.y - min1) / tileSize1) + Mathf.RoundToInt((position.z - min2) / tileSize2) * size1;
+            default:
+                return -1;
+        }
     }
 
     /// <summary>
@@ -186,8 +291,8 @@ public class BBoard : MonoBehaviour
         int auxIndex;
 
         // Calculamos todos los ejes a partir de los ejes basicos guardados en boardInfo
-        // Al sumarle xSize obtenemos la casilla norte
-        auxIndex = index + xSize;
+        // Al sumarle size1 obtenemos la casilla norte
+        auxIndex = index + size1;
         if (locations.ContainsKey(auxIndex))
         {
             localEdges.Add(auxIndex, boardInfo.northEdge);
@@ -208,8 +313,8 @@ public class BBoard : MonoBehaviour
             localEdges.Add(auxIndex, 0);
         }
 
-        // Al restar xSize obtenemos la casilla al sur
-        auxIndex = index - xSize;
+        // Al restar size1 obtenemos la casilla al sur
+        auxIndex = index - size1;
         if (locations.ContainsKey(auxIndex))
         {
             localEdges.Add(auxIndex, boardInfo.northEdge);
@@ -261,8 +366,8 @@ public class BBoard : MonoBehaviour
         int auxIndex;
 
         // Para cada uno de las casillas que lo rodea actualizamos el eje en ambos sentidos
-        // Al sumarle xSize obtenemos la casilla norte
-        auxIndex = index + xSize;
+        // Al sumarle size1 obtenemos la casilla norte
+        auxIndex = index + size1;
         if (locations.ContainsKey(auxIndex))
         {
             edges[index][auxIndex] *= wall.northEdge;
@@ -277,8 +382,8 @@ public class BBoard : MonoBehaviour
             edges[auxIndex][index] *= wall.eastEdge;
         }
 
-        // Al restar xSize obtenemos la casilla al sur
-        auxIndex = index - xSize;
+        // Al restar size1 obtenemos la casilla al sur
+        auxIndex = index - size1;
         if (locations.ContainsKey(auxIndex))
         {
             edges[index][auxIndex] *= wall.southEdge;
@@ -319,9 +424,9 @@ public class BBoard : MonoBehaviour
     {
         foreach (int index in edges.Keys)
         {
-            if((index / xSize) == 0)
+            if((index / size1) == 0)
             {
-                int auxIndex = index - xSize;
+                int auxIndex = index - size1;
                 edges[index][auxIndex] = 0;
                 if (edges.ContainsKey(auxIndex))
                 {
@@ -329,7 +434,7 @@ public class BBoard : MonoBehaviour
                 }
             }
 
-            if ((index % xSize) == 0)
+            if ((index % size1) == 0)
             {
                 int auxIndex = index - 1;
                 edges[index][auxIndex] = 0;
@@ -339,9 +444,9 @@ public class BBoard : MonoBehaviour
                 }
             }
 
-            if ((index / xSize) == zSize)
+            if ((index / size1) == size2)
             {
-                int auxIndex = index + xSize;
+                int auxIndex = index + size1;
                 edges[index][auxIndex] = 0;
                 if (edges.ContainsKey(auxIndex))
                 {
@@ -349,7 +454,7 @@ public class BBoard : MonoBehaviour
                 }
             }
 
-            if ((index % xSize) == xSize-1)
+            if ((index % size1) == size1-1)
             {
                 int auxIndex = index + 1;
                 edges[index][auxIndex] = 0;
@@ -429,11 +534,6 @@ public class BBoard : MonoBehaviour
     #endregion
 
     #region Temporal hasta que decidamos como aparecen los niveles
-    // Start is called before the first frame update
-    void Start()
-    {
-        ShowBoard();
-    }
 
     // Update is called once per frame
     void Update()

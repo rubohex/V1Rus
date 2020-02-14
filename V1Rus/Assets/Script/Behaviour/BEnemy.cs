@@ -65,8 +65,8 @@ public class BEnemy : MonoBehaviour
 
         if (isRotating)
         {
-            transform.rotation = Quaternion.Slerp(transform.rotation, enemyRotation, 0.01f);
-            isRotating = false;
+            Debug.Log("PUM DAMAGES");
+            StartCoroutine(RotateOverTimeCoroutine(this.gameObject, .5f, transform.rotation, enemyRotation));
         }
 
         if (Input.GetKeyDown(KeyCode.L))
@@ -121,26 +121,26 @@ public class BEnemy : MonoBehaviour
     }
 
     #region COROUTINES STOP 
-    /// <summary>
-    /// Corrutina encargada de controlar que la rotacion sea de 90 grados
-    /// </summary>
-    /// <param name="direction"> -1 o 1 dependiendo del sentido de la rotacion </param>
-    IEnumerator stopRotation(int direction)
+    private IEnumerator RotateOverTimeCoroutine(GameObject targetObject, float transitionDuration, Quaternion start, Quaternion target)
     {
-        // Guardamos la rotacion anterior
-        Vector3 prevRotation = transform.eulerAngles;
+        float timer = 0.0f;
 
-        // Calculamos el tiempo que tenemos que esperar en funcion a la velocidad de rotacion
-        float timeToWait = (Mathf.PI / 2) / rotationSpeed;
-        // Esperamos el tiempo necesario
-        yield return new WaitForSeconds(timeToWait);
+        Debug.Log("He entrado puto");
 
-        // Paramos el giro
-        GetComponentInParent<Rigidbody>().angularVelocity = new Vector3(0, 0, 0);
-        // Redondeamos la rotacion para que sea exacta
-        transform.eulerAngles = prevRotation + new Vector3(0, direction * 90, 0);
-        // Informamos que ha parado la rotacion
+        while (timer < transitionDuration)
+        {
+            timer += Time.deltaTime;
+            float t = timer / transitionDuration;
+            t = t * t * t * (t * (6f * t - 15f) + 10f);
+
+            targetObject.transform.rotation = Quaternion.Slerp(start, target, t);
+
+            yield return null;
+        }
+
         isRotating = false;
+
+        yield return null;
     }
 
     /// <summary>

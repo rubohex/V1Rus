@@ -19,4 +19,9 @@ public class DBoardInfo : ScriptableObject
     public int southEdge = 1;
     public int westEdge = 1;
 
+    [Header("Coordenadas activas")]
+    public bool x = false;
+    public bool y = false;
+    public bool z = false;
+
 }
