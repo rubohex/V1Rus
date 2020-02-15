@@ -15,7 +15,7 @@ MonoBehaviour:
   maxHealth: 32
   currentHealth: 32
   rotationTime: 0.3
-  moveTime: 0.4
+  moveTime: 0.3
   rotateLeft: 97
   rotateRight: 100
   move: 119
