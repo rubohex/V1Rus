@@ -31,7 +31,7 @@ public class BCameraController : MonoBehaviour
     private float cameraMoveSpeed;
 
     /// Velocidad de rotacion de la camara
-    private float cameraRotationSpeed;
+    private float cameraRotationTime;
 
     /// Borde a partir del que notamos el raton en el mapa
     private float mapBorderThickness = 10f;
@@ -40,13 +40,16 @@ public class BCameraController : MonoBehaviour
     private bool isRotating = false;
 
     /// Limites del mapa en Eje X y Z
-    private float minX;
-    private float maxX;
-    private float minZ;
-    private float maxZ;
+    private float min1;
+    private float max1;
+    private float min2;
+    private float max2;
 
     /// Target de la camara
-    private Transform target;
+    private Transform parentT;
+
+    /// Enumerado del tipo de sistema de coordenadas
+    private BBoard.ECord coordSys;
 
     #endregion
 
@@ -61,25 +64,34 @@ public class BCameraController : MonoBehaviour
         moveDown = cameraInfo.moveDown;
         moveLeft = cameraInfo.moveLeft;
         moveRight = cameraInfo.moveRight;
-        cameraMoveSpeed = cameraInfo.moveSpeed;
-        cameraRotationSpeed = cameraInfo.rotationSpeed;
+        cameraMoveSpeed = cameraInfo.cameraSpeed;
+        cameraRotationTime = cameraInfo.rotationTime;
     }
 
     /// Start is called before the first frame update
     void Start()
     {
         // Guardamos el target
-        target = transform.parent;
+        parentT = transform.parent;
 
         // Hacemos que la camara se centre en el target
-        transform.LookAt(target);
+        transform.LookAt(parentT);
+
+        // Obtenemos el tablero
+        BBoard board = FindObjectOfType<BBoard>();
 
         // Obtenemos los limites del tablero
-        Vector4 aux = FindObjectOfType<BBoard>().getBoardLimits();
-        minX = aux.x;
-        maxX = aux.y;
-        minZ = aux.z;
-        maxZ = aux.w;
+        Vector4 aux = board.getBoardLimits();
+        min1 = aux.x;
+        max1 = aux.y;
+        min2 = aux.z;
+        max2 = aux.w;
+
+        // Colocamos la camara con la posicion inicial
+        parentT.position = board.getPlayerSpawnPos(0f);
+        parentT.rotation = board.getPlayerSpawnRot();
+
+        coordSys = board.getCoordSys();
     }
 
     /// Update is called once per frame
@@ -91,68 +103,67 @@ public class BCameraController : MonoBehaviour
     /// Late Update is called once per frame after Update
     private void LateUpdate()
     {
+        Vector3 pos = parentT.position;
+        Vector3 camRight = transform.right;
+        Vector3 camFordward = transform.forward;
+
         // Control del giro a la izquierda
         if (Input.GetKeyDown(rotateLeft) && !isRotating)
         {
-            // Añadimos una velocidad de giro
-            GetComponentInParent<Rigidbody>().angularVelocity = new Vector3(0f, -cameraRotationSpeed, 0f);
-            isRotating = true;
-            // Llamamos a una rutina paralela para que pare el giro
-            StartCoroutine(stopRotation(-1));
+            // Llamamos a una rutina paralela para que controle el giro
+            StartCoroutine(RotateOverTimeCoroutine(parentT, cameraRotationTime, parentT.rotation, Quaternion.LookRotation(-parentT.right, parentT.up)));
         }
 
         // Control del giro a la derecha
         if (Input.GetKeyDown(rotateRight) && !isRotating)
         {
-            // Añadimos una velocidad de giro
-            GetComponentInParent<Rigidbody>().angularVelocity = new Vector3(0f, cameraRotationSpeed, 0f);
-            isRotating = true;
-            // Llamamos a una rutina paralela para que pare el giro
-            StartCoroutine(stopRotation(1));
+            // Llamamos a una rutina paralela para que controle el giro
+            StartCoroutine(RotateOverTimeCoroutine(parentT, cameraRotationTime, parentT.rotation, Quaternion.LookRotation(parentT.right, parentT.up)));
         }
 
-        // Guardamos la posicion del target y las direcciones de la camara
-        Vector3 pos = target.position;
-        Vector3 camRight = Camera.main.transform.right;
-        Vector3 camFordward = Camera.main.transform.forward;
 
-        //Comprobamos los movimientos en todas las direcciones tanto con raton como con las teclas designadas
         if (Input.GetKey(moveUp) || Input.mousePosition.y >= Screen.height - mapBorderThickness)
         {
-            camFordward.y = 0;
-            camFordward.Normalize();
-
             pos.x += camFordward.x * cameraMoveSpeed * Time.deltaTime;
+            pos.y += camFordward.y * cameraMoveSpeed * Time.deltaTime;
             pos.z += camFordward.z * cameraMoveSpeed * Time.deltaTime;
         }
 
         if (Input.GetKey(moveDown) || Input.mousePosition.y <= mapBorderThickness)
         {
-            camFordward.y = 0;
-            camFordward.Normalize();
-
             pos.x -= camFordward.x * cameraMoveSpeed * Time.deltaTime;
+            pos.y -= camFordward.y * cameraMoveSpeed * Time.deltaTime;
             pos.z -= camFordward.z * cameraMoveSpeed * Time.deltaTime;
         }
 
         if (Input.GetKey(moveRight) || Input.mousePosition.x >= Screen.width - mapBorderThickness)
         {
             pos.x += camRight.x * cameraMoveSpeed * Time.deltaTime;
+            pos.y += camRight.y * cameraMoveSpeed * Time.deltaTime;
             pos.z += camRight.z * cameraMoveSpeed * Time.deltaTime;
         }
 
         if (Input.GetKey(moveLeft) || Input.mousePosition.x <= mapBorderThickness)
         {
             pos.x -= camRight.x * cameraMoveSpeed * Time.deltaTime;
+            pos.y -= camRight.y * cameraMoveSpeed * Time.deltaTime;
             pos.z -= camRight.z * cameraMoveSpeed * Time.deltaTime;
         }
 
-        // Acotamos los movimientos dentro del tablerro
-        pos.x = Mathf.Clamp(pos.x, minX, maxX);
-        pos.z = Mathf.Clamp(pos.z, minZ, maxZ);
-
-        // Asignamos las nueva posicion a la camara
-        transform.parent.transform.position = pos;
+        switch (coordSys)
+        {
+            case BBoard.ECord.XY:
+                parentT.position = new Vector3(Mathf.Clamp(pos.x,min1,max1), Mathf.Clamp(pos.y, min2, max2),0);
+                break;
+            case BBoard.ECord.XZ:
+                parentT.position = new Vector3(Mathf.Clamp(pos.x, min1, max1),0,Mathf.Clamp(pos.z, min2, max2));
+                break;
+            case BBoard.ECord.YZ:
+                parentT.position = new Vector3(0, Mathf.Clamp(pos.y, min1, max1), Mathf.Clamp(pos.z, min2, max2));
+                break;
+            default:
+                break;
+        }
     }
 
     /// <summary>
@@ -171,25 +182,39 @@ public class BCameraController : MonoBehaviour
     }
 
     /// <summary>
-    /// Corrutina encargada de controlar que la rotacion sea de 90 grados
+    /// Corutina encargada de rotar un objeto a una rotacion indicada en el tiempo indicado
     /// </summary>
-    /// <param name="direction"> -1 o 1 dependiendo del sentido de la rotacion </param>
-    IEnumerator stopRotation(int direction)
+    /// <param name="targetObject"> GameObject Objeto que vamos a mover </param>
+    /// <param name="transitionDuration"> Float Tiempo que dura la transicion </param>
+    /// <param name="start"> Quaternion Marca la rotacion de inicio </param>
+    /// <param name="target"> Quaternion Marca la rotacion final </param>
+    private IEnumerator RotateOverTimeCoroutine(Transform targetTransform, float transitionDuration, Quaternion start, Quaternion target)
     {
-        // Guardamos la rotacion anterior
-        Vector3 prevRotation = target.eulerAngles;
+        // Marcamos que la camara esta rotando
+        isRotating = true;
 
-        // Calculamos el tiempo que tenemos que esperar en funcion a la velocidad de rotacion
-        float timeToWait = (Mathf.PI / 2) / cameraRotationSpeed;
-        // Esperamos el tiempo necesario
-        yield return new WaitForSeconds(timeToWait);
+        // Iniciamos el timer a 0
+        float timer = 0.0f;
 
-        // Paramos el giro
-        GetComponentInParent<Rigidbody>().angularVelocity = new Vector3(0, 0, 0);
-        // Redondeamos la rotacion para que sea exacta
-        transform.parent.transform.eulerAngles = prevRotation + new Vector3(0, direction * 90, 0);
-        // Informamos que ha parado la rotacion
+        // Mientras el tiempo sea menor que la duracion de la transicion repetimos
+        while (timer < transitionDuration)
+        {
+            // Aumentamos el tiempo en funcion de el Time.deltaTime
+            timer += Time.deltaTime;
+            // Calculamos el porcentaje del tiempo que llevamos
+            float t = timer / transitionDuration;
+            // Transformamos el porcentaje segun una funcion para que la transicion sea suave
+            t = t * t * t * (t * (6f * t - 15f) + 10f);
+
+            // Hacemos un Lerp en funcion de la rotacion objetivo la original y el procentaje de tiempo que ha pasado
+            targetTransform.rotation = Quaternion.Slerp(start, target, t);
+
+            yield return null;
+        }
+
         isRotating = false;
+
+        yield return null;
     }
 
     #endregion

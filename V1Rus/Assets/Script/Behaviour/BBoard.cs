@@ -39,7 +39,7 @@ public class BBoard : MonoBehaviour
     public Dictionary<string, int> indexDirections = new Dictionary<string, int>();
 
     /// Guardamos el valor del systema de coordenadas
-    private ECord cordSys;
+    private ECord coordSys;
 
     /// Diccionario para almacenar las localizaciones de las casillas en funcion de los indices de un array
     private Dictionary<int, Vector2> locations = new Dictionary<int, Vector2>();
@@ -49,6 +49,9 @@ public class BBoard : MonoBehaviour
 
     /// Diccionario para almacenar las particulas de datos
     private Dictionary<int, GameObject> dataParticles = new Dictionary<int, GameObject>();
+
+    /// Rotacion del jugador que nos servira para spawnear las particulas
+    private Quaternion spawnRotation;
 
     /// Indice de la casilla incial y de la casilla final
     private int startIndex;
@@ -68,6 +71,10 @@ public class BBoard : MonoBehaviour
     /// Tamaño de las casillas 
     private float tileSize1;
     private float tileSize2;
+    private float tileSize3;
+
+    /// Coordenada de la superficie
+    private float surfaceCoord;
 
     #endregion
 
@@ -76,40 +83,60 @@ public class BBoard : MonoBehaviour
     #region AWAKE START UPDATE
     private void Awake()
     {
+
         // Primero observamos el sistema de coordenadas que vamos a utilizar
         // El sistema elegido dependera de las coordenadas que provengan del boardInfo
-        if(boardInfo.x && boardInfo.y)
+        if (boardInfo.x && boardInfo.y)
         {
-            cordSys = ECord.XY;
+            coordSys = ECord.XY;
         }
         else if(boardInfo.x && boardInfo.z)
         {
-            cordSys = ECord.XZ;
+            coordSys = ECord.XZ;
         }
         else if(boardInfo.y && boardInfo.z)
         {
-            cordSys = ECord.YZ;
+            coordSys = ECord.YZ;
         }
         else
         {
             Debug.LogError("Por favor indique en la informacion del tablero dos coordenadas para el systema de coordenadas");
         }
 
-        //Obtenemos el tamaño de la casilla base y lo guardamos para usarlo mas tarde
+        // Obtenemos el tamaño de la casilla base y lo guardamos para usarlo mas tarde
         Vector3 tileSize = Tile.GetComponent<Renderer>().bounds.size;
         tileSize1 = tileSize.x;
         tileSize2 = tileSize.z;
+        tileSize3 = tileSize.y;
 
-        //Obtenemos todas las casillas de la escena activas
+        // Obtenemos todas las casillas de la escena activas
         Object[] boardTiles = FindObjectsOfType(typeof(BTile));
-        
-        //A partir de todas estas casillas obtenemos sus posiciones en el sistema
+
+        // Obtenemos la coordenada de la superficie para poder spawnear particulas mas tarde en esta
+        BTile aux = (BTile) boardTiles[0];
+        switch (coordSys)
+        {
+            case ECord.XY:
+                surfaceCoord = aux.gameObject.transform.position.z + tileSize3 / 2;
+                break;
+            case ECord.XZ:
+                surfaceCoord = aux.gameObject.transform.position.y+ tileSize3 / 2;
+                break;
+            case ECord.YZ:
+                surfaceCoord = aux.gameObject.transform.position.x + tileSize3 / 2;
+                break;
+            default:
+                break;
+        }
+
+
+        // A partir de todas estas casillas obtenemos sus posiciones en el sistema
         List<float> firstPositions = new List<float>();
         List<float> secondPositions = new List<float>();
         foreach (BTile item in boardTiles)
         {
             // Dependiendo del sistema de coordenadas guardamos unos valores diferentes
-            switch (cordSys)
+            switch (coordSys)
             {
                 case ECord.XY:
                     firstPositions.Add(item.gameObject.transform.position.x);
@@ -138,6 +165,12 @@ public class BBoard : MonoBehaviour
         size1 = (int)((max1 - min1) / tileSize1) + 1;
         size2 = (int)((max2 - min2) / tileSize2) + 1;
 
+        // Premaramos el diccionario con las diferentes direcciones
+        indexDirections.Add("Up", size1);
+        indexDirections.Add("Down", -size1);
+        indexDirections.Add("Left", -1);
+        indexDirections.Add("Right", 1);
+
         //Para cada casilla almacenamos su posicion y como referente guardamos su indice en el array
         foreach (BTile item in boardTiles)
         {
@@ -146,7 +179,7 @@ public class BBoard : MonoBehaviour
             int firstIndex = 0;
             int secondIndex = 0; 
 
-            switch (cordSys)
+            switch (coordSys)
             {
                 case ECord.XY:
 
@@ -203,11 +236,8 @@ public class BBoard : MonoBehaviour
         // Ponemos a 0 los bordes del tablero
         setBorderEdges();
 
-        // Premaramos el diccionario con las diferentes direcciones
-        indexDirections.Add("Up", size1);
-        indexDirections.Add("Down", -size1);
-        indexDirections.Add("Left", -1);
-        indexDirections.Add("Right", 1);
+        // Obtenemos la roatacion de los elementos del tablero para cuando spawneemos particulas
+        spawnRotation = FindObjectOfType<BPlayer>().transform.rotation;
     }
 
     private void Start()
@@ -249,13 +279,22 @@ public class BBoard : MonoBehaviour
     }
 
     /// <summary>
+    /// Devuelve el tamaño de la casilla
+    /// </summary>
+    /// <returns></returns>
+    public float getTileSize()
+    {
+        return tileSize1;
+    }
+
+    /// <summary>
     /// Transforma una coordenada en el indice dentro del tablero
     /// </summary>
     /// <param name="position"> Vector 3 Posicion que queremos pasar a index </param>
     /// <returns> Indice correspondiente a la posicion </returns>
     public int positionToIndex(Vector3 position)
     {
-        switch (cordSys)
+        switch (coordSys)
         {
             case ECord.XY:
                 return Mathf.RoundToInt((position.x - min1) / tileSize1) + Mathf.RoundToInt((position.y - min2) / tileSize2) * size1;
@@ -269,13 +308,71 @@ public class BBoard : MonoBehaviour
     }
 
     /// <summary>
+    /// Devuelve la posicion de spawn para el jugador
+    /// </summary>
+    /// <param name="playerHeight">Float Altura del jugador</param>
+    /// <returns></returns>
+    public Vector3 getPlayerSpawnPos(float playerHeight)
+    {
+        return indexToVector(startIndex, null, surfaceCoord + playerHeight / 2);
+    }
+
+    /// <summary>
+    /// Devuelve la posicion de spawn para el jugador
+    /// </summary>
+    /// <returns></returns>
+    public Quaternion getPlayerSpawnRot()
+    {
+        GameObject aux = FindObjectOfType<BTile>().gameObject;
+        return Quaternion.LookRotation(aux.transform.forward, aux.transform.up);
+    }
+    /// <summary>
+    /// Devuelve el sistema de coordenadas usado
+    /// </summary>
+    /// <returns></returns>
+    public ECord getCoordSys()
+    {
+        return coordSys;
+    }
+
+    /// <summary>
     /// Transforma un indice en una posicion
     /// </summary>
-    /// <param name="index"> Indice de la casilla </param>
-    /// <returns></returns>
-    public Vector2 indexToVector(int index)
+    /// <param name="index">Int Indice de la casilla </param>
+    /// <param name="targetObject"> GameObject objeto del que tomaremos la coordenada restante</param>
+    /// <param name="extraCoord"> Offset de la coordenada extra en caso de añadir GameObject y en caso coontrario offset que le sumamos</param>
+    /// <returns> Vector 3 con las cordenadas bases del tablero y la restante del objeto que recibimos </returns>
+    public Vector3 indexToVector(int index, GameObject targetObject = null, float extraCoord = 0f)
     {
-        return locations[index];
+        Vector2 aux = locations[index];
+        if(targetObject == null)
+        {
+            switch (coordSys)
+            {
+                case ECord.XY:
+                    return new Vector3(aux.x, aux.y, extraCoord);
+                case ECord.XZ:
+                    return new Vector3(aux.x, extraCoord, aux.y);
+                case ECord.YZ:
+                    return new Vector3(extraCoord, aux.x, aux.y);
+                default:
+                    return new Vector3(0, 0, 0);
+            }
+        }
+        else
+        {
+            switch (coordSys)
+            {
+                case ECord.XY:
+                    return new Vector3(aux.x, aux.y, targetObject.transform.position.z);
+                case ECord.XZ:
+                    return new Vector3(aux.x, targetObject.transform.position.y, aux.y);
+                case ECord.YZ:
+                    return new Vector3(targetObject.transform.position.x, aux.x, aux.y);
+                default:
+                    return new Vector3(0, 0, 0);
+            }
+        }
     }
 
     /// <summary>
@@ -292,21 +389,21 @@ public class BBoard : MonoBehaviour
 
         // Calculamos todos los ejes a partir de los ejes basicos guardados en boardInfo
         // Al sumarle size1 obtenemos la casilla norte
-        auxIndex = index + size1;
+        auxIndex = index + indexDirections["Up"];
         if (locations.ContainsKey(auxIndex))
         {
-            localEdges.Add(auxIndex, boardInfo.northEdge);
+            localEdges.Add(auxIndex, boardInfo.upEdge);
         }
         else
         {
             localEdges.Add(auxIndex, 0);
         }
 
-        // Al sumarle uno obtenemos la casilla al este
-        auxIndex = index + 1;
+        // Al sumarle uno obtenemos la casilla al oeste
+        auxIndex = index + indexDirections["Left"];
         if (locations.ContainsKey(auxIndex))
         {
-            localEdges.Add(auxIndex, boardInfo.eastEdge);
+            localEdges.Add(auxIndex, boardInfo.leftEdge);
         }
         else
         {
@@ -314,21 +411,21 @@ public class BBoard : MonoBehaviour
         }
 
         // Al restar size1 obtenemos la casilla al sur
-        auxIndex = index - size1;
+        auxIndex = index + indexDirections["Down"];
         if (locations.ContainsKey(auxIndex))
         {
-            localEdges.Add(auxIndex, boardInfo.northEdge);
+            localEdges.Add(auxIndex, boardInfo.downEdge);
         }
         else
         {
             localEdges.Add(auxIndex, 0);
         }
 
-        // Al restar 1 obtenemos la casilla al oeste
-        auxIndex = index - 1;
+        // Al restar 1 obtenemos la casilla al este
+        auxIndex = index + indexDirections["Right"];
         if (locations.ContainsKey(auxIndex))
         {
-            localEdges.Add(auxIndex, boardInfo.northEdge);
+            localEdges.Add(auxIndex, boardInfo.rightEdge);
         }
         else
         {
@@ -367,35 +464,35 @@ public class BBoard : MonoBehaviour
 
         // Para cada uno de las casillas que lo rodea actualizamos el eje en ambos sentidos
         // Al sumarle size1 obtenemos la casilla norte
-        auxIndex = index + size1;
+        auxIndex = index + indexDirections["Up"];
         if (locations.ContainsKey(auxIndex))
         {
-            edges[index][auxIndex] *= wall.northEdge;
-            edges[auxIndex][index] *= wall.northEdge;
+            edges[index][auxIndex] *= wall.upEdge;
+            edges[auxIndex][index] *= wall.upEdge;
         }
 
-        // Al sumarle uno obtenemos la casilla al este
-        auxIndex = index + 1;
+        // Al sumarle uno obtenemos la casilla al oeste
+        auxIndex = index + indexDirections["Left"];
         if (locations.ContainsKey(auxIndex))
         {
-            edges[index][auxIndex] *= wall.eastEdge;
-            edges[auxIndex][index] *= wall.eastEdge;
+            edges[index][auxIndex] *= wall.leftEdge;
+            edges[auxIndex][index] *= wall.leftEdge;
         }
 
         // Al restar size1 obtenemos la casilla al sur
-        auxIndex = index - size1;
+        auxIndex = index + indexDirections["Down"];
         if (locations.ContainsKey(auxIndex))
         {
-            edges[index][auxIndex] *= wall.southEdge;
-            edges[auxIndex][index] *= wall.southEdge;
+            edges[index][auxIndex] *= wall.downEdge;
+            edges[auxIndex][index] *= wall.downEdge;
         }
 
-        // Al restar 1 obtenemos la casilla al oeste
-        auxIndex = index - 1;
+        // Al restar 1 obtenemos la casilla al este
+        auxIndex = index + indexDirections["Right"];
         if (locations.ContainsKey(auxIndex))
         {
-            edges[index][auxIndex] *= wall.westEdge;
-            edges[auxIndex][index] *= wall.westEdge;
+            edges[index][auxIndex] *= wall.rightEdge;
+            edges[auxIndex][index] *= wall.rightEdge;
         }
     }
 
@@ -405,11 +502,19 @@ public class BBoard : MonoBehaviour
     /// <param name="actualTile"> Int indica el indice de la casilla actual</param>
     /// <param name="objectiveTile"> Int indica el indice de la casilla objetivo </param>
     /// <returns> Int que representa el coste del movimiento</returns>
-    public int costToEnter(int actualTile, int objectiveTile)
+    public int costToEnter(int actualTile, int objectiveTile, bool activeAbility)
     {
         if (edges.ContainsKey(actualTile) && edges[actualTile].ContainsKey(objectiveTile))
         {
-            return edges[actualTile][objectiveTile];
+            if (activeAbility && dataParticles.ContainsKey(objectiveTile))
+            {
+                return -edges[actualTile][objectiveTile];
+             
+            }
+            else
+            {
+                return edges[actualTile][objectiveTile];
+            }  
         }
         else
         {
@@ -417,6 +522,7 @@ public class BBoard : MonoBehaviour
         }
 
     }
+
     /// <summary>
     /// Cambia los valores de los bordes de las casillas a los bordes a 0
     /// </summary>
@@ -426,7 +532,7 @@ public class BBoard : MonoBehaviour
         {
             if((index / size1) == 0)
             {
-                int auxIndex = index - size1;
+                int auxIndex = index + indexDirections["Down"];
                 edges[index][auxIndex] = 0;
                 if (edges.ContainsKey(auxIndex))
                 {
@@ -436,7 +542,7 @@ public class BBoard : MonoBehaviour
 
             if ((index % size1) == 0)
             {
-                int auxIndex = index - 1;
+                int auxIndex = index + indexDirections["Left"];
                 edges[index][auxIndex] = 0;
                 if (edges.ContainsKey(auxIndex))
                 {
@@ -446,7 +552,7 @@ public class BBoard : MonoBehaviour
 
             if ((index / size1) == size2)
             {
-                int auxIndex = index + size1;
+                int auxIndex = index + indexDirections["Up"];
                 edges[index][auxIndex] = 0;
                 if (edges.ContainsKey(auxIndex))
                 {
@@ -456,7 +562,7 @@ public class BBoard : MonoBehaviour
 
             if ((index % size1) == size1-1)
             {
-                int auxIndex = index + 1;
+                int auxIndex = index + indexDirections["Right"];
                 edges[index][auxIndex] = 0;
                 if (edges.ContainsKey(auxIndex))
                 {
@@ -482,16 +588,10 @@ public class BBoard : MonoBehaviour
         if (!dataParticles.ContainsKey(index))
         {
             // Obtenemos la posicion en la que queremos spawnear
-            Vector2 position = indexToVector(index);
+            Vector3 position = indexToVector(index,null,surfaceCoord);
 
             // Spawneamos las particulas de datos
-            GameObject particle = Instantiate(dataParticle, new Vector3(position.x, 0f, position.y), Quaternion.identity);
-
-            // Añadimos los bordes de la particula al tablero
-            if (activeAbility)
-            {
-                addWallEdges(particle.GetComponent<BMuro>());
-            }
+            GameObject particle = Instantiate(dataParticle, position, spawnRotation);
 
             // Guardamos las particulas
             dataParticles.Add(index, particle);
@@ -504,30 +604,15 @@ public class BBoard : MonoBehaviour
     /// <param name="index">Int indica el indice de la casilla </param>
     public void despawnParticle(int index)
     {
-        // Obtenemos la posicion en la que queremos spawnear
-        Vector2 position = indexToVector(index);
 
         // Obtenemos las particulas y la eliminamos del diccionario
         GameObject particle = dataParticles[index];
         dataParticles.Remove(index);
 
-        // Devolvemos los bordes a su estado anterior
-        addWallEdges(particle.GetComponent<BMuro>());
-
         // Eliminamos la particula de datos
         Destroy(particle);
     }
-
-    /// <summary>
-    /// Activa las particulas de datos inactivas hasta el momento activando los bordes
-    /// </summary>
-    public void activateDataParticles()
-    {
-        foreach (GameObject dataPart in dataParticles.Values)
-        {
-            addWallEdges(dataPart.GetComponent<BMuro>());
-        }
-    }
+    
 
     #endregion
     

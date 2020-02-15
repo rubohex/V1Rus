@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxHealth: 32
   currentHealth: 32
-  rotationSpeed: 8
-  moveSpeed: 4
+  rotationTime: 0.3
+  moveTime: 0.4
   rotateLeft: 97
   rotateRight: 100
   move: 119

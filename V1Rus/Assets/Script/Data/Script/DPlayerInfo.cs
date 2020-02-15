@@ -21,12 +21,12 @@ public class DPlayerInfo : ScriptableObject {
     /// <summary>
     /// Velocidad de giro del jugador
     /// </summary>
-    public float rotationSpeed;
+    public float rotationTime;
 
     /// <summary>
     /// Velocidad de giro del jugador
     /// </summary>
-    public float moveSpeed;
+    public float moveTime;
 
 
     [Header("Teclas control")]

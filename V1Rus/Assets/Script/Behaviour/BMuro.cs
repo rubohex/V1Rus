@@ -10,19 +10,19 @@ public class BMuro : MonoBehaviour
     /// <summary>
     /// Borde Norte
     /// </summary>
-    public int northEdge = 1;
+    public int upEdge = 1;
     /// <summary>
     /// Borde Este
     /// </summary>
-    public int eastEdge = 1;
+    public int leftEdge = 1;
     /// <summary>
     /// Borde Sur
     /// </summary>
-    public int southEdge = 1;
+    public int rightEdge = 1;
     /// <summary>
     /// Borde Oeste
     /// </summary>
-    public int westEdge = 1;
+    public int downEdge = 1;
 
     #endregion
 }

@@ -13,7 +13,10 @@ MonoBehaviour:
   m_Name: DemoBoardInfo
   m_EditorClassIdentifier: 
   APNivel: 27
-  northEdge: 1
-  eastEdge: 1
-  southEdge: 1
-  westEdge: 1
+  upEdge: 1
+  leftEdge: 1
+  rightEdge: 1
+  downEdge: 1
+  x: 0
+  y: 1
+  z: 1

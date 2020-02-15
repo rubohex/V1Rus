@@ -14,10 +14,10 @@ public class DBoardInfo : ScriptableObject
     /// <summary>
     /// Bordes basicos 1 para poder pasar 0 para no poder
     /// </summary>
-    public int northEdge = 1;
-    public int eastEdge = 1;
-    public int southEdge = 1;
-    public int westEdge = 1;
+    public int upEdge = 1;
+    public int leftEdge = 1;
+    public int rightEdge = 1;
+    public int downEdge = 1;
 
     [Header("Coordenadas activas")]
     public bool x = false;

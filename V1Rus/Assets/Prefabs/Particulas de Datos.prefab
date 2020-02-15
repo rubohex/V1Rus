@@ -117,7 +117,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7680fba14faa8d548a2e39ff31f900f4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  northEdge: -1
-  eastEdge: -1
-  southEdge: -1
-  westEdge: -1
+  upEdge: -1
+  leftEdge: -1
+  rightEdge: -1
+  downEdge: -1

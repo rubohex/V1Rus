@@ -28,18 +28,15 @@ public class BPlayer : MonoBehaviour
     private int Ap;
 
     /// Velocidad de rotacion del jugador
-    private float rotationSpeed;
+    private float rotationTime;
     /// Velocidad de movimiento del jugador
-    private float moveSpeed;
+    private float moveTime;
 
     /// Indice de la casilla actual
     private int tileIndex;
 
     /// Indica si el jugador esta rotando o moviendose
     private bool isMoving = false;
-
-    /// Diccionario para guardar la relacion entre la rotacion y la casilla a la que apuntamos
-    private Dictionary<int, int> direction = new Dictionary<int, int>();
     
     /// Tablero del nivel
     private BBoard board;
@@ -56,24 +53,25 @@ public class BPlayer : MonoBehaviour
         rotateLeft = playerInfo.rotateLeft;
         rotateRight = playerInfo.rotateRight;
         move = playerInfo.move;
-        rotationSpeed = playerInfo.rotationSpeed;
-        moveSpeed = playerInfo.moveSpeed;
+        rotationTime = playerInfo.rotationTime;
+        moveTime = playerInfo.moveTime;
         recogerCable = playerInfo.recogerCable;
     }
 
     // Start is called before the first frame update
     void Start()
     {
+        // Obtenemos el tablero
         board = FindObjectOfType<BBoard>();
+        // Actualizamos los Ap que tenemos para el nivel
         Ap = maxAP = board.getBoardAp();
+
+        // Colocamos al jugador en la casilla de salida y guardamos su indice
+        transform.rotation = board.getPlayerSpawnRot();
+        transform.position = board.getPlayerSpawnPos(GetComponent<Renderer>().bounds.size.y);
         tileIndex = board.positionToIndex(transform.position);
-        int xSize = (int) board.getBoardShape()[0];
 
-        direction.Add(0, xSize);
-        direction.Add(90, 1);
-        direction.Add(180, -xSize);
-        direction.Add(270, -1);
-
+        // Temporal
         textAp.text = "AP: " + Ap;
 
     }
@@ -84,32 +82,28 @@ public class BPlayer : MonoBehaviour
         // Control del giro a la izquierda
         if (Input.GetKeyDown(rotateLeft) && !isMoving)
         {
-            // Añadimos una velocidad de giro
-            GetComponentInParent<Rigidbody>().angularVelocity = new Vector3(0f, -rotationSpeed, 0f);
-            isMoving = true;
-            // Llamamos a una rutina paralela para que pare el giro
-            StartCoroutine(stopRotation(-1));
+            StartCoroutine(RotateOverTimeCoroutine(this.gameObject, rotationTime, transform.rotation, Quaternion.LookRotation(-transform.right,transform.up)));
         }
 
         // Control del giro a la derecha
         if (Input.GetKeyDown(rotateRight) && !isMoving)
         {
-            // Añadimos una velocidad de giro
-            GetComponentInParent<Rigidbody>().angularVelocity = new Vector3(0f, rotationSpeed, 0f);
-            isMoving = true;
-            // Llamamos a una rutina paralela para que pare el giro
-            StartCoroutine(stopRotation(1));
+            StartCoroutine(RotateOverTimeCoroutine(this.gameObject, rotationTime, transform.rotation, Quaternion.LookRotation(transform.right, transform.up)));
         }
 
         // Control movimiento
         if (Input.GetKeyDown(move) && !isMoving)
         {
+            // Vector de posicion de la casilla objetivo
+            Vector3 objectivePos = board.indexToVector(tileIndex) + transform.forward;
             // Obtenemos el indice de la casilla a la que queremos ir a partir de la casilla acutal y la casilla a la que miramos
-            int objectiveIndex = tileIndex + direction[Mathf.RoundToInt(transform.eulerAngles.y)];
+            int objectiveIndex = board.positionToIndex(objectivePos);
 
             // Obtenemos tambien el coste de dicha casilla
-            int cost = board.costToEnter(tileIndex, objectiveIndex);
-            Debug.Log("Coste: " + cost);
+            int cost = board.costToEnter(tileIndex, objectiveIndex, recogerCable);
+
+            // Debug.Log("Coste: " + cost);
+            
             // Obsevamos que el coste es distinto de cero
             //maxAP == 0 sería considerado AP infinito(sala del boss)
             if (cost != 0 && (cost <= Ap || maxAP == 0))
@@ -117,10 +111,8 @@ public class BPlayer : MonoBehaviour
                 // Informamos de que nos estamos moviendo
                 isMoving = true;
 
-                // Obtenemos el regidbody y le damos una velocidad
-                GetComponent<Rigidbody>().velocity = transform.forward * moveSpeed;
-                // Lanzamos una Corrutina para que pare al jugador al llegar al punto
-                StartCoroutine(stopMovement(objectiveIndex));
+                // Llamamos a la corutina para que se encargue del movimiento
+                StartCoroutine(MoveOverTimeCoroutine(this.gameObject, moveTime, transform.position, board.indexToVector(objectiveIndex, gameObject)));
 
                 // Miramos si la casilla en la que entramos tiene particuals de datos o no esto lo podemos ver con el coste
                 if (cost > 0)
@@ -159,11 +151,11 @@ public class BPlayer : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space))
         {
             recogerCable = !recogerCable;
-            board.activateDataParticles();
         }
     }
     #endregion
-    
+
+    #region CHANGE STATS
     /// <summary>
     /// Sumamos al Ap actual los puntos que introducimos por parametros
     /// </summary>
@@ -172,54 +164,85 @@ public class BPlayer : MonoBehaviour
     {
         Ap = Mathf.Clamp(Ap + actionPoints, 0, maxAP);
     }
+    #endregion
 
-    #region COROUTINES STOP 
+    #region COROUTINES 
+
     /// <summary>
-    /// Corrutina encargada de controlar que la rotacion sea de 90 grados
+    /// Corutina encargada de mover un objeto al lugar indicado en el tiempo indicado
     /// </summary>
-    /// <param name="direction"> -1 o 1 dependiendo del sentido de la rotacion </param>
-    IEnumerator stopRotation(int direction)
-    {
-        // Guardamos la rotacion anterior
-        Vector3 prevRotation = transform.eulerAngles;
+    /// <param name="targetObject"> GameObject Objeto que vamos a mover </param>
+    /// <param name="transitionDuration"> Float Tiempo que dura la transicion </param>
+    /// <param name="start"> Vector3 marca la posicion inicial </param>
+    /// <param name="target"> Vector3 marca la posicion final </param>
+    private IEnumerator MoveOverTimeCoroutine(GameObject targetObject, float transitionDuration, Vector3 start, Vector3 target)
+        {
+            // Marcamos que el jugador se esta moviendo
+            isMoving = true;
 
-        // Calculamos el tiempo que tenemos que esperar en funcion a la velocidad de rotacion
-        float timeToWait = (Mathf.PI / 2) / rotationSpeed;
-        // Esperamos el tiempo necesario
-        yield return new WaitForSeconds(timeToWait);
+            // Iniciamos el timer a 0
+            float timer = 0.0f;
 
-        // Paramos el giro
-        GetComponentInParent<Rigidbody>().angularVelocity = new Vector3(0, 0, 0);
-        // Redondeamos la rotacion para que sea exacta
-        transform.eulerAngles = prevRotation + new Vector3(0, direction * 90, 0);
-        // Informamos que ha parado la rotacion
-        isMoving = false;
+            // Mientras el tiempo sea menor que la duracion de la transicion repetimos
+            while (timer < transitionDuration)
+            {
+                // Aumentamos el tiempo en funcion de el Time.deltaTime
+                timer += Time.deltaTime;
+                // Calculamos el porcentaje del tiempo que llevamos
+                float t = timer / transitionDuration;
+                // Transformamos el porcentaje segun una funcion para que la transicion sea suave
+                t = t * t * t * (t * (6f * t - 15f) + 10f);
+
+                // Hacemos un Lerp en funcion de la posicion inicial y finla y el porcentaje de tiempo
+                targetObject.transform.position = Vector3.Lerp(start, target, t);
+
+                yield return null;
+            }
+
+            isMoving = false;
+
+            yield return null;
+
     }
 
     /// <summary>
-    /// Corrutina encargada de controlar que el movimiento sea de una sola casilla
+    /// Corutina encargada de rotar un objeto a una rotacion indicada en el tiempo indicado
     /// </summary>
-    /// <param name="direction"> -1 o 1 dependiendo del sentido de la rotacion </param>
-    IEnumerator stopMovement(int objectiveInd)
+    /// <param name="targetObject"> GameObject Objeto que vamos a mover </param>
+    /// <param name="transitionDuration"> Float Tiempo que dura la transicion </param>
+    /// <param name="start"> Quaternion Marca la rotacion de inicio </param>
+    /// <param name="target"> Quaternion Marca la rotacion final </param>
+    private IEnumerator RotateOverTimeCoroutine(GameObject targetObject, float transitionDuration, Quaternion start, Quaternion target)
     {
-        Vector2 aux = board.indexToVector(objectiveInd);
-        Vector3 objectivePos = new Vector3(aux.x, transform.position.y, aux.y);
+        // Marcamos que el jugador se esta moviendo
+        isMoving = true;
 
-        // Calculamos el tiempo que tenemos que esperar
-        float timeToWait = Vector3.Magnitude(objectivePos-transform.position) / moveSpeed;
+        // Iniciamos el timer a 0
+        float timer = 0.0f;
 
-        // Esperamos hasta obtener el angulo deseado
-        yield return new WaitForSeconds(timeToWait);
-        
-        // Paramos el giro
-        GetComponentInParent<Rigidbody>().velocity = new Vector3(0, 0, 0);
-        // Redondeamos la rotacion para que sea exacta
-        transform.position = objectivePos;
-        // Informamos que ha parado la rotacion
+        // Mientras el tiempo sea menor que la duracion de la transicion repetimos
+        while (timer < transitionDuration)
+        {
+            // Aumentamos el tiempo en funcion de el Time.deltaTime
+            timer += Time.deltaTime;
+            // Calculamos el porcentaje del tiempo que llevamos
+            float t = timer / transitionDuration;
+            // Transformamos el porcentaje segun una funcion para que la transicion sea suave
+            t = t * t * t * (t * (6f * t - 15f) + 10f);
+
+            // Hacemos un Lerp en funcion de la rotacion objetivo la original y el procentaje de tiempo que ha pasado
+            targetObject.transform.rotation = Quaternion.Slerp(start, target, t);
+
+            yield return null;
+        }
+
         isMoving = false;
+
+        yield return null;
     }
 
     #endregion
+
     #endregion
 
 }

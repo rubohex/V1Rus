@@ -125,8 +125,6 @@ public class BEnemy : MonoBehaviour
     {
         float timer = 0.0f;
 
-        Debug.Log("He entrado puto");
-
         while (timer < transitionDuration)
         {
             timer += Time.deltaTime;
@@ -149,8 +147,8 @@ public class BEnemy : MonoBehaviour
     /// <param name="direction"> -1 o 1 dependiendo del sentido de la rotacion </param>
     IEnumerator stopMovement(int objectiveInd)
     {
-        Vector2 aux = board.indexToVector(objectiveInd);
-        Vector3 objectivePos = new Vector3(aux.x, transform.position.y, aux.y);
+        // Obtenemos la posicion de la casilla a la que queremos ir
+        Vector3 objectivePos = board.indexToVector(objectiveInd, gameObject);
 
         // Calculamos el tiempo que tenemos que esperar
         float timeToWait = Vector3.Magnitude(objectivePos - transform.position) / moveSpeed;
