@@ -26,6 +26,18 @@ public class BMapPlayer : MonoBehaviour
     /// Tester para ver si se puede mover hacia adelante
     public bool CanMove = true;
 
+    public Vector3 CurrentEventpoint;
+    public Vector3 NewPoint;
+
+    float lerpTime = 5f;
+    float currentLerpTime;
+
+    public enum ECord
+    {
+        XY,
+        XZ,
+        YZ
+    }
 
     #endregion
 
@@ -38,6 +50,8 @@ public class BMapPlayer : MonoBehaviour
         move = mapPlayerInfo.move;
         rotationSpeed = mapPlayerInfo.rotationSpeed;
         moveSpeed = mapPlayerInfo.moveSpeed;
+
+        
     }
     // Start is called before the first frame update
     void Start()
@@ -56,9 +70,14 @@ public class BMapPlayer : MonoBehaviour
             //Control de movimiento hacia adelante
             if (Input.GetKey(move))
             {
-                this.transform.Translate(Vector3.forward * moveSpeed * Time.deltaTime);
+                Move(CurrentEventpoint, NewPoint);
+            }
+            else
+            {
+                transform.position = CurrentEventpoint;
             }
             
+
         }
         //Control de giro a la izquierda
         if (Input.GetKey(rotateLeft))
@@ -71,7 +90,29 @@ public class BMapPlayer : MonoBehaviour
             this.transform.Rotate(Vector3.up * rotationSpeed * Time.deltaTime);
         }
 
+        
+
     }
 
     #endregion
+
+    void Move(Vector3 startPos, Vector3 endPos)
+    {
+        if (Input.GetKeyDown(move))
+        {
+            currentLerpTime = 0f;
+        }
+
+        currentLerpTime += Time.deltaTime;
+        if (currentLerpTime > lerpTime)
+        {
+            currentLerpTime = lerpTime;
+        }
+
+        float t = currentLerpTime / lerpTime;
+        t = Mathf.Sin(t * Mathf.PI * 0.5f);
+        transform.position = Vector3.Lerp(startPos, endPos, t);
+
+        
+    }
 }
