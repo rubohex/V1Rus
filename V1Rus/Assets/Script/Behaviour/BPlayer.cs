@@ -79,6 +79,7 @@ public class BPlayer : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        updateUI();
         // Control del giro a la izquierda
         if (Input.GetKeyDown(rotateLeft) && !isMoving)
         {
@@ -132,18 +133,6 @@ public class BPlayer : MonoBehaviour
                 {
                     changeAP(-cost);
                 }
-
-                // Temporal para debugear ap hasta tener un IU
-                textAp.text = "AP: " + Ap;
-
-                if(maxAP == 0)
-                {
-                    textAp.text = "AP: " + "inf";
-                }
-                else if (Ap == 0)
-                {
-                    textAp.color = Color.red;
-                }
             }
         }
 
@@ -164,6 +153,23 @@ public class BPlayer : MonoBehaviour
     {
         Ap = Mathf.Clamp(Ap + actionPoints, 0, maxAP);
     }
+
+
+    // Temporal para debugear ap hasta tener un IU
+    public void updateUI()
+    {
+        textAp.text = "AP: " + Ap;
+
+        if (maxAP == 0)
+        {
+            textAp.text = "AP: " + "inf";
+        }
+        else if (Ap == 0)
+        {
+            textAp.color = Color.red;
+        }
+    }
+
     #endregion
 
     #region COROUTINES 
