@@ -91,12 +91,17 @@ public class BTerminal : MonoBehaviour
 
     public void actualizaInteracciones(int interacciones){
         this.numInteracciones = interacciones;
-        this.mensaje1=("\nNIVEL=" + this.Nivel + "\n\n" + "INFECTADO\n " + ((interacciones / this.Nivel) * 100) + "%");
+        this.mensaje1=("\nNIVEL=" + this.Nivel + "\n\n" + "INFECTADO\n " + (((float)interacciones / (float)this.Nivel) * 100) + "%");
         this.mensaje2=("Proceso Hackeo\n" + "Interacciones necesarias: \n " + Nivel + "\nInteracciones actuales: " + this.numInteracciones);
     }
 
     public int getInteracciones(){
         return this.numInteracciones;
+    }
+
+    public bool getHackeable()
+    {
+        return this.hackeable;
     }
 
     private void accionTrasHackear(){
