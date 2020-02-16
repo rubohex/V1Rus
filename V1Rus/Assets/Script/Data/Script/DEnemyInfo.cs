@@ -11,10 +11,10 @@ public class DEnemyInfo : ScriptableObject
     /// <summary>
     /// Velocidad de giro del enemigo
     /// </summary>
-    public float rotationSpeed;
+    public float rotationTime;
 
     /// <summary>
     /// Velocidad de giro del enemigo
     /// </summary>
-    public float moveSpeed;
+    public float moveTime;
 }

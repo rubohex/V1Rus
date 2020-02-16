@@ -6,28 +6,36 @@ public class BEnemy : MonoBehaviour
 {
     #region ATRIBUTES
 
+    /// <summary>
+    /// Array con los waypoints por los que ha de pasar el enemigo
+    /// </summary>
     public Transform[] wayPoints;
+
+    /// <summary>
+    /// Booleano que marca si el camino es cerrado o no
+    /// </summary>
     public bool closedPath;
 
+    /// <summary>
+    /// Informacion del enemigo
+    /// </summary>
     public DEnemyInfo enemyInfo;
 
     /// Velocidad de rotacion del enemigo
-    private float rotationSpeed;
+    private float rotationTime;
     /// Velocidad de movimiento del enemigo
-    private float moveSpeed;
+    private float moveTime;
 
     /// Indica si el enemigo moviendose
     private bool isMoving = false;
     /// Indica si el enemigo esta rotando
     private bool isRotating = false;
 
-    /// Indice en el que se encuentra el enemigo
-    private int actualIndex;
     /// Indice al que debe ir el enemigo
-    private int objectiveIndex;
+    private int boardIndex;
 
     /// Indice del path en el que se encuentra el enemigo
-    private int pathActualIndex;
+    private int pathIndex;
     /// Indica el sentido del camino en el que vamos para caminos no cerrados
     private int pathDirection = 1;
     /// Quaternion que guarda la rotacion que el enemigo tendra que hacer despues de moverse
@@ -36,20 +44,33 @@ public class BEnemy : MonoBehaviour
     /// Tablero del nivel
     private BBoard board;
 
+    /// Vector que apunta hacia arriba en el tablero
+    private Vector3 boardUP;
+
     #endregion
     private void Awake()
     {
-        rotationSpeed = enemyInfo.rotationSpeed;
-        moveSpeed = enemyInfo.moveSpeed;
+        rotationTime = enemyInfo.rotationTime;
+        moveTime = enemyInfo.moveTime;
         board = FindObjectOfType<BBoard>();
+        boardUP = board.getBoardUp();
     }
+
     // Start is called before the first frame update
     void Start()
     {
-        transform.position = new Vector3(wayPoints[0].position.x, transform.position.y, wayPoints[0].position.z);
-        transform.rotation = Quaternion.LookRotation(wayPoints[1].position-wayPoints[0].position);
-        actualIndex = board.positionToIndex(transform.position);
-        pathActualIndex = 0;
+        // Altura del enemigo
+        float enemyHeight = GetComponent<Renderer>().bounds.size.y;
+
+        // Posicion inicial del jugador en el waypoint 0
+        transform.position = board.getEnemySpawnPos(wayPoints[0].position, enemyHeight);
+        // Rotacion inicial mirando hacia el waypoint 1
+        transform.rotation = Quaternion.LookRotation(wayPoints[1].position-wayPoints[0].position ,boardUP);
+        
+        // Obtenemos el indice del tablero en el que estamos
+        boardIndex = board.positionToIndex(transform.position);
+        // Obtenemos el indice del array de waypoints en el que estamos
+        pathIndex = 0;
     }
 
     // Update is called once per frame
@@ -57,62 +78,62 @@ public class BEnemy : MonoBehaviour
     {
         if (isMoving)
         {
-            // Obtenemos el regidbody y le damos una velocidad
-            GetComponent<Rigidbody>().velocity = transform.forward * moveSpeed;
-            // Lanzamos una Corrutina para que pare al enemigo al llegar al punto
-            StartCoroutine(stopMovement(objectiveIndex));
+            StartCoroutine(MoveOverTimeCoroutine(gameObject, moveTime, transform.position, board.indexToVector(boardIndex, gameObject)));
         }
 
         if (isRotating)
         {
-            Debug.Log("PUM DAMAGES");
-            StartCoroutine(RotateOverTimeCoroutine(this.gameObject, .5f, transform.rotation, enemyRotation));
+            StartCoroutine(RotateOverTimeCoroutine(this.gameObject, rotationTime, transform.rotation, enemyRotation));
         }
 
-        if (Input.GetKeyDown(KeyCode.L))
+        if (Input.GetKeyDown(KeyCode.L) && !isRotating && !isMoving)
         {
             nextMovement();
         }
     }
 
+    /// <summary>
+    /// Cuando se llama a este metodo el enemigo hace su siguiente movimiento mirando al siguiente wayPoint
+    /// </summary>
     public void nextMovement()
     {
         // Obtenemos el Indice al que queremos movernos
-        pathActualIndex = computeNextWayPointsIndex(pathActualIndex);
-        objectiveIndex = board.positionToIndex(wayPoints[pathActualIndex].position);
+        pathIndex = computeNextWayPointsIndex(pathIndex);
+        boardIndex = board.positionToIndex(wayPoints[pathIndex].position);
+
         // Actualizamos la variable para indicar que el enemigo se esta moviendo
         isMoving = true;
 
-        int lookWayPointIndex = computeNextWayPointsIndex(pathActualIndex);
-        enemyRotation = Quaternion.LookRotation(wayPoints[lookWayPointIndex].position - wayPoints[pathActualIndex].position);
-        
+        // Calculamos el indice al que va a mirar el enemigo al finalizar su movimiento y calculamos la rotacion
+        int lookWayPointIndex = computeNextWayPointsIndex(pathIndex);
+        enemyRotation = Quaternion.LookRotation(wayPoints[lookWayPointIndex].position - wayPoints[pathIndex].position, boardUP);
+
     }
 
     /// <summary>
     /// Calcula el indice del siguiente wayPoin al que debe ir el enemigo
     /// </summary>
-    /// <param name="actualIndex">Int Indice del wayPoint actual </param>
+    /// <param name="boardIndex">Int Indice del wayPoint actual </param>
     /// <returns> Int Indice del siguiente wayPoint </returns>
-    private int computeNextWayPointsIndex(int actualIndex)
+    private int computeNextWayPointsIndex(int boardIndex)
     {
         // En caso de que el path no sea observamos los casos de los extremos
-        if (!closedPath && actualIndex == wayPoints.Length - 1)
+        if (!closedPath && boardIndex == wayPoints.Length - 1)
         {
             // En caso de llegar al ultimo waypoint damos la vuelta al sentido
-            Debug.Log("HAllo");
             pathDirection = -1;
             
-        }else if (!closedPath && actualIndex == 0)
+        }else if (!closedPath && boardIndex == 0)
         {
             // En caso de ser el primer waypoint ponemos el sentido recto
             pathDirection = 1;
         }
 
         // Aumentamos el index en funcion de la direccion
-        int nextIndex = actualIndex + pathDirection;
+        int nextIndex = boardIndex + pathDirection;
 
         // En caso de ser un path cerrado al llegar al final indicamos que el proximo indice es el primero
-        if (closedPath && actualIndex == wayPoints.Length - 1)
+        if (closedPath && boardIndex == wayPoints.Length - 1)
         {
             nextIndex = 0;
         }
@@ -121,6 +142,52 @@ public class BEnemy : MonoBehaviour
     }
 
     #region COROUTINES STOP 
+
+    /// <summary>
+    /// Corutina encargada de mover un objeto al lugar indicado en el tiempo indicado
+    /// </summary>
+    /// <param name="targetObject"> GameObject Objeto que vamos a mover </param>
+    /// <param name="transitionDuration"> Float Tiempo que dura la transicion </param>
+    /// <param name="start"> Vector3 marca la posicion inicial </param>
+    /// <param name="target"> Vector3 marca la posicion final </param>
+    private IEnumerator MoveOverTimeCoroutine(GameObject targetObject, float transitionDuration, Vector3 start, Vector3 target)
+    {
+        // Marcamos que el jugador se esta moviendo
+        isMoving = true;
+
+        // Iniciamos el timer a 0
+        float timer = 0.0f;
+
+        // Mientras el tiempo sea menor que la duracion de la transicion repetimos
+        while (timer < transitionDuration)
+        {
+            // Aumentamos el tiempo en funcion de el Time.deltaTime
+            timer += Time.deltaTime;
+            // Calculamos el porcentaje del tiempo que llevamos
+            float t = timer / transitionDuration;
+            // Transformamos el porcentaje segun una funcion para que la transicion sea suave
+            t = t * t * t * (t * (6f * t - 15f) + 10f);
+
+            // Hacemos un Lerp en funcion de la posicion inicial y finla y el porcentaje de tiempo
+            targetObject.transform.position = Vector3.Lerp(start, target, t);
+
+            yield return null;
+        }
+
+        isMoving = false;
+        isRotating = true;
+
+        yield return null;
+
+    }
+
+    /// <summary>
+    /// Corutina encargada de rotar un objeto a una rotacion indicada en el tiempo indicado
+    /// </summary>
+    /// <param name="targetObject"> GameObject Objeto que vamos a mover </param>
+    /// <param name="transitionDuration"> Float Tiempo que dura la transicion </param>
+    /// <param name="start"> Quaternion Marca la rotacion de inicio </param>
+    /// <param name="target"> Quaternion Marca la rotacion final </param>
     private IEnumerator RotateOverTimeCoroutine(GameObject targetObject, float transitionDuration, Quaternion start, Quaternion target)
     {
         float timer = 0.0f;
@@ -140,32 +207,5 @@ public class BEnemy : MonoBehaviour
 
         yield return null;
     }
-
-    /// <summary>
-    /// Corrutina encargada de controlar que el movimiento sea de una sola casilla
-    /// </summary>
-    /// <param name="direction"> -1 o 1 dependiendo del sentido de la rotacion </param>
-    IEnumerator stopMovement(int objectiveInd)
-    {
-        // Obtenemos la posicion de la casilla a la que queremos ir
-        Vector3 objectivePos = board.indexToVector(objectiveInd, gameObject);
-
-        // Calculamos el tiempo que tenemos que esperar
-        float timeToWait = Vector3.Magnitude(objectivePos - transform.position) / moveSpeed;
-
-        // Esperamos hasta obtener el angulo deseado
-        yield return new WaitForSeconds(timeToWait);
-
-        // Paramos el giro
-        GetComponentInParent<Rigidbody>().velocity = new Vector3(0, 0, 0);
-        // Redondeamos la rotacion para que sea exacta
-        transform.position = objectivePos;
-        // Informamos que ha parado la rotacion
-        isMoving = false;
-
-        // Comenzamos la rotacion
-        isRotating = true;
-    }
-
     #endregion
 }

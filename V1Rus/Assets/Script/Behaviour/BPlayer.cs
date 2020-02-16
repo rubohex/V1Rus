@@ -66,9 +66,12 @@ public class BPlayer : MonoBehaviour
         // Actualizamos los Ap que tenemos para el nivel
         Ap = maxAP = board.getBoardAp();
 
+        //Obtenemos el tamaño del jugador
+        float playerHeight = GetComponent<Renderer>().bounds.size.y;
+
         // Colocamos al jugador en la casilla de salida y guardamos su indice
         transform.rotation = board.getPlayerSpawnRot();
-        transform.position = board.getPlayerSpawnPos(GetComponent<Renderer>().bounds.size.y);
+        transform.position = board.getPlayerSpawnPos(playerHeight);
         tileIndex = board.positionToIndex(transform.position);
 
         // Temporal

@@ -117,13 +117,13 @@ public class BBoard : MonoBehaviour
         switch (coordSys)
         {
             case ECord.XY:
-                surfaceCoord = aux.gameObject.transform.position.z + tileSize3 / 2;
+                surfaceCoord = aux.gameObject.transform.position.z + aux.transform.up.z * tileSize3 / 2;
                 break;
             case ECord.XZ:
-                surfaceCoord = aux.gameObject.transform.position.y+ tileSize3 / 2;
+                surfaceCoord = aux.gameObject.transform.position.y + aux.transform.up.y * tileSize3 / 2;
                 break;
             case ECord.YZ:
-                surfaceCoord = aux.gameObject.transform.position.x + tileSize3 / 2;
+                surfaceCoord = aux.gameObject.transform.position.x + aux.transform.up.x * tileSize3 / 2;
                 break;
             default:
                 break;
@@ -236,13 +236,14 @@ public class BBoard : MonoBehaviour
         // Ponemos a 0 los bordes del tablero
         setBorderEdges();
 
-        // Obtenemos la roatacion de los elementos del tablero para cuando spawneemos particulas
-        spawnRotation = FindObjectOfType<BPlayer>().transform.rotation;
     }
 
     private void Start()
     {
         ShowBoard();
+
+        // Obtenemos la roatacion de los elementos del tablero para cuando spawneemos particulas
+        spawnRotation = FindObjectOfType<BPlayer>().transform.rotation;
     }
     #endregion
     
@@ -314,7 +315,50 @@ public class BBoard : MonoBehaviour
     /// <returns></returns>
     public Vector3 getPlayerSpawnPos(float playerHeight)
     {
-        return indexToVector(startIndex, null, surfaceCoord + playerHeight / 2);
+        // Obtenemos el vector para decidir hacia donte apunta parte superior
+        Vector3 vectorUp = FindObjectOfType<BTile>().transform.up;
+
+        switch (coordSys)
+        {
+            case ECord.XY:
+                return indexToVector(startIndex, null, surfaceCoord + vectorUp.z * playerHeight / 2);
+            case ECord.XZ:
+                return indexToVector(startIndex, null, surfaceCoord + vectorUp.y * playerHeight / 2);
+            case ECord.YZ:
+                return indexToVector(startIndex, null, surfaceCoord + vectorUp.x * playerHeight / 2);
+            default:
+                return vectorUp;
+        } 
+    }
+    /// <summary>
+    /// Devuelve la posicion de spawn para el enemigo
+    /// </summary>
+    /// <param name="pos"> Posicion del waypoint en el que queremos spawnear</param>
+    /// <returns></returns>
+    public Vector3 getEnemySpawnPos(Vector3 pos,float enemyHeight)
+    {
+        // Obtenemos el vector para decidir hacia donte apunta parte superior
+        Vector3 vectorUp = FindObjectOfType<BTile>().transform.up;
+
+        switch (coordSys)
+        {
+            case ECord.XY:
+                return new Vector3(pos.x, pos.y, surfaceCoord + vectorUp.z * enemyHeight / 2);
+            case ECord.XZ:
+                return new Vector3(pos.x, surfaceCoord + vectorUp.y * enemyHeight / 2, pos.z);
+            case ECord.YZ:
+                return new Vector3(surfaceCoord + vectorUp.z * enemyHeight / 2, pos.y, pos.z);
+            default:
+                return vectorUp;
+        }
+    }
+    /// <summary>
+    /// Devuelve el vector que apunta hacia arriba del tablero
+    /// </summary>
+    /// <returns></returns>
+    public Vector3 getBoardUp()
+    {
+        return FindObjectOfType<BTile>().transform.up;
     }
 
     /// <summary>

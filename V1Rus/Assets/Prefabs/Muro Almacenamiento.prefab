@@ -45,10 +45,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7680fba14faa8d548a2e39ff31f900f4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  northEdge: 0
-  eastEdge: 0
-  southEdge: 0
-  westEdge: 0
+  upEdge: 0
+  leftEdge: 0
+  rightEdge: 0
+  downEdge: 0
 --- !u!33 &2208898982727229251
 MeshFilter:
   m_ObjectHideFlags: 0

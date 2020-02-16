@@ -17,6 +17,6 @@ MonoBehaviour:
   leftEdge: 1
   rightEdge: 1
   downEdge: 1
-  x: 0
+  x: 1
   y: 1
-  z: 1
+  z: 0
