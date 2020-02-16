@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2994a91f00770ba4a8452d3c8b22bd04, type: 3}
   m_Name: BasicAntivirusInfo
   m_EditorClassIdentifier: 
-  rotationTime: 0.8
-  moveTime: 0.4
+  rotationTime: 0.3
+  moveTime: 0.3
