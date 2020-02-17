@@ -20,11 +20,6 @@ public class BMapPlayer : MonoBehaviour
     /// Codigo de tecla para mover hacia atrás
     private KeyCode moveBack;
 
-    /// Velocidad de rotacion del jugador
-    private float rotationTime;
-    /// Velocidad de movimiento del jugador
-    private float moveTime;
-
     /// Tester para ver si se puede mover hacia adelante
     public bool CanMove = true;
 
@@ -36,6 +31,7 @@ public class BMapPlayer : MonoBehaviour
 
     /// Hacia donde mira el jugador respecto a la cara del cubo (Front, Back, Left, Right)
     private string Direction = "null";
+    private string PrevDirection = "Front";
 
     /// Tiempo total del movimiento del muelle
     float lerpTime = 5f;
@@ -82,10 +78,7 @@ public class BMapPlayer : MonoBehaviour
         {
             if (Direction != "Front")
             {
-                transform.position = CurrentEventpoint.transform.position;
-                currentLerpTime = 0f;
-                Direction = "Front";
-                NewEventPoint = Targets[Direction];
+                RestartMovement("Front");
             }
             CanMove = false;
         }
@@ -94,10 +87,7 @@ public class BMapPlayer : MonoBehaviour
         {
             if (Direction != "Back")
             {
-                transform.position = CurrentEventpoint.transform.position;
-                currentLerpTime = 0f;
-                Direction = "Back";
-                NewEventPoint = Targets[Direction];
+                RestartMovement("Back");
             }
             CanMove = false;
         }
@@ -106,10 +96,7 @@ public class BMapPlayer : MonoBehaviour
         {
             if (Direction != "Left")
             {
-                transform.position = CurrentEventpoint.transform.position;
-                Direction = "Left";
-                NewEventPoint = Targets[Direction];
-                currentLerpTime = 0f;
+                RestartMovement("Left");
             }
             CanMove = false;
         }
@@ -118,9 +105,7 @@ public class BMapPlayer : MonoBehaviour
         {
             if (Direction != "Right")
             {
-                transform.position = CurrentEventpoint.transform.position;
-                Direction = "Right";
-                NewEventPoint = Targets[Direction];
+                RestartMovement("Right");
             }
             CanMove = false;
         }
@@ -130,15 +115,14 @@ public class BMapPlayer : MonoBehaviour
             currentLerpTime = 0f;
             CanMove = true;
             desplazamiento = Vector3.zero;
+            NewEventPoint = Targets[PrevDirection];
         }
 
         //Desplazamiento
         if (!CanMove && NewEventPoint != null)
         {
             Move(CurrentEventpoint.transform.position + desplazamiento, NewEventPoint.transform.position);
-        }
-
-        
+        }    
 
     }
 
@@ -161,6 +145,15 @@ public class BMapPlayer : MonoBehaviour
         
     }
 
+    private void RestartMovement(string dir)
+    {
+        transform.position = CurrentEventpoint.transform.position;
+        //currentLerpTime = 0f;
+        PrevDirection = dir;
+        Direction = dir;
+        NewEventPoint = Targets[dir];
+    }
+
     private void OnTriggerEnter(Collider other)
     {
         GameObject col = other.gameObject;
@@ -168,33 +161,29 @@ public class BMapPlayer : MonoBehaviour
         {
             if (Direction != "Front" && Input.GetKey(moveFront) && col.GetComponent<BJunction>().Targets["Front"])
             {
-                Direction = "Front";
-                desplazamiento = col.transform.position - CurrentEventpoint.transform.position;
-                NewEventPoint = col.GetComponent<BJunction>().Targets[Direction];
-                currentLerpTime = 0f;
+                DestinationChange("Front", col);
             }
             else if (Direction != "Back" && Input.GetKey(moveBack) && col.GetComponent<BJunction>().Targets["Back"])
             {
-                Direction = "Back";
-                desplazamiento = col.transform.position - CurrentEventpoint.transform.position;
-                NewEventPoint = col.GetComponent<BJunction>().Targets[Direction];
-                currentLerpTime = 0f;
+                DestinationChange("Back", col);
             }
             else if (Direction != "Left" && Input.GetKey(moveLeft) && col.GetComponent<BJunction>().Targets["Left"])
             {
-                Direction = "Left";
-                desplazamiento = col.transform.position - CurrentEventpoint.transform.position;
-                NewEventPoint = col.GetComponent<BJunction>().Targets[Direction];
-                currentLerpTime = 0f;
+                DestinationChange("Left", col);
             }
             else if (Direction != "Right" && Input.GetKey(moveRight) && col.GetComponent<BJunction>().Targets["Right"])
             {
-                Direction = "Right";
-                desplazamiento = col.transform.position - CurrentEventpoint.transform.position;
-                NewEventPoint = col.GetComponent<BJunction>().Targets[Direction];
-                currentLerpTime = 0f;
+                DestinationChange("Right", col);
             }
         }
+    }
+
+    private void DestinationChange(string dir, GameObject col)
+    {
+        Direction = dir;
+        desplazamiento = col.transform.position - CurrentEventpoint.transform.position;
+        NewEventPoint = col.GetComponent<BJunction>().Targets[Direction];
+        currentLerpTime = 0f;
     }
 
 }
