@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a3fa7e26757911d4e89d71454a7b722a, type: 3}
   m_Name: MapPlayerInfo
   m_EditorClassIdentifier: 
-  rotationSpeed: 400
-  moveSpeed: 4
-  rotateLeft: 97
-  rotateRight: 100
-  move: 119
+  moveTime: 2
+  moveLeft: 97
+  moveRight: 100
+  moveFront: 119
+  moveBack: 115

@@ -8,30 +8,28 @@ public class DMapPlayerInfo : ScriptableObject
 {
     [Header("Opciones De Jugador")]
 
-
     /// <summary>
     /// Velocidad de giro del jugador
     /// </summary>
-    public float rotationSpeed;
-
-    /// <summary>
-    /// Velocidad de giro del jugador
-    /// </summary>
-    public float moveSpeed;
+    public float moveTime;
 
 
     [Header("Teclas control")]
 
     /// <sumary>
-    /// Codigo de tecla para rotar -90º
+    /// Codigo de tecla para mover hacia la Izquierda
     /// </sumary>
-    public KeyCode rotateLeft = KeyCode.A;
+    public KeyCode moveLeft = KeyCode.A;
     /// <sumary>
-    /// Codigo de tecla para rotar -90º
+    /// Codigo de tecla para mover hacia la Derecha
     /// </sumary>
-    public KeyCode rotateRight = KeyCode.D;
+    public KeyCode moveRight = KeyCode.D;
     /// <sumary>
     /// Codigo de tecla para mover hacia delante
     /// </sumary>
-    public KeyCode move = KeyCode.W;
+    public KeyCode moveFront = KeyCode.W;
+    /// <sumary>
+    /// Codigo de tecla para mover hacia atrás
+    /// </sumary>
+    public KeyCode moveBack = KeyCode.S;
 }

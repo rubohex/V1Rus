@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BEventPoint : MonoBehaviour
+public class BJunction : MonoBehaviour
 {
+
     public GameObject FrontTarget;
     public GameObject BackTarget;
     public GameObject RightTarget;

@@ -44,8 +44,6 @@ public class BMapCameraController : MonoBehaviour
     /// Base de coordenadas para controlar el giro de la cámara
     private int[] Base = new int[3];
 
-    /// Target de la camara
-    private Transform target;
     #endregion
 
     #region METHODS
@@ -68,7 +66,7 @@ public class BMapCameraController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        target = transform.parent;
+        GetComponentInParent<Rigidbody>().angularVelocity = new Vector3(0, 0, 0);
 
         Base[0] = 1;
         Base[1] = 2;
