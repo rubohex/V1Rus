@@ -41,6 +41,10 @@ public class BEnemy : MonoBehaviour
     /// Quaternion que guarda la rotacion que el enemigo tendra que hacer despues de moverse
     private Quaternion enemyRotation;
 
+    public int verticalVisionSize = 2;
+    public int horizontalVisionSize = 3;
+    private HashSet<int> visionTiles = new HashSet<int>();
+
     /// Tablero del nivel
     private BBoard board;
 
@@ -108,6 +112,51 @@ public class BEnemy : MonoBehaviour
         int lookWayPointIndex = computeNextWayPointsIndex(pathIndex);
         enemyRotation = Quaternion.LookRotation(wayPoints[lookWayPointIndex].position - wayPoints[pathIndex].position, boardUP);
 
+    }
+
+    private void ComputeVisionSet()
+    {
+        // Vaciamos el Set anterior
+
+        // Obtenemos el tamaño basico de la casilla
+        float tileSize = board.getTileSize();
+
+        // Obtenemos el indice de la casilla a la que miramos
+        int centralIndex = board.positionToIndex(transform.position + transform.forward* tileSize);
+
+        // Obtenemos la diferencia entre el indice al que apuntamos y el actual
+        int rightDiff = Mathf.Abs(centralIndex - boardIndex);
+
+        // Calculamos los limites para los bucles
+        int minI;
+        int maxI;
+        int minJ;
+        int maxJ;
+        int boardSize1 = (int) board.GetBoardShape()[0];
+
+        if (Mathf.Abs(rightDiff) < boardSize1)
+        {
+            maxI = boardSize1 * (horizontalVisionSize % 2);
+            minI = -maxI;
+            maxJ = rightDiff;
+            minJ = 0;
+            
+        }
+        else
+        {
+            maxI = (verticalVisionSize - 1) * rightDiff;
+            minI = 0;
+            maxJ = horizontalVisionSize % 2;
+            minJ = -maxJ;
+        }
+
+        for (int i = minI; i < maxI; i++)
+        {
+            for (int j = minJ; j < maxJ; j++)
+            {
+                visionTiles.Add(centralIndex + i + j);
+            }
+        }
     }
 
     /// <summary>

@@ -34,7 +34,7 @@ public class BTile : MonoBehaviour
     /// Start is called before the first frame update
     void Start()
     {
-        transparency = this.gameObject.GetComponent<Renderer>().material.GetFloat("_Transparency");
+        // transparency = this.gameObject.GetComponent<Renderer>().material.GetFloat("_Transparency");
     }
 
     /// <summary>

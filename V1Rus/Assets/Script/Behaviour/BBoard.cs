@@ -47,6 +47,9 @@ public class BBoard : MonoBehaviour
     /// Diccionario para almacena los costes de los bordes con respecto a cada casilla
     private Dictionary<int, Dictionary<int, int>> edges = new Dictionary<int, Dictionary<int, int>>();
 
+    /// Diccionario para almacenar los tiles y poder cambiar sus valores
+    private Dictionary<int, BTile> tiles = new Dictionary<int, BTile>();
+
     /// Diccionario para almacenar las particulas de datos
     private Dictionary<int, GameObject> dataParticles = new Dictionary<int, GameObject>();
 
@@ -57,9 +60,9 @@ public class BBoard : MonoBehaviour
     private int startIndex;
     private int endIndex;
 
-    /// Tamaño en casillas del tablero en X 
+    /// Tamaño en casillas del tablero en la primera Coordenada
     private int size1;
-    /// Tamaño en casillas del tablero en Z
+    /// Tamaño en casillas del tablero en la segunda Coordenada
     private int size2;
 
     /// Limites del mapa en Eje X y Z
@@ -188,6 +191,7 @@ public class BBoard : MonoBehaviour
                     secondIndex = (int)(position.y - min2 / tileSize2) * size1;
                     // Guardamos en el diccionario el index con su respectiva posicion
                     locations.Add((firstIndex + secondIndex), new Vector2(position.x, position.y));
+                    tiles.Add((firstIndex + secondIndex), item);
                     break;
                 case ECord.XZ:
 
@@ -265,7 +269,7 @@ public class BBoard : MonoBehaviour
     /// Devolvemos el tamaño del tablero en casillas
     /// </summary>
     /// <returns> Vector2 que contiene size1 seguido de size2 </returns>
-    public Vector2 getBoardShape()
+    public Vector2 GetBoardShape()
     {
         return new Vector2(size1, size2);
     }
@@ -657,7 +661,6 @@ public class BBoard : MonoBehaviour
         Destroy(particle);
     }
     
-
     #endregion
     
     #endregion
