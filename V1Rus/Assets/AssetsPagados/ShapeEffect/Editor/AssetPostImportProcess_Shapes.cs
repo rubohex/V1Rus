@@ -1,9 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEditor;
-using Orangedkeys.ShapesFX;
 using System.IO;
+using Orangedkeys.SPHERICFX;
 
 // Set the scale of all the imported models to  "globalScaleModifier"
 // and dont generate materials for the imported objects
