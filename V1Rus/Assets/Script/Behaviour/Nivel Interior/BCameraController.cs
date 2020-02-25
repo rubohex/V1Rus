@@ -81,17 +81,17 @@ public class BCameraController : MonoBehaviour
         BBoard board = FindObjectOfType<BBoard>();
 
         // Obtenemos los limites del tablero
-        Vector4 aux = board.getBoardLimits();
+        Vector4 aux = board.GetBoardLimits();
         min1 = aux.x;
         max1 = aux.y;
         min2 = aux.z;
         max2 = aux.w;
 
         // Colocamos la camara con la posicion inicial
-        parentT.position = board.getPlayerSpawnPos(0f);
-        parentT.rotation = board.getPlayerSpawnRot();
+        parentT.position = board.GetPlayerSpawnPos(0f);
+        parentT.rotation = board.GetPlayerSpawnRot();
 
-        coordSys = board.getCoordSys();
+        coordSys = board.GetCoordSys();
     }
 
     /// Update is called once per frame

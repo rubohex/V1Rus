@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Linq;
+﻿using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -78,6 +77,12 @@ public class BBoard : MonoBehaviour
 
     /// Coordenada de la superficie
     private float surfaceCoord;
+
+    /// Script del jugador
+    private BPlayer player;
+
+    /// Set que contiene las posiciones de los enemigos
+    private HashSet<int> enemiesPos = new HashSet<int>();
 
     #endregion
 
@@ -200,6 +205,7 @@ public class BBoard : MonoBehaviour
                     secondIndex = (int)(position.z - min2 / tileSize2) * size1;
                     // Guardamos en el diccionario el index con su respectiva posicion
                     locations.Add((firstIndex + secondIndex), new Vector2(position.x, position.z));
+                    tiles.Add((firstIndex + secondIndex), item);
                     break;
                 case ECord.YZ:
 
@@ -208,6 +214,7 @@ public class BBoard : MonoBehaviour
                     secondIndex = (int)(position.z - min2 / tileSize2) * size1;
                     // Guardamos en el diccionario el index con su respectiva posicion
                     locations.Add((firstIndex + secondIndex), new Vector2(position.y, position.z));
+                    tiles.Add((firstIndex + secondIndex), item);
                     break;
                 default:
                     break;
@@ -223,22 +230,25 @@ public class BBoard : MonoBehaviour
                 endIndex = firstIndex + secondIndex;
             }
 
-            Debug.Log("Indice " + (firstIndex + secondIndex) + " localizacion " + locations[(firstIndex + secondIndex)]);
+            //Debug.Log("Indice " + (firstIndex + secondIndex) + " localizacion " + locations[(firstIndex + secondIndex)]);
 
         }
 
         // Para cada casilla almacenamos sus bordes usando como referente su indice en el array
         foreach (int index in locations.Keys)
         {
-            // Llamamos a la funcion getLocaledges que nos devuelve los bordes del indice
-            edges.Add(index, getLocalEdges(index));
+            // Llamamos a la funcion CreateLocalEdges que nos devuelve los bordes del indice
+            edges.Add(index, CreateLocalEdges(index));
         }
 
         // Añadimos los bordes de las paredes
-        addWallsEdges();
+        AddWallsEdges();
 
         // Ponemos a 0 los bordes del tablero
-        setBorderEdges();
+        SetBorderEdges();
+
+        // Obtenemos los jugadores 
+        player = FindObjectOfType<BPlayer>();
 
     }
 
@@ -247,11 +257,26 @@ public class BBoard : MonoBehaviour
         ShowBoard();
 
         // Obtenemos la roatacion de los elementos del tablero para cuando spawneemos particulas
-        spawnRotation = FindObjectOfType<BPlayer>().transform.rotation;
+        spawnRotation = player.transform.rotation;
+
+        // Obtenemos todos los enemigos y los guardamos en la lista
+        foreach (BEnemy enemy in FindObjectsOfType<BEnemy>())
+        {
+            enemiesPos.Add(enemy.GetEnemyIndex());
+        }
     }
     #endregion
-    
+
     #region GETTERS
+
+    /// <summary>
+    /// Devuelve el tamaño de la casilla
+    /// </summary>
+    /// <returns></returns>
+    public float GetTileSize()
+    {
+        return tileSize1;
+    }
 
     /// <summary>
     /// Devolvemos los limites del Tablero en un array de 4 componentes
@@ -260,7 +285,7 @@ public class BBoard : MonoBehaviour
     /// Vector4 que contiene la minima coordenada de la primera coordenada y la maxima 
     /// seguida de la minima coordenada de la segunda coordenada y la maxima de la misma 
     /// </returns>
-    public Vector4 getBoardLimits()
+    public Vector4 GetBoardLimits()
     {
         return new Vector4(min1, max1, min2, max2);
     }
@@ -278,68 +303,26 @@ public class BBoard : MonoBehaviour
     /// Devuelve el Ap asignado en este nivel
     /// </summary>
     /// <returns></returns>
-    public int getBoardAp()
+    public int GetBoardAp()
     {
         return boardInfo.APNivel;
     }
 
     /// <summary>
-    /// Devuelve el tamaño de la casilla
+    /// Devuelve el vector que apunta hacia arriba del tablero
     /// </summary>
     /// <returns></returns>
-    public float getTileSize()
+    public Vector3 GetBoardUp()
     {
-        return tileSize1;
+        return FindObjectOfType<BTile>().transform.up;
     }
 
-    /// <summary>
-    /// Transforma una coordenada en el indice dentro del tablero
-    /// </summary>
-    /// <param name="position"> Vector 3 Posicion que queremos pasar a index </param>
-    /// <returns> Indice correspondiente a la posicion </returns>
-    public int positionToIndex(Vector3 position)
-    {
-        switch (coordSys)
-        {
-            case ECord.XY:
-                return Mathf.RoundToInt((position.x - min1) / tileSize1) + Mathf.RoundToInt((position.y - min2) / tileSize2) * size1;
-            case ECord.XZ:
-                return Mathf.RoundToInt((position.x - min1) / tileSize1) + Mathf.RoundToInt((position.z - min2) / tileSize2) * size1;
-            case ECord.YZ:
-                return Mathf.RoundToInt((position.y - min1) / tileSize1) + Mathf.RoundToInt((position.z - min2) / tileSize2) * size1;
-            default:
-                return -1;
-        }
-    }
-
-    /// <summary>
-    /// Devuelve la posicion de spawn para el jugador
-    /// </summary>
-    /// <param name="playerHeight">Float Altura del jugador</param>
-    /// <returns></returns>
-    public Vector3 getPlayerSpawnPos(float playerHeight)
-    {
-        // Obtenemos el vector para decidir hacia donte apunta parte superior
-        Vector3 vectorUp = FindObjectOfType<BTile>().transform.up;
-
-        switch (coordSys)
-        {
-            case ECord.XY:
-                return indexToVector(startIndex, null, surfaceCoord + vectorUp.z * playerHeight / 2);
-            case ECord.XZ:
-                return indexToVector(startIndex, null, surfaceCoord + vectorUp.y * playerHeight / 2);
-            case ECord.YZ:
-                return indexToVector(startIndex, null, surfaceCoord + vectorUp.x * playerHeight / 2);
-            default:
-                return vectorUp;
-        } 
-    }
     /// <summary>
     /// Devuelve la posicion de spawn para el enemigo
     /// </summary>
     /// <param name="pos"> Posicion del waypoint en el que queremos spawnear</param>
     /// <returns></returns>
-    public Vector3 getEnemySpawnPos(Vector3 pos,float enemyHeight)
+    public Vector3 GetEnemySpawnPos(Vector3 pos, float enemyHeight)
     {
         // Obtenemos el vector para decidir hacia donte apunta parte superior
         Vector3 vectorUp = FindObjectOfType<BTile>().transform.up;
@@ -356,31 +339,70 @@ public class BBoard : MonoBehaviour
                 return vectorUp;
         }
     }
+
     /// <summary>
-    /// Devuelve el vector que apunta hacia arriba del tablero
+    /// Devuelve la posicion de spawn para el jugador
     /// </summary>
+    /// <param name="playerHeight">Float Altura del jugador</param>
     /// <returns></returns>
-    public Vector3 getBoardUp()
+    public Vector3 GetPlayerSpawnPos(float playerHeight)
     {
-        return FindObjectOfType<BTile>().transform.up;
+        // Obtenemos el vector para decidir hacia donte apunta parte superior
+        Vector3 vectorUp = FindObjectOfType<BTile>().transform.up;
+
+        switch (coordSys)
+        {
+            case ECord.XY:
+                return IndexToPosition(startIndex, null, surfaceCoord + vectorUp.z * playerHeight / 2);
+            case ECord.XZ:
+                return IndexToPosition(startIndex, null, surfaceCoord + vectorUp.y * playerHeight / 2);
+            case ECord.YZ:
+                return IndexToPosition(startIndex, null, surfaceCoord + vectorUp.x * playerHeight / 2);
+            default:
+                return vectorUp;
+        }
     }
 
     /// <summary>
     /// Devuelve la posicion de spawn para el jugador
     /// </summary>
     /// <returns></returns>
-    public Quaternion getPlayerSpawnRot()
+    public Quaternion GetPlayerSpawnRot()
     {
         GameObject aux = FindObjectOfType<BTile>().gameObject;
         return Quaternion.LookRotation(aux.transform.forward, aux.transform.up);
     }
+
     /// <summary>
     /// Devuelve el sistema de coordenadas usado
     /// </summary>
     /// <returns></returns>
-    public ECord getCoordSys()
+    public ECord GetCoordSys()
     {
         return coordSys;
+    }
+
+    #endregion
+
+    #region CHANGEINDEX
+    /// <summary>
+    /// Transforma una coordenada en el indice dentro del tablero
+    /// </summary>
+    /// <param name="position"> Vector 3 Posicion que queremos pasar a index </param>
+    /// <returns> Indice correspondiente a la posicion </returns>
+    public int PositionToIndex(Vector3 position)
+    {
+        switch (coordSys)
+        {
+            case ECord.XY:
+                return Mathf.RoundToInt((position.x - min1) / tileSize1) + Mathf.RoundToInt((position.y - min2) / tileSize2) * size1;
+            case ECord.XZ:
+                return Mathf.RoundToInt((position.x - min1) / tileSize1) + Mathf.RoundToInt((position.z - min2) / tileSize2) * size1;
+            case ECord.YZ:
+                return Mathf.RoundToInt((position.y - min1) / tileSize1) + Mathf.RoundToInt((position.z - min2) / tileSize2) * size1;
+            default:
+                return -1;
+        }
     }
 
     /// <summary>
@@ -390,9 +412,9 @@ public class BBoard : MonoBehaviour
     /// <param name="targetObject"> GameObject objeto del que tomaremos la coordenada restante</param>
     /// <param name="extraCoord"> Offset de la coordenada extra en caso de añadir GameObject y en caso coontrario offset que le sumamos</param>
     /// <returns> Vector 3 con las cordenadas bases del tablero y la restante del objeto que recibimos </returns>
-    public Vector3 indexToVector(int index, GameObject targetObject = null, float extraCoord = 0f)
+    public Vector3 IndexToPosition(int index, GameObject targetObject = null, float extraCoord = 0f)
     {
-        Vector2 aux = locations[index];
+        Vector2 aux = new Vector2(min1 + (index % size1) * tileSize1, min2 + (index / size1) * tileSize2);
         if(targetObject == null)
         {
             switch (coordSys)
@@ -424,11 +446,138 @@ public class BBoard : MonoBehaviour
     }
 
     /// <summary>
+    /// Actualizamos la posicion del enemigo en el mapa
+    /// </summary>
+    /// <param name="enemy">Benemy enemigo del que actualizamos la posicion</param>
+    public void UpdateEnemy(int oldPos, int newPos)
+    {
+        enemiesPos.Remove(oldPos);
+        enemiesPos.Add(newPos);
+    }
+    #endregion
+
+    #region BOARD LOGIC
+
+    #region BORDER LOGIC
+    /// <summary>
+    /// Recorre todos los muros y añade sus bordes a los del tablero
+    /// </summary>
+    private void AddWallsEdges()
+    {
+        // Buscamos todos los muros y los guardamos en un array
+        BMuro[] walls = FindObjectsOfType<BMuro>();
+
+        // Realizamos el mismo proceso para cada mur
+        foreach (BMuro wall in walls)
+        {
+            AddWallEdges(wall);
+        }
+    }
+
+    /// <summary>
+    /// Añade los bordes de un muro a la casilla
+    /// </summary>
+    /// <param name="wall"> Muro del que obtenemos los bordes</param>
+    private void AddWallEdges(BMuro wall)
+    {
+        // Calculamos su indice
+        int index = PositionToIndex(wall.transform.position);
+        int auxIndex;
+
+        // Para cada uno de las casillas que lo rodea actualizamos el eje en ambos sentidos
+        // Al sumarle size1 obtenemos la casilla norte
+        auxIndex = index + indexDirections["Up"];
+        if (locations.ContainsKey(auxIndex))
+        {
+            edges[index][auxIndex] *= wall.upEdge;
+            edges[auxIndex][index] *= wall.upEdge;
+        }
+
+        // Al sumarle uno obtenemos la casilla al oeste
+        auxIndex = index + indexDirections["Left"];
+        if (locations.ContainsKey(auxIndex))
+        {
+            edges[index][auxIndex] *= wall.leftEdge;
+            edges[auxIndex][index] *= wall.leftEdge;
+        }
+
+        // Al restar size1 obtenemos la casilla al sur
+        auxIndex = index + indexDirections["Down"];
+        if (locations.ContainsKey(auxIndex))
+        {
+            edges[index][auxIndex] *= wall.downEdge;
+            edges[auxIndex][index] *= wall.downEdge;
+        }
+
+        // Al restar 1 obtenemos la casilla al este
+        auxIndex = index + indexDirections["Right"];
+        if (locations.ContainsKey(auxIndex))
+        {
+            edges[index][auxIndex] *= wall.rightEdge;
+            edges[auxIndex][index] *= wall.rightEdge;
+        }
+    }
+
+    /// <summary>
+    /// Cambia los valores de los bordes de las casillas a los bordes a 0
+    /// </summary>
+    private void SetBorderEdges()
+    {
+        // Recorremos todos los casillas y en caso de ser uno de los bordes del tablero ponemos su borde a cero
+        foreach (int index in edges.Keys)
+        {
+            // Borde Inferior
+            if ((index / size1) == 0)
+            {
+                int auxIndex = index + indexDirections["Down"];
+                edges[index][auxIndex] = 0;
+                if (edges.ContainsKey(auxIndex))
+                {
+                    edges[auxIndex][index] = 0;
+                }
+            }
+
+            // Borde Izquierdo
+            if ((index % size1) == 0)
+            {
+                int auxIndex = index + indexDirections["Left"];
+                edges[index][auxIndex] = 0;
+                if (edges.ContainsKey(auxIndex))
+                {
+                    edges[auxIndex][index] = 0;
+                }
+            }
+
+            // Borde Superior
+            if ((index / size1) == size2)
+            {
+                int auxIndex = index + indexDirections["Up"];
+                edges[index][auxIndex] = 0;
+                if (edges.ContainsKey(auxIndex))
+                {
+                    edges[auxIndex][index] = 0;
+                }
+            }
+
+            // Borde Derecho
+            if ((index % size1) == size1 - 1)
+            {
+                int auxIndex = index + indexDirections["Right"];
+                edges[index][auxIndex] = 0;
+                if (edges.ContainsKey(auxIndex))
+                {
+                    edges[auxIndex][index] = 0;
+                }
+            }
+        }
+    }
+
+    /// <summary>
     /// Obtenemos un diccionario con los 4 indices que lo rodean y sus respectivos costes
     /// </summary>
     /// <param name="index"> Int indica el indice del que queremos obtener su diccionario</param>
     /// <returns> Diccionario con los respectivos costes </returns>
-    private Dictionary<int, int> getLocalEdges(int index)
+    private Dictionary<int, int> CreateLocalEdges(int index)
     {
         // Diccionario que llenaremos con la informacion pertinente
         Dictionary<int, int> localEdges = new Dictionary<int, int>();
@@ -482,67 +631,10 @@ public class BBoard : MonoBehaviour
 
         return localEdges;
     }
+
     #endregion
 
-    #region BOARD LOGIC
-    /// <summary>
-    /// Recorre todos los muros y añade sus bordes a los del tablero
-    /// </summary>
-    private void addWallsEdges()
-    {
-        // Buscamos todos los muros y los guardamos en un array
-        BMuro[] walls = FindObjectsOfType<BMuro>();
-
-        // Realizamos el mismo proceso para cada mur
-        foreach (BMuro wall in walls)
-        {
-            addWallEdges(wall);
-        }
-    }
-
-    /// <summary>
-    /// Añade los bordes de un muro a la casilla
-    /// </summary>
-    /// <param name="wall"> Muro del que obtenemos los bordes</param>
-    private void addWallEdges(BMuro wall)
-    {
-        // Calculamos su indice
-        int index = positionToIndex(wall.transform.position);
-        int auxIndex;
-
-        // Para cada uno de las casillas que lo rodea actualizamos el eje en ambos sentidos
-        // Al sumarle size1 obtenemos la casilla norte
-        auxIndex = index + indexDirections["Up"];
-        if (locations.ContainsKey(auxIndex))
-        {
-            edges[index][auxIndex] *= wall.upEdge;
-            edges[auxIndex][index] *= wall.upEdge;
-        }
-
-        // Al sumarle uno obtenemos la casilla al oeste
-        auxIndex = index + indexDirections["Left"];
-        if (locations.ContainsKey(auxIndex))
-        {
-            edges[index][auxIndex] *= wall.leftEdge;
-            edges[auxIndex][index] *= wall.leftEdge;
-        }
-
-        // Al restar size1 obtenemos la casilla al sur
-        auxIndex = index + indexDirections["Down"];
-        if (locations.ContainsKey(auxIndex))
-        {
-            edges[index][auxIndex] *= wall.downEdge;
-            edges[auxIndex][index] *= wall.downEdge;
-        }
-
-        // Al restar 1 obtenemos la casilla al este
-        auxIndex = index + indexDirections["Right"];
-        if (locations.ContainsKey(auxIndex))
-        {
-            edges[index][auxIndex] *= wall.rightEdge;
-            edges[auxIndex][index] *= wall.rightEdge;
-        }
-    }
+    #region PATHFINDING
 
     /// <summary>
     /// Devuelve el coste de entrar a objectiveTile desde acutalTile
@@ -550,75 +642,123 @@ public class BBoard : MonoBehaviour
     /// <param name="actualTile"> Int indica el indice de la casilla actual</param>
     /// <param name="objectiveTile"> Int indica el indice de la casilla objetivo </param>
     /// <returns> Int que representa el coste del movimiento</returns>
-    public int costToEnter(int actualTile, int objectiveTile, bool activeAbility)
+    public float CostToEnter(int actualTile, int objectiveTile, bool activeAbility)
     {
-        if (edges.ContainsKey(actualTile) && edges[actualTile].ContainsKey(objectiveTile))
+        if (edges.ContainsKey(actualTile) && edges[actualTile].ContainsKey(objectiveTile) && edges[actualTile][objectiveTile] != 0 && !enemiesPos.Contains(objectiveTile))
         {
             if (activeAbility && dataParticles.ContainsKey(objectiveTile))
             {
                 return -edges[actualTile][objectiveTile];
-             
+
             }
             else
             {
                 return edges[actualTile][objectiveTile];
-            }  
+            }
         }
         else
         {
-            return 0;
+            return Mathf.Infinity;
         }
 
     }
 
     /// <summary>
-    /// Cambia los valores de los bordes de las casillas a los bordes a 0
+    /// Devuelve una lista que representa un camino desde el indice de inicio al objetivo
     /// </summary>
-    private void setBorderEdges()
+    /// <param name="start"> Indice en el que estamos</param>
+    /// <param name="objective"> Indice al que queremos ir</param>
+    /// <param name="activeAbility"> Booleano que nos indica si la abilidad de recoger codigo esta activa</param>
+    /// <returns> Una Lista con los indices desde objective hasta start</returns>
+    public List<int> AStarAlgorithm(int start, int objective, bool activeAbility = false)
     {
-        foreach (int index in edges.Keys)
+        Dictionary<int, float> openSet = new Dictionary<int, float>();
+
+        Dictionary<int, int> cameFrom = new Dictionary<int, int>();
+
+        Dictionary<int, float> gScore = new Dictionary<int, float>();
+        Dictionary<int, float> fScore = new Dictionary<int, float>();
+
+        SortedSet<int> neighbours = new SortedSet<int>();
+
+        int current = start;
+
+        gScore.Add(start, 0f);
+        fScore.Add(start, Heuristic(start, objective));
+        openSet.Add(start, fScore[start]);
+
+        while (openSet.Count != 0)
         {
-            if((index / size1) == 0)
+            current = openSet.OrderBy(x => x.Value).First().Key;
+            
+            if (current == objective)
             {
-                int auxIndex = index + indexDirections["Down"];
-                edges[index][auxIndex] = 0;
-                if (edges.ContainsKey(auxIndex))
+                return ReconstructPath(cameFrom, current);
+            }
+
+            neighbours.Add(current + size1);
+            neighbours.Add(current - size1);
+            neighbours.Add(current + 1);
+            neighbours.Add(current - 1);
+
+            openSet.Remove(current);
+
+            foreach (int neighbor in neighbours)
+            {
+                float neighborGScore = gScore[current] + CostToEnter(current,neighbor,activeAbility);
+
+                if (!gScore.ContainsKey(neighbor) || neighborGScore < gScore[neighbor])
                 {
-                    edges[auxIndex][index] = 0;
+                    cameFrom[neighbor] = current;
+                    gScore[neighbor] = neighborGScore;
+                    fScore[neighbor] = gScore[neighbor] + Heuristic(neighbor, objective);
+                    if (!openSet.ContainsKey(neighbor))
+                    {
+                        openSet.Add(neighbor, neighborGScore);
+                    }
                 }
             }
 
-            if ((index % size1) == 0)
-            {
-                int auxIndex = index + indexDirections["Left"];
-                edges[index][auxIndex] = 0;
-                if (edges.ContainsKey(auxIndex))
-                {
-                    edges[auxIndex][index] = 0;
-                }
-            }
-
-            if ((index / size1) == size2)
-            {
-                int auxIndex = index + indexDirections["Up"];
-                edges[index][auxIndex] = 0;
-                if (edges.ContainsKey(auxIndex))
-                {
-                    edges[auxIndex][index] = 0;
-                }
-            }
-
-            if ((index % size1) == size1-1)
-            {
-                int auxIndex = index + indexDirections["Right"];
-                edges[index][auxIndex] = 0;
-                if (edges.ContainsKey(auxIndex))
-                {
-                    edges[auxIndex][index] = 0;
-                }
-            }
+            neighbours.Clear();
         }
+        return null;
     }
+
+    /// <summary>
+    /// La funcion recibe un diccionario y devuelve una lista con el camino desde el objetivo hasta el final
+    /// </summary>
+    /// <param name="cameFrom"> Diccionario en el que cada indice contiene al indice del que viene</param>
+    /// <param name="current"> Indice de la ultima casilla</param>
+    /// <returns></returns>
+    private List<int> ReconstructPath(Dictionary<int,int> cameFrom, int current)
+    {
+        List<int> path = new List<int>();
+        path.Add(current);
+
+        while (cameFrom.ContainsKey(current))
+        {
+            current = cameFrom[current];
+            path.Insert(0,current);
+        }
+
+        path.RemoveAt(0);
+
+        return path;
+    }
+
+    /// <summary>
+    /// Devuelve la Heuristica de una casilla para el algoritmo A estrella
+    /// </summary>
+    /// <param name="element">Indice del que queremos saber la euristica</param>
+    /// <param name="objective">Indice del valor al que queremos llegar</param>
+    /// <returns>Float Heuristica basada en la distancia entre los dos puntos</returns>
+    private float Heuristic(int element, int objective)
+    {
+        return Vector2.Distance(IndexToPosition(element), IndexToPosition(objective));
+    }
+
+    #endregion
+
     #endregion
 
     #region PARTICLES
@@ -629,14 +769,14 @@ public class BBoard : MonoBehaviour
     /// <param name="activeAbility"> Bool indica si tenemos la habilidad de recoger cable activa
     /// ya que hasta que no la tengamos las particulas no deben cambiar la logica de los bordes 
     /// </param>
-    public void spawnParticle(int index, bool activeAbility)
+    public void SpawnParticle(int index, bool activeAbility)
     {
 
         // Comprobamos que no haya una particula ya en esa posicion
         if (!dataParticles.ContainsKey(index))
         {
             // Obtenemos la posicion en la que queremos spawnear
-            Vector3 position = indexToVector(index,null,surfaceCoord);
+            Vector3 position = IndexToPosition(index,null,surfaceCoord);
 
             // Spawneamos las particulas de datos
             GameObject particle = Instantiate(dataParticle, position, spawnRotation);
@@ -650,7 +790,7 @@ public class BBoard : MonoBehaviour
     /// Destruye la particula en la casilla de index
     /// </summary>
     /// <param name="index">Int indica el indice de la casilla </param>
-    public void despawnParticle(int index)
+    public void DespawnParticle(int index)
     {
 
         // Obtenemos las particulas y la eliminamos del diccionario
@@ -660,9 +800,21 @@ public class BBoard : MonoBehaviour
         // Eliminamos la particula de datos
         Destroy(particle);
     }
-    
+
+    /// <summary>
+    /// Cambia el material de la casilla en la posicion index
+    /// </summary>
+    /// <param name="index"> Indice de la casilla</param>
+    /// <param name="mat"> Nuevo material de la casilla</param>
+    public void ChangeTileMaterial(int index, Material newMaterial)
+    {
+        if (tiles.ContainsKey(index))
+        {
+            tiles[index].GetComponent<Renderer>().material = newMaterial;
+        }
+    }
     #endregion
-    
+
     #endregion
 
     #region Temporal hasta que decidamos como aparecen los niveles

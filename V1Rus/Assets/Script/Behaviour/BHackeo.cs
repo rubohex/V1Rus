@@ -26,7 +26,7 @@ public class BHackeo : MonoBehaviour
             {
                 this.GetComponent<BTerminal>().actualizaInteracciones(this.GetComponent<BTerminal>().getInteracciones() + 1);
                 listo = false;
-                player.GetComponent<BPlayer>().changeAP(-1);
+                player.GetComponent<BPlayer>().ChangeAP(-1);
             }
         }
         else

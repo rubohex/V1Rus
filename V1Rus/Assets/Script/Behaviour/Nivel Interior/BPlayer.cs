@@ -64,15 +64,15 @@ public class BPlayer : MonoBehaviour
         // Obtenemos el tablero
         board = FindObjectOfType<BBoard>();
         // Actualizamos los Ap que tenemos para el nivel
-        Ap = maxAP = board.getBoardAp();
+        Ap = maxAP = board.GetBoardAp();
 
         //Obtenemos el tamaño del jugador
         float playerHeight = GetComponent<Renderer>().bounds.size.y;
 
         // Colocamos al jugador en la casilla de salida y guardamos su indice
-        transform.rotation = board.getPlayerSpawnRot();
-        transform.position = board.getPlayerSpawnPos(playerHeight);
-        tileIndex = board.positionToIndex(transform.position);
+        transform.rotation = board.GetPlayerSpawnRot();
+        transform.position = board.GetPlayerSpawnPos(playerHeight);
+        tileIndex = board.PositionToIndex(transform.position);
 
         // Temporal
         textAp.text = "AP: " + Ap;
@@ -82,7 +82,7 @@ public class BPlayer : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        updateUI();
+        UpdateUI();
         // Control del giro a la izquierda
         if (Input.GetKeyDown(rotateLeft) && !isMoving)
         {
@@ -99,42 +99,42 @@ public class BPlayer : MonoBehaviour
         if (Input.GetKeyDown(move) && !isMoving)
         {
             // Vector de posicion de la casilla objetivo
-            Vector3 objectivePos = board.indexToVector(tileIndex) + transform.forward;
+            Vector3 objectivePos = board.IndexToPosition(tileIndex) + transform.forward;
             // Obtenemos el indice de la casilla a la que queremos ir a partir de la casilla acutal y la casilla a la que miramos
-            int objectiveIndex = board.positionToIndex(objectivePos);
+            int objectiveIndex = board.PositionToIndex(objectivePos);
 
             // Obtenemos tambien el coste de dicha casilla
-            int cost = board.costToEnter(tileIndex, objectiveIndex, recogerCable);
+            float cost = board.CostToEnter(tileIndex, objectiveIndex, recogerCable);
 
-            // Debug.Log("Coste: " + cost);
+            //Debug.Log("Coste: " + cost);
             
             // Obsevamos que el coste es distinto de cero
             //maxAP == 0 sería considerado AP infinito(sala del boss)
-            if (cost != 0 && (cost <= Ap || maxAP == 0))
+            if (cost != Mathf.Infinity && (cost <= Ap || maxAP == 0))
             {
                 // Informamos de que nos estamos moviendo
                 isMoving = true;
 
                 // Llamamos a la corutina para que se encargue del movimiento
-                StartCoroutine(MoveOverTimeCoroutine(this.gameObject, moveTime, transform.position, board.indexToVector(objectiveIndex, gameObject)));
+                StartCoroutine(MoveOverTimeCoroutine(this.gameObject, moveTime, transform.position, board.IndexToPosition(objectiveIndex, gameObject)));
 
                 // Miramos si la casilla en la que entramos tiene particuals de datos o no esto lo podemos ver con el coste
                 if (cost > 0)
                 {
                     // Spawneamos las particulas
-                    board.spawnParticle(tileIndex, recogerCable);
+                    board.SpawnParticle(tileIndex, recogerCable);
                 }
                 else if (cost < 0 && recogerCable)
                 {
                     // Eliminamos la particula
-                    board.despawnParticle(objectiveIndex);
+                    board.DespawnParticle(objectiveIndex);
                 }
 
                 // Cambiamos a casilla en la que estamos y el coste
                 tileIndex = objectiveIndex;
                 if(maxAP != 0)
                 {
-                    changeAP(-cost);
+                    ChangeAP((int) -cost);
                 }
             }
         }
@@ -146,20 +146,30 @@ public class BPlayer : MonoBehaviour
         }
     }
     #endregion
+    
+    #region GETTERS
+    /// <summary>
+    /// Devuelve el indice del jugador
+    /// </summary>
+    /// <returns></returns>
+    public int GetIndex()
+    {
+        return tileIndex;
+    }
+    #endregion
 
     #region CHANGE STATS
     /// <summary>
     /// Sumamos al Ap actual los puntos que introducimos por parametros
     /// </summary>
     /// <param name="actionPoints"> Int puntos a sumar </param>
-    public void changeAP(int actionPoints)
+    public void ChangeAP(int actionPoints)
     {
         Ap = Mathf.Clamp(Ap + actionPoints, 0, maxAP);
     }
 
-
-    // Temporal para debugear ap hasta tener un IU
-    public void updateUI()
+    /// Temporal para debugear ap hasta tener un IU
+    public void UpdateUI()
     {
         textAp.text = "AP: " + Ap;
 
@@ -172,6 +182,7 @@ public class BPlayer : MonoBehaviour
             textAp.color = Color.red;
         }
     }
+
 
     #endregion
 
