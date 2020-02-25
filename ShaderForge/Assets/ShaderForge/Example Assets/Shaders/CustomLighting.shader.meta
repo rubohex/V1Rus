@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: e570c2adf90d6a24b8634788025bb2bb
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures:
+  - _AlbedoAO: {fileID: 2800000, guid: 8993b617f08498f43adcbd90697f1c5d, type: 3}
+  - _Normals: {fileID: 2800000, guid: c6dfb00dbee6bc044a8a3bb22e56e064, type: 3}
+  - _texturaparalasombra: {fileID: 2800000, guid: fef47ba7891e8224d91a4dad8e08bc11,
+      type: 3}
+  - _texturaparalasombradelasnormales: {fileID: 2800000, guid: 52faf797b08ecc24081738537b00a003,
+      type: 3}
+  nonModifiableTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

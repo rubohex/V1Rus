@@ -1,0 +1,63 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 6
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_Name: CustomLighting
+  m_Shader: {fileID: 4800000, guid: e570c2adf90d6a24b8634788025bb2bb, type: 3}
+  m_ShaderKeywords: 
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _Diffuse:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 16, y: 16}
+        m_Offset: {x: 0, y: 0}
+    - _Normals:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 32, y: 32}
+        m_Offset: {x: 0, y: 0}
+    - _node_3145:
+        m_Texture: {fileID: 2800000, guid: e958c6041cfe445e987c73751e8d4082, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _texturaparalasombra:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Floats:
+    - _AmbientLight: -0.36
+    - _AmbientLight_copy: 0
+    - _Bands: 5
+    - _Distanciadegradado: 0.05
+    - _Distanciadegradado_copy: 0
+    - _Gloss: 0.836
+    - _LightAtten: 1.66
+    - _MaximoDegradadoDistancia: 25
+    - _MaximoDegradadoDistancia_copy: 100
+    - _MinimoDegrafadoDistancia: 0
+    - _MinimoDegrafadoDistancia_copy: 0
+    - _OutlineDistanciadegradado_copy: 0
+    - _OutlineMaximoDegradadoDistancia_copy: 80
+    - _OutlineMinimoDegrafadoDistancia_copy: 0
+    - _node_4707: 0
+    - _node_9088: 2.24
+    - _outlinewith: 0.01
+    m_Colors:
+    - _Color: {r: 0.8301887, g: 0.8301887, b: 0.8301887, a: 1}
+    - _ColorDistanciaCamara: {r: 0.6132076, g: 0.38761616, b: 0.28635636, a: 1}
+    - _ColorDistanciaCamara_copy: {r: 0.5566038, g: 0.5566038, b: 0.5566038, a: 1}
+    - _OutlineColorDistanciaCamara_copy: {r: 0.6886792, g: 0.43552127, b: 0.3216002,
+        a: 1}
+    - _Outlinecolor: {r: 0, g: 0, b: 0, a: 1}
+    - _node_1424: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+    - _node_6015: {r: 1, g: 0, b: 0, a: 1}

@@ -1,0 +1,133 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 6
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_Name: ground
+  m_Shader: {fileID: 4800000, guid: e570c2adf90d6a24b8634788025bb2bb, type: 3}
+  m_ShaderKeywords: 
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _Albedo:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _AmbientOcclusion:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Curvature:
+        m_Texture: {fileID: 2800000, guid: a39e18242af09684bbb46fe74321b789, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Diffuse:
+        m_Texture: {fileID: 2800000, guid: 20f1c02b4a881b14a99307f7b62ceaac, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Franja1:
+        m_Texture: {fileID: 2800000, guid: 4483a053a5dede54983f8d4e6c71510c, type: 3}
+        m_Scale: {x: 400, y: 400}
+        m_Offset: {x: 0, y: 0}
+    - _Franja2:
+        m_Texture: {fileID: 2800000, guid: 528e0afc34908c44b975066881106576, type: 3}
+        m_Scale: {x: 400, y: 400}
+        m_Offset: {x: 0, y: 0}
+    - _Franja3:
+        m_Texture: {fileID: 2800000, guid: b1082c997f2aba04792047d304e8bb59, type: 3}
+        m_Scale: {x: 400, y: 400}
+        m_Offset: {x: 0, y: 0}
+    - _Franja4:
+        m_Texture: {fileID: 2800000, guid: f5723494e26b7d3479a8887bd9de3ee2, type: 3}
+        m_Scale: {x: 1000, y: 1000}
+        m_Offset: {x: 0, y: 0}
+    - _Normals:
+        m_Texture: {fileID: 2800000, guid: 98ee315755ff7274faf84f42282e56e5, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Texturasombraproyectada:
+        m_Texture: {fileID: 2800000, guid: 4483a053a5dede54983f8d4e6c71510c, type: 3}
+        m_Scale: {x: 800, y: 800}
+        m_Offset: {x: 0, y: 0}
+    - _node_3145:
+        m_Texture: {fileID: 2800000, guid: e958c6041cfe445e987c73751e8d4082, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _rimlighttxture:
+        m_Texture: {fileID: 2800000, guid: b3e1c6b6aeab7114aa20c982ffd9d040, type: 3}
+        m_Scale: {x: 2, y: 2}
+        m_Offset: {x: 0, y: 0}
+    - _texturaparalasombra:
+        m_Texture: {fileID: 2800000, guid: f5723494e26b7d3479a8887bd9de3ee2, type: 3}
+        m_Scale: {x: 50, y: 50}
+        m_Offset: {x: 0, y: 0}
+    - _texturaparalasombra_copy:
+        m_Texture: {fileID: 2800000, guid: 52faf797b08ecc24081738537b00a003, type: 3}
+        m_Scale: {x: 10, y: 10}
+        m_Offset: {x: 0, y: 0}
+    - _texturaparalasombradelasnormales:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Floats:
+    - _AmbientLight: -0.36
+    - _AmbientLight_copy: 0
+    - _Ambientlight: 1
+    - _Bands: 5.59
+    - _CelShadingBands: 600
+    - _Distanciadegradado: 0.05
+    - _Distanciadegradado_copy: 0
+    - _FranjasSombra: 2
+    - _Gloss: 1
+    - _IntensidadAO: 0.72
+    - _IntensidadCurvature: 0.45
+    - _IntensidadSombra: 1
+    - _LightAtten: 0.937
+    - _MaximoDegradadoDistancia: 25
+    - _MaximoDegradadoDistancia_copy: 100
+    - _MinimoDegrafadoDistancia: 0
+    - _MinimoDegrafadoDistancia_copy: 0
+    - _OutlineDistanciadegradado_copy: 0
+    - _OutlineMaximoDegradadoDistancia_copy: 80
+    - _OutlineMinimoDegrafadoDistancia_copy: 0
+    - _Transicinsombra: 0.5
+    - _ValorFranja1: 0.001
+    - _ValorFranja2: 0.3
+    - _ValorFranja3: 0.59
+    - _ValorFranja4: 1
+    - _intensidadluz: 1.5
+    - _limitesombra: 0.69
+    - _node_4707: 0
+    - _node_9088: 2.24
+    - _outlinewith: 0
+    - _reduccinsombra: 2
+    - _rimlighthardness: 2
+    - _rimlighthardness_sombra: 0
+    - _rimlightsize: 5
+    - _rimlightsizesombra: 5
+    - _valorsombra: 0
+    m_Colors:
+    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _ColorDistanciaCamara: {r: 0.6132076, g: 0.38761616, b: 0.28635636, a: 1}
+    - _ColorDistanciaCamara_copy: {r: 0.5566038, g: 0.5566038, b: 0.5566038, a: 1}
+    - _Colorsombra: {r: 1, g: 1, b: 1, a: 1}
+    - _OutlineColorDistanciaCamara_copy: {r: 0.6886792, g: 0.43552127, b: 0.3216002,
+        a: 1}
+    - _Outlinecolor: {r: 0, g: 0, b: 0, a: 1}
+    - _colorsombra: {r: 0.14901961, g: 0.16470589, b: 0.25490198, a: 1}
+    - _node_1369: {r: 1, g: 1, b: 1, a: 1}
+    - _node_1424: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+    - _node_3306: {r: 1, g: 1, b: 1, a: 1}
+    - _node_5153: {r: 0.6946412, g: 0.3551086, b: 0.7924528, a: 1}
+    - _node_6015: {r: 1, g: 0, b: 0, a: 1}
+    - _rimlightcolor: {r: 0, g: 0, b: 0, a: 1}
+    - _rimlightcolor_sombra: {r: 0, g: 0, b: 0, a: 1}
