@@ -262,12 +262,17 @@ public class BEnemy : MonoBehaviour
         int minJ;
         int maxJ;
         int boardSize1 = (int) board.GetBoardShape()[0];
+        int boardSize2 = (int) board.GetBoardShape()[1];
 
         if (Mathf.Abs(centerDiff) < boardSize1)
         {
+            // Definimos los bordes del tablero
+            int clampMaxJ = boardSize1 - 1 - (centralIndex % boardSize1);
+            int clampMinJ = -(centralIndex % boardSize1);
+
             maxI = horizontalVisionSize / 2;
-            minI = -maxI;
-            maxJ = (verticalVisionSize - 1) * centerDiff;
+            minI = -horizontalVisionSize / 2;
+            maxJ = Mathf.Clamp((verticalVisionSize - 1) * centerDiff, clampMinJ, clampMaxJ);
             minJ = 0;
 
             if (minJ > maxJ)
@@ -276,46 +281,26 @@ public class BEnemy : MonoBehaviour
                 maxJ = 0;
             }
 
-            int auxMaxJ = boardSize1 - 1 - centralIndex % boardSize1;
-            if (auxMaxJ < verticalVisionSize - 1)
-            {
-                maxJ = auxMaxJ;
-            }
-
-            int auxMinJ = centralIndex % boardSize1;
-            if (auxMinJ < verticalVisionSize - 1)
-            {
-                minJ = -auxMinJ;
-            }
-
         }
         else
         {
-            maxI = (verticalVisionSize - 1) * (int) Mathf.Sign(centerDiff);
+            // Definimos los bordes del tablero
+            int clampMaxJ = boardSize1 - 1 - (centralIndex % boardSize1);
+            int clampMinJ = -(centralIndex % boardSize1);
+
+            maxJ = Mathf.Clamp(horizontalVisionSize / 2, clampMinJ, clampMaxJ);
+            minJ = Mathf.Clamp(-horizontalVisionSize / 2, clampMinJ, clampMaxJ);
+            maxI = (verticalVisionSize - 1) * (int)Mathf.Sign(centerDiff);
             minI = 0;
-            maxJ = horizontalVisionSize / 2;
-            minJ = -maxJ;
 
             if (minI > maxI)
             {
                 minI = maxI;
                 maxI = 0;
             }
-
-            int auxMaxJ = boardSize1 - 1 - centralIndex % boardSize1;
-            if (auxMaxJ < horizontalVisionSize / 2)
-            {
-                maxJ = auxMaxJ;
-            }
-
-            int auxMinJ = centralIndex % boardSize1;
-            if (auxMinJ < horizontalVisionSize / 2)
-            {
-                minJ = -auxMinJ;
-            }
         }
 
-        if(centralIndex > 0)
+        if(centralIndex >= 0)
         {
             for (int i = minI; i <= maxI; i++)
             {
