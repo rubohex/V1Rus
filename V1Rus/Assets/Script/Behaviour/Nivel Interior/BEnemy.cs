@@ -262,7 +262,6 @@ public class BEnemy : MonoBehaviour
         int minJ;
         int maxJ;
         int boardSize1 = (int) board.GetBoardShape()[0];
-        int boardSize2 = (int) board.GetBoardShape()[1];
 
         if (Mathf.Abs(centerDiff) < boardSize1)
         {
@@ -300,7 +299,9 @@ public class BEnemy : MonoBehaviour
             }
         }
 
-        if(centralIndex >= 0)
+        int borderCheck = Mathf.Abs(centralIndex % boardSize1 - boardIndex % boardSize1);
+
+        if (centralIndex >= 0 && borderCheck != boardSize1-1)
         {
             for (int i = minI; i <= maxI; i++)
             {
@@ -311,6 +312,35 @@ public class BEnemy : MonoBehaviour
                 }
             }
         }
+
+        List<int> removeList = new List<int>();
+
+        // Una vez añadidas todas las casillas de vision basicas detectaremos los muros que hay dentro de ellas y eliminaremos los valores de vision que tapan deichos muros
+        foreach (int tile in visionTiles)
+        {
+            if (board.isWall(tile))
+            {
+
+                if(Mathf.Abs(centerDiff) < boardSize1)
+                {
+                    for (int i = 0; i < verticalVisionSize; i++)
+                    {
+                        removeList.Add(tile + i * (int)Mathf.Sign(centerDiff));
+                    }
+                    
+                }
+                else
+                {
+                    for (int i = 0; i < verticalVisionSize; i++)
+                    {
+                        removeList.Add(tile + i * boardSize1 * (int)Mathf.Sign(centerDiff));
+                    }
+                }
+
+            }
+        }
+
+        removeList.ForEach(x => visionTiles.Remove(x));
     }
 
     #endregion
@@ -351,7 +381,6 @@ public class BEnemy : MonoBehaviour
         // Informamos que el enemigo ya no se mueve
         isMoving = false;
 
-        // Calculamos el nuevo set de vision
         ComputeVisionSet();
         ChangeVisionRangeMaterial(visionMaterial);
 

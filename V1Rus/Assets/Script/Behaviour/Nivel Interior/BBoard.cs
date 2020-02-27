@@ -52,6 +52,9 @@ public class BBoard : MonoBehaviour
     /// Diccionario para almacenar las particulas de datos
     private Dictionary<int, GameObject> dataParticles = new Dictionary<int, GameObject>();
 
+    /// Diccionario para almacenar los muros de almacenamiento
+    private Dictionary<int, BMuro> walls = new Dictionary<int, BMuro>();
+
     /// Rotacion del jugador que nos servira para spawnear las particulas
     private Quaternion spawnRotation;
 
@@ -113,8 +116,8 @@ public class BBoard : MonoBehaviour
 
         // Obtenemos el tamaño de la casilla base y lo guardamos para usarlo mas tarde
         Vector3 tileSize = Tile.GetComponent<Renderer>().bounds.size;
-        tileSize1 = tileSize.x;
-        tileSize2 = tileSize.z;
+        tileSize1 = (int) tileSize.x;
+        tileSize2 = (int) tileSize.z;
         tileSize3 = tileSize.y;
 
         // Obtenemos todas las casillas de la escena activas
@@ -382,6 +385,16 @@ public class BBoard : MonoBehaviour
         return coordSys;
     }
 
+    /// <summary>
+    /// La funcion devuelve true si hay un muro en el indice
+    /// </summary>
+    /// <param name="index">Indice en el que queremos saber si hay un muro</param>
+    /// <returns> True en caso de haber muro False en casod e que no</returns>
+    public bool isWall(int index)
+    {
+        return walls.ContainsKey(index);
+    }
+
     #endregion
 
     #region CHANGEINDEX
@@ -471,6 +484,11 @@ public class BBoard : MonoBehaviour
         foreach (BMuro wall in walls)
         {
             AddWallEdges(wall);
+
+            // Tambien añadimos al muro al diccionario de muros
+            int index = PositionToIndex(wall.transform.position);
+
+            this.walls.Add(index, wall);
         }
     }
 
