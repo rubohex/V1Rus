@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class BHackeo : MonoBehaviour
 {
-    public GameObject player;
+    private GameObject player;
 
     public float tHack;
     private float t = 0;
@@ -13,7 +13,7 @@ public class BHackeo : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        player = GameObject.Find("Player");
     }
 
     // Update is called once per frame
