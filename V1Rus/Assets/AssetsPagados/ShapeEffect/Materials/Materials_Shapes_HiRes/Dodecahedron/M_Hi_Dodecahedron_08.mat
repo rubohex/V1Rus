@@ -117,11 +117,11 @@ Material:
     - _InfluenceRadius: 0.5
     - _Metallic: 0
     - _Mode: 0
-    - _NormalPush: 0.3
+    - _NormalPush: -0.06
     - _OcclusionStrength: 1
     - _Outline_Opacity: 30
     - _PannerX: 1
-    - _PannerY: 0
+    - _PannerY: 0.288
     - _Parallax: 0.02
     - _Shrink_Faces_Amplitude: 1
     - _SmoothnessTextureChannel: 0
