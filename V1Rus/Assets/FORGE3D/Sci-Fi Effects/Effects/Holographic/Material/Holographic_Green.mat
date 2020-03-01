@@ -31,12 +31,12 @@ Material:
     - _Fade: 1
     - _FresMult: 1
     - _FresMultOut: 0.5
-    - _FresPow: 10.8
-    - _FresPowOut: 8.75
+    - _FresPow: 14
+    - _FresPowOut: 5
     - _InvFade: 3
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
-    - _Inter: {r: 0.1, g: 200, b: 100, a: 15}
+    - _Inter: {r: 0.1, g: 200, b: 100, a: 40}
     - _InterScale: {r: 0.1, g: 200, b: 100, a: 0}
     - _TintColor: {r: 0.2352941, g: 0.7784991, b: 1, a: 1}
     - _bLayerColorA: {r: 0, g: 0.29412377, b: 0.050711006, a: 0.5019608}
