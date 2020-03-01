@@ -204,15 +204,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2e10c387593d61546b2ce24b9b52c046, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  wayPoints:
-  - {fileID: 0}
-  - {fileID: 0}
+  wayPoints: []
   closedPath: 0
-  enemyInfo: {fileID: 11400000, guid: fbccdc5f399d5534d872f03d330dfd60, type: 2}
-  visionMaterial: {fileID: 2100000, guid: b9000c299b696484ca34fea266bed067, type: 2}
-  normalMaterial: {fileID: 2100000, guid: 344baf0e44520e04dab4224db2dc0567, type: 2}
   verticalVisionSize: 2
   horizontalVisionSize: 3
+  enemyInfo: {fileID: 11400000, guid: fbccdc5f399d5534d872f03d330dfd60, type: 2}
+  visionMaterial: {fileID: 2100000, guid: 322ae824c63074846958c90dffd7b904, type: 2}
+  normalMaterial: {fileID: 2100000, guid: 51a4eb7c96fd2d545a745a3bfde9a5de, type: 2}
 --- !u!1001 &3280772701094691934
 PrefabInstance:
   m_ObjectHideFlags: 0

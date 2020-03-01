@@ -23,5 +23,4 @@ public class DBoardInfo : ScriptableObject
     public bool x = false;
     public bool y = false;
     public bool z = false;
-
 }
