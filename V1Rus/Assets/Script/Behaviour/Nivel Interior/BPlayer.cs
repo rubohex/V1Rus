@@ -43,6 +43,28 @@ public class BPlayer : MonoBehaviour
 
     /// Texto del canvas de prueba
     public Text textAp;
+
+    /// Material de cursor en casilla
+    public Material cursorMaterial;
+
+    /// Material de casilla seleccionada
+    public Material selectedMaterial;
+
+    /// Rayo lanzado desde la camara para detectar objetos
+    private Ray cameraRay;
+
+    /// Hit del Raycast
+    private RaycastHit cameraHit;
+
+    /// Indice de la casilla en la que estaba el cursor anteriormente
+    private int previousHit = -1;
+
+    /// Indice de la casilla actual
+    private int actualHit = -1;
+
+    /// Camino que seguira el jugador
+    private List<int> path = new List<int>();
+
     #endregion
 
     #region METHODS
@@ -74,6 +96,9 @@ public class BPlayer : MonoBehaviour
         transform.position = board.GetPlayerSpawnPos(playerHeight);
         tileIndex = board.PositionToIndex(transform.position);
 
+        // Inicializa el camino
+        RestartPath();
+
         // Temporal
         textAp.text = "AP: " + Ap;
 
@@ -86,13 +111,37 @@ public class BPlayer : MonoBehaviour
         // Control del giro a la izquierda
         if (Input.GetKeyDown(rotateLeft) && !isMoving)
         {
-            StartCoroutine(RotateOverTimeCoroutine(this.gameObject, rotationTime, transform.rotation, Quaternion.LookRotation(-transform.right,transform.up)));
+            StartCoroutine(RotateOverTimeCoroutine(this.gameObject, rotationTime, transform.rotation, Quaternion.LookRotation(-transform.right, transform.up)));
         }
 
         // Control del giro a la derecha
         if (Input.GetKeyDown(rotateRight) && !isMoving)
         {
             StartCoroutine(RotateOverTimeCoroutine(this.gameObject, rotationTime, transform.rotation, Quaternion.LookRotation(transform.right, transform.up)));
+        }
+
+        if (Input.GetMouseButtonDown(0) && !isMoving)
+        {
+            path.AddRange(board.AStarAlgorithm(path[path.Count - 1], actualHit, recogerCable));
+
+            board.ResetMaterial(actualHit);
+
+            board.ChangeTileMaterial(actualHit, selectedMaterial);
+
+            previousHit = -1;
+        }
+
+        if (Input.GetMouseButtonDown(1) && !isMoving)
+        {
+            path.AddRange(board.AStarAlgorithm(path[path.Count - 1], actualHit, recogerCable));
+
+            board.ResetMaterial(actualHit);
+
+            board.ChangeTileMaterial(actualHit, selectedMaterial);
+
+            previousHit = -1;
+
+            StartCoroutine(MakePath());
         }
 
         // Control movimiento
@@ -107,7 +156,7 @@ public class BPlayer : MonoBehaviour
             float cost = board.CostToEnter(tileIndex, objectiveIndex, recogerCable);
 
             //Debug.Log("Coste: " + cost);
-            
+
             // Obsevamos que el coste es distinto de cero
             //maxAP == 0 sería considerado AP infinito(sala del boss)
             if (cost != Mathf.Infinity && (cost <= Ap || maxAP == 0))
@@ -132,9 +181,43 @@ public class BPlayer : MonoBehaviour
 
                 // Cambiamos a casilla en la que estamos y el coste
                 tileIndex = objectiveIndex;
-                if(maxAP != 0)
+                if (maxAP != 0)
                 {
-                    ChangeAP((int) -cost);
+                    ChangeAP((int)-cost);
+                }
+            }
+
+            // Temporal
+            RestartPath();
+        }
+    }
+
+    void FixedUpdate(){
+        
+        // Elegimos el rayo que vamos a usar para el raycast
+        cameraRay = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+        // Hacemos el raycast y vemos si hemos golpeado alguna casilla
+        if (Physics.Raycast(cameraRay, out cameraHit))
+        {
+            if (cameraHit.collider.name == "Board" && !isMoving)
+            {
+                actualHit = board.PositionToIndex(cameraHit.point);
+
+                if(previousHit != actualHit)
+                {
+                    // Cambiamos el material de la anterior casillas
+                    board.ResetMaterial(previousHit);
+
+                    if (!board.GetTileMaterial(actualHit).name.Contains(selectedMaterial.name))
+                    {
+
+                        // Cambiamos el material por el del cursor
+                        board.ChangeTileMaterial(actualHit, cursorMaterial);
+
+                        // Guardamos el indice de la casilla cambiada
+                        previousHit = actualHit;
+                    }
                 }
             }
         }
@@ -186,7 +269,84 @@ public class BPlayer : MonoBehaviour
 
     #endregion
 
+    #region PATH
+
+    /// <summary>
+    /// La funcion vacia el camino y añade el indice actual
+    /// </summary>
+    private void RestartPath()
+    {
+        path.Clear();
+
+        path.Add(tileIndex);
+    }
+
+    #endregion
+
     #region COROUTINES 
+
+    private IEnumerator MakePath()
+    {
+        // Unformamos de que el jugador se esta moviendo
+        isMoving = true;
+
+        for (int i = 0; i < path.Count - 1; i++)
+        {
+            // Obtenemos el indice de la casilla a la que queremos ir a partir de la casilla acutal y la casilla a la que miramos
+            int objectiveIndex = path[i + 1];
+
+            // Rotamos hacia dicha casilla si es necesario
+            Vector3 lookAt = board.IndexToPosition(objectiveIndex, gameObject);
+
+            // Comprobamos si hace falta girar o no
+            if (Vector3.Distance(transform.position+transform.forward,lookAt) > 0.001f)
+            {
+                yield return StartCoroutine(RotateOverTimeCoroutine(this.gameObject, rotationTime, transform.rotation, Quaternion.LookRotation(lookAt-transform.position, transform.up)));
+            }
+
+            // Obtenemos tambien el coste de dicha casilla
+            float cost = board.CostToEnter(tileIndex, objectiveIndex, recogerCable);
+
+            if (cost > Ap)
+            {
+                break;
+            }
+            else
+            {
+                // Llamamos a la corutina para que se encargue del movimiento
+                yield return StartCoroutine(MoveOverTimeCoroutine(this.gameObject, moveTime, transform.position, board.IndexToPosition(objectiveIndex, gameObject)));
+
+                //Restaruamos el valor de la casilla
+                board.ResetMaterial(objectiveIndex);
+
+                // Miramos si la casilla en la que entramos tiene particuals de datos o no esto lo podemos ver con el coste
+                if (cost > 0)
+                {
+                    // Spawneamos las particulas
+                    board.SpawnParticle(tileIndex, recogerCable);
+                }
+                else if (cost < 0 && recogerCable)
+                {
+                    // Eliminamos la particula
+                    board.DespawnParticle(objectiveIndex);
+                }
+
+                // Cambiamos a casilla en la que estamos y el coste
+                tileIndex = objectiveIndex;
+
+                if (maxAP != 0)
+                {
+                    ChangeAP((int)-cost);
+                }
+            }
+        }
+
+        RestartPath();
+
+        isMoving = false;
+
+        yield return null;
+    }
 
     /// <summary>
     /// Corutina encargada de mover un objeto al lugar indicado en el tiempo indicado
