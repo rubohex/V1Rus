@@ -114,9 +114,6 @@ public class BBoard : MonoBehaviour
             Debug.LogError("Por favor indique en la informacion del tablero dos coordenadas para el systema de coordenadas");
         }
 
-        // Cambiamos el nombre a Board para poder detectar las colisiones mejor mas tarde
-        gameObject.name = "Board";
-
         // Obtenemos el tamaño de la casilla base y lo guardamos para usarlo mas tarde
         Vector3 tileSize = Tile.GetComponent<Renderer>().bounds.size;
         tileSize1 = (int) tileSize.x;
@@ -169,18 +166,15 @@ public class BBoard : MonoBehaviour
             }
         }
 
-        // Guardamos la posicion minima para usarla mas tarde
+        //Guardamos la posicion minima para usarla mas tarde
         min1 = firstPositions.Min();
         min2 = secondPositions.Min();
         max1 = firstPositions.Max();
         max2 = secondPositions.Max();
 
-        // Calculamos el tamaño del tablero a partir de las posiciones y de los tamaños
+        //Calculamos el tamaño del tablero a partir de las posiciones y de los tamaños
         size1 = (int)((max1 - min1) / tileSize1) + 1;
         size2 = (int)((max2 - min2) / tileSize2) + 1;
-
-        // Spawneamos el plano de collision para detectar los clicks
-        SpawnCollisionPlane();
 
         // Premaramos el diccionario con las diferentes direcciones
         indexDirections.Add("Up", size1);
@@ -263,6 +257,7 @@ public class BBoard : MonoBehaviour
 
     private void Start()
     {
+        ShowBoard();
 
         // Obtenemos la roatacion de los elementos del tablero para cuando spawneemos particulas
         spawnRotation = player.transform.rotation;
@@ -692,7 +687,6 @@ public class BBoard : MonoBehaviour
     /// <param name="start"> Indice en el que estamos</param>
     /// <param name="objective"> Indice al que queremos ir</param>
     /// <param name="activeAbility"> Booleano que nos indica si la abilidad de recoger codigo esta activa</param>
-    /// <param name="AP"> Float indica la cantidad de ap que tiene el jugador</param>
     /// <returns> Una Lista con los indices desde objective hasta start</returns>
     public List<int> AStarAlgorithm(int start, int objective, bool activeAbility = false)
     {
@@ -731,7 +725,7 @@ public class BBoard : MonoBehaviour
             {
                 float neighborGScore = gScore[current] + CostToEnter(current,neighbor,activeAbility);
 
-                if (neighborGScore != Mathf.Infinity && (!gScore.ContainsKey(neighbor) || neighborGScore < gScore[neighbor]))
+                if (!gScore.ContainsKey(neighbor) || neighborGScore < gScore[neighbor])
                 {
                     cameFrom[neighbor] = current;
                     gScore[neighbor] = neighborGScore;
@@ -783,44 +777,9 @@ public class BBoard : MonoBehaviour
 
     #endregion
 
-    #region COLLISION PLANE
-
-    private void SpawnCollisionPlane()
-    {
-        // Generamos la colision
-        BoxCollider boxCollider = gameObject.AddComponent<BoxCollider>();
-
-        // Dependiendo de el sistema de coordenadas generamos el plano de collision en un punto distinto
-        switch (coordSys)
-        {
-            case ECord.XY:
-                // Calculamos el tamaño del plano
-                boxCollider.size = new Vector3(size1, size2, 0);
-                // Calculamos el punto central del plano 
-                boxCollider.center = new Vector3((max1 + min1) / 2 - transform.position.x, (max2 + min2) / 2 - transform.position.y, surfaceCoord);
-                break;
-            case ECord.XZ:
-                // Calculamos el tamaño del plano
-                boxCollider.size = new Vector3(size1, 0, size2);
-                // Calculamos el punto central del plano 
-                boxCollider.center = new Vector3((max1 + min1) / 2 - transform.position.x, surfaceCoord, (max2 + min2) / 2 - transform.position.z);
-                break;
-            case ECord.YZ:
-                // Calculamos el tamaño del plano
-                boxCollider.size = new Vector3(0,size1, size2);
-                // Calculamos el punto central del plano 
-                boxCollider.center = new Vector3(surfaceCoord,(max1 + min1) / 2 - transform.position.y, (max2 + min2) / 2 - transform.position.z);
-                break;
-            default:
-                break;
-        }
-    }
-
     #endregion
 
-    #endregion
-
-    #region PARTICLES & MATERIALS
+    #region PARTICLES
     /// <summary>
     /// Spawnea particulas de datos en la casilla de index
     /// </summary>
@@ -869,39 +828,44 @@ public class BBoard : MonoBehaviour
     {
         if (tiles.ContainsKey(index))
         {
-            tiles[index].ChangeMaterial(newMaterial);
-        }
-    }
-
-    /// <summary>
-    /// Devuelve el material de la casilla en la posicion index
-    /// </summary>
-    /// <param name="index">Indice de la casilla</param>
-    public void ResetMaterial(int index)
-    {
-        if (tiles.ContainsKey(index))
-        {
-            tiles[index].ResetMaterial();
-        }
-    }
-
-    /// <summary>
-    /// Conseguimos el material de la casilla seleccionada
-    /// </summary>
-    /// <param name="index">Indice de la casilla deseada</param>
-    /// <returns> Material de la casilla</returns>
-    public Material GetTileMaterial(int index)
-    {
-        if (tiles.ContainsKey(index))
-        {
-            return tiles[index].GetComponent<Renderer>().material;
-        }
-        else
-        {
-            return null;
+            tiles[index].GetComponent<Renderer>().material = newMaterial;
         }
     }
     #endregion
 
+    #endregion
+
+    #region Temporal hasta que decidamos como aparecen los niveles
+
+    // Update is called once per frame
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            HideBoard();
+        }
+    }
+
+    private void ShowBoard()
+    {
+        //Obtenemos todas las casillas de la escena
+        Object[] boardTiles = FindObjectsOfType(typeof(BTile));
+
+        foreach (BTile item in boardTiles)
+        {
+            item.ShowTile();
+        }
+    }
+
+    private void HideBoard()
+    {
+        //Obtenemos todas las casillas de la escena
+        Object[] boardTiles = FindObjectsOfType(typeof(BTile));
+
+        foreach (BTile item in boardTiles)
+        {
+            item.HideTile();
+        }
+    }
     #endregion
 }
