@@ -14,8 +14,6 @@ public class BTile : MonoBehaviour
         Empty,
         Start,
         End,
-        Obstacle,
-        Enemy
     }
 
     /// <summary>
@@ -23,72 +21,43 @@ public class BTile : MonoBehaviour
     /// </summary>
     public ETileState currentState;
 
-    /// Atributos temporales
-    private bool show = false;
-    private bool hide = false;
-    private float transparency;
-
+    /// Material anterior de la casilla
+    private Material oldMaterial;
     #endregion
 
     #region METHODS
-    /// Start is called before the first frame update
-    void Start()
+    private void Start()
     {
-        // transparency = this.gameObject.GetComponent<Renderer>().material.GetFloat("_Transparency");
+        oldMaterial = GetComponent<Renderer>().material;
     }
 
     /// <summary>
     /// La funcion cambia el estado de la casilla
     /// </summary> 
     /// <param name="newState"> ETileState estado que queremos aplicar a la casilla </param>
-    void SwitchCurrentState(ETileState newState)
+    public void SwitchCurrentState(ETileState newState)
     {
         currentState = newState;
     }
 
-    #endregion
-
-    #region Temporal hasta que decidamos como aparecen los niveles
-
-    void Update()
+    /// <summary>
+    /// Cambia el material de la casilla por el nuevo material
+    /// </summary>
+    /// <param name="newMaterial">Nuevo Material</param>
+    public void ChangeMaterial(Material newMaterial)
     {
-        if (show && transform.position.y > 0)
-        {
-            transform.position -= transform.up * Time.deltaTime;
-            if (transform.position.y < 0)
-            {
-                transform.position.Set(transform.position.x, 0, transform.position.z);
-            }
-            transparency += 5 * Time.deltaTime;
-            this.gameObject.GetComponent<Renderer>().material.SetFloat("_Transparency", transparency);
-        }
-        else if (show && transparency < 1)
-        {
-            transparency += 5 * Time.deltaTime;
-            this.gameObject.GetComponent<Renderer>().material.SetFloat("_Transparency", Mathf.Clamp(transparency, 0, 1));
-        }
+        oldMaterial = GetComponent<Renderer>().material;
 
-        if(hide && transparency > 0)
-        {
-            transform.position -= transform.up * Time.deltaTime;
-            transparency -= 1 * Time.deltaTime;
-            this.gameObject.GetComponent<Renderer>().material.SetFloat("_Transparency", Mathf.Clamp(transparency,0,1));
-        }
+        GetComponent<Renderer>().material = newMaterial;
     }
 
-    public void ShowTile()
+    /// <summary>
+    /// Devuelve el material a su antiguo material
+    /// </summary>
+    public void ResetMaterial()
     {
+        GetComponent<Renderer>().material = oldMaterial;
+    }
 
-    }
-    public void HideTile()
-    {
-        StartCoroutine("Hide");
-    }
-
-    IEnumerator Hide()
-    {
-        yield return new WaitForSeconds(Random.Range(0f,2f));
-        hide = true;
-    }
     #endregion
 }
