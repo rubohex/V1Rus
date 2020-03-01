@@ -26,7 +26,7 @@ public class BTile : MonoBehaviour
     #endregion
 
     #region METHODS
-    private void Start()
+    private void Awake()
     {
         oldMaterial = GetComponent<Renderer>().material;
     }

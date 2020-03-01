@@ -77,18 +77,19 @@ public class BEnemy : MonoBehaviour
     {
         rotationTime = enemyInfo.rotationTime;
         moveTime = enemyInfo.moveTime;
-        board = FindObjectOfType<BBoard>();
-        boardUP = board.GetBoardUp();
     }
 
     // Start is called before the first frame update
     void Start()
     {
-        // Altura del enemigo
-        float enemyHeight = GetComponent<Renderer>().bounds.size.y;
+
+        board = FindObjectOfType<BBoard>();
 
         // Posicion inicial del jugador en el waypoint 0
-        transform.position = board.GetEnemySpawnPos(wayPoints[0].position, enemyHeight);
+        transform.position = board.GetEnemySpawnPos(wayPoints[0].position, GetComponent<Renderer>().bounds.size.y);
+        
+        // Obtenemos el vector hacia arriba del tablero
+        boardUP = board.GetBoardUp();
 
         // Añadimos la posicion actual como inicial en el camino
         path.Add(transform.position);

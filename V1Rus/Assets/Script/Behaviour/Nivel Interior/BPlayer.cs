@@ -41,6 +41,8 @@ public class BPlayer : MonoBehaviour
     /// Tablero del nivel
     private BBoard board;
 
+    private BGameManager manager;
+
     /// Texto del canvas de prueba
     public Text textAp;
 
@@ -65,6 +67,8 @@ public class BPlayer : MonoBehaviour
     /// Camino que seguira el jugador
     private List<int> path = new List<int>();
 
+    private List<int> cursorPointers = new List<int>();
+
     #endregion
 
     #region METHODS
@@ -85,6 +89,8 @@ public class BPlayer : MonoBehaviour
     {
         // Obtenemos el tablero
         board = FindObjectOfType<BBoard>();
+
+        manager = FindObjectOfType<BGameManager>();
         // Actualizamos los Ap que tenemos para el nivel
         Ap = maxAP = board.GetBoardAp();
 
@@ -128,6 +134,8 @@ public class BPlayer : MonoBehaviour
 
             board.ChangeTileMaterial(actualHit, selectedMaterial);
 
+            cursorPointers.Add(actualHit);
+
             previousHit = -1;
         }
 
@@ -138,6 +146,8 @@ public class BPlayer : MonoBehaviour
             board.ResetMaterial(actualHit);
 
             board.ChangeTileMaterial(actualHit, selectedMaterial);
+
+            cursorPointers.Add(actualHit);
 
             previousHit = -1;
 
@@ -185,6 +195,8 @@ public class BPlayer : MonoBehaviour
                 {
                     ChangeAP((int)-cost);
                 }
+
+                manager.EnemyTurn();
             }
 
             // Temporal
@@ -290,6 +302,9 @@ public class BPlayer : MonoBehaviour
         // Unformamos de que el jugador se esta moviendo
         isMoving = true;
 
+        // Limpiamos la lista de indices
+        cursorPointers.ForEach( tile => board.ResetMaterial(tile));
+
         for (int i = 0; i < path.Count - 1; i++)
         {
             // Obtenemos el indice de la casilla a la que queremos ir a partir de la casilla acutal y la casilla a la que miramos
@@ -316,9 +331,6 @@ public class BPlayer : MonoBehaviour
                 // Llamamos a la corutina para que se encargue del movimiento
                 yield return StartCoroutine(MoveOverTimeCoroutine(this.gameObject, moveTime, transform.position, board.IndexToPosition(objectiveIndex, gameObject)));
 
-                //Restaruamos el valor de la casilla
-                board.ResetMaterial(objectiveIndex);
-
                 // Miramos si la casilla en la que entramos tiene particuals de datos o no esto lo podemos ver con el coste
                 if (cost > 0)
                 {
@@ -339,6 +351,8 @@ public class BPlayer : MonoBehaviour
                     ChangeAP((int)-cost);
                 }
             }
+
+            manager.EnemyTurn();
         }
 
         RestartPath();
