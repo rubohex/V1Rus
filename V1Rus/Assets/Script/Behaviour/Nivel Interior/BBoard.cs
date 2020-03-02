@@ -498,6 +498,49 @@ public class BBoard : MonoBehaviour
     }
 
     /// <summary>
+    /// Acutaliza los ejes de las casillas 
+    /// </summary>
+    /// <param name="index">Indice de la casilla</param>
+    /// <param name="upEdge"> Eje superior de la casilla</param>
+    /// <param name="leftEdge"> Eje izquierdo de la casilla</param>
+    /// <param name="downEdge"> Eje inferior de la casilla</param>
+    /// <param name="rightEdge"> Eje derecho de la casilla</param>
+    public void UpdateWallsEdges(int index, int upEdge, int leftEdge, int downEdge, int rightEdge)
+    {
+
+        int auxIndex = index + indexDirections["Up"];
+        if (locations.ContainsKey(auxIndex))
+        {
+            edges[index][auxIndex] = upEdge;
+            edges[auxIndex][index] = upEdge;
+        }
+
+        // Al sumarle uno obtenemos la casilla al oeste
+        auxIndex = index + indexDirections["Left"];
+        if (locations.ContainsKey(auxIndex))
+        {
+            edges[index][auxIndex] = leftEdge;
+            edges[auxIndex][index] = leftEdge;
+        }
+
+        // Al restar size1 obtenemos la casilla al sur
+        auxIndex = index + indexDirections["Down"];
+        if (locations.ContainsKey(auxIndex))
+        {
+            edges[index][auxIndex] = downEdge;
+            edges[auxIndex][index] = downEdge;
+        }
+
+        // Al restar 1 obtenemos la casilla al este
+        auxIndex = index + indexDirections["Right"];
+        if (locations.ContainsKey(auxIndex))
+        {
+            edges[index][auxIndex] = rightEdge;
+            edges[auxIndex][index] = rightEdge;
+        }
+    }
+
+    /// <summary>
     /// Añade los bordes de un muro a la casilla
     /// </summary>
     /// <param name="wall"> Muro del que obtenemos los bordes</param>
