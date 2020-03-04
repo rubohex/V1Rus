@@ -671,7 +671,8 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 0}
+  - {fileID: 2100000, guid: d62cba8d2f5af6441a7fa23e1aa9363a, type: 2}
+  - {fileID: 2100000, guid: 639bed6bda2055648971726bd8332cdd, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -770,11 +771,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 4978695485263253525}
     m_Modifications:
-    - target: {fileID: -927199367670048503, guid: 8bc6d2782aa136344aca99923113ecd2,
-        type: 3}
-      propertyPath: m_Name
-      value: Terminal
-      objectReference: {fileID: 0}
     - target: {fileID: -4216859302048453862, guid: 8bc6d2782aa136344aca99923113ecd2,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -844,6 +840,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalScale.z
       value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: -927199367670048503, guid: 8bc6d2782aa136344aca99923113ecd2,
+        type: 3}
+      propertyPath: m_Name
+      value: Terminal
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8bc6d2782aa136344aca99923113ecd2, type: 3}
