@@ -7,7 +7,15 @@ public class BTerminal : MonoBehaviour
 {
     #region Atributos
 
-    public GameObject objetoHackeado;
+    public enum EAccionHack
+    {
+        Ability,
+        Door,
+    }
+
+    public EAccionHack hackAction;
+    public GameObject[] objetoHackeado;
+
     private GameObject pantalla1;
     private GameObject pantalla2;
     private GameObject camara;
@@ -107,7 +115,13 @@ public class BTerminal : MonoBehaviour
 
     private void accionTrasHackear(){
         //definir accion
-        objetoHackeado.GetComponent<BPuerta>().abrir();
+        if(hackAction == EAccionHack.Door)
+        {
+            foreach(GameObject p in objetoHackeado)
+            {
+                p.GetComponent<BPuerta>().abrir();
+            }
+        }
     }
 
 }
