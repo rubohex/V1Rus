@@ -114,7 +114,6 @@ public class BTerminal : MonoBehaviour
     }
 
     private void accionTrasHackear(){
-        //definir accion
         if(hackAction == EAccionHack.Door)
         {
             foreach(GameObject p in objetoHackeado)
