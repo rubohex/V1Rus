@@ -834,24 +834,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d9933f9260440634bb88fe4efd9dda24, type: 3}
---- !u!1 &729799690 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 4978695485263253521, guid: d7e6d129399464a4fb6e0ebe01ca95a5,
-    type: 3}
-  m_PrefabInstance: {fileID: 4978695484445309705}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &729799691
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 729799690}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bfe4ddd6c1b1de84a99dca43687d168c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1001 &750908084
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2968,15 +2950,18 @@ PrefabInstance:
       propertyPath: objetoHackeado.Array.data[1]
       value: 
       objectReference: {fileID: 1785462274}
-    - target: {fileID: 4978695485263253524, guid: d7e6d129399464a4fb6e0ebe01ca95a5,
-        type: 3}
-      propertyPath: cam
-      value: 
-      objectReference: {fileID: 1870697572}
     - target: {fileID: 1272990980, guid: d7e6d129399464a4fb6e0ebe01ca95a5, type: 3}
       propertyPath: m_LocalPosition.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 729799691, guid: d7e6d129399464a4fb6e0ebe01ca95a5, type: 3}
+      propertyPath: objetoHackeado.Array.data[0]
+      value: 
+      objectReference: {fileID: 1785462274}
+    - target: {fileID: 729799691, guid: d7e6d129399464a4fb6e0ebe01ca95a5, type: 3}
+      propertyPath: objetoHackeado.Array.data[1]
+      value: 
+      objectReference: {fileID: 632643597}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d7e6d129399464a4fb6e0ebe01ca95a5, type: 3}
 --- !u!1001 &5292494242202285564
