@@ -44,7 +44,7 @@ public class BPlayer : MonoBehaviour
     private BGameManager manager;
 
     /// Texto del canvas de prueba
-    public Text textAp;
+    private Text textAp;
 
     /// Material de cursor en casilla
     public Material cursorMaterial;
@@ -106,6 +106,7 @@ public class BPlayer : MonoBehaviour
         RestartPath();
 
         // Temporal
+        textAp = GameObject.Find("TextApPrueba").GetComponent<Text>();
         textAp.text = "AP: " + Ap;
 
     }
