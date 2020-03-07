@@ -68,6 +68,9 @@ public class BEnemy : MonoBehaviour
     /// Camino que va a seguir el enemigo
     private List<Vector3> path = new List<Vector3>();
 
+    /// GameManager del nivel
+    private BGameManager gameManager;
+
     /// Tablero del nivel
     private BBoard board;
     #endregion
@@ -79,15 +82,17 @@ public class BEnemy : MonoBehaviour
         moveTime = enemyInfo.moveTime;
     }
 
-    // Start is called before the first frame update
-    void Start()
+    public void SetupEnemy(BGameManager gameManager)
     {
+        // Guardamos el gameManager
+        this.gameManager = gameManager;
 
-        board = FindObjectOfType<BBoard>();
+        // Obtenemos el tablero
+        board = gameManager.GetActiveBoard();
 
         // Posicion inicial del jugador en el waypoint 0
         transform.position = board.GetEnemySpawnPos(wayPoints[0].position, GetComponent<Renderer>().bounds.size.y);
-        
+
         // Obtenemos el vector hacia arriba del tablero
         boardUP = board.GetBoardUp();
 
@@ -98,16 +103,19 @@ public class BEnemy : MonoBehaviour
         CreatePath();
 
         // Rotacion inicial mirando hacia el waypoint 1
-        transform.rotation = Quaternion.LookRotation(path[1]-path[0] ,boardUP);
-        
+        transform.rotation = Quaternion.LookRotation(path[1] - path[0], boardUP);
+
         // Obtenemos el indice del tablero en el que estamos
         boardIndex = board.PositionToIndex(transform.position);
         // Obtenemos el indice del array de waypoints en el que estamos
         pathIndex = 0;
 
-        //Iniciamos la vision
+        // Calculamos la zona de vision
         ComputeVisionSet();
+        // Cambiamos los materiales de las casillas de vision del enemigo
         ChangeVisionRangeMaterial(visionMaterial);
+
+
     }
 
     // Update is called once per frame

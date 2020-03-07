@@ -24,4 +24,8 @@ public class DBoardInfo : ScriptableObject
     public bool y = false;
     public bool z = false;
 
+    [Header("Prefabs")]
+    public GameObject player;
+    public GameObject camera;
+
 }

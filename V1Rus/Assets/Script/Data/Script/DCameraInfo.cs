@@ -14,6 +14,14 @@ public class DCameraInfo : ScriptableObject
     /// Velocidad de rotacion de la camara
     /// </summary>
     public float rotationTime = 2f;
+    /// <summary>
+    /// Tamaño minimo de la vista ortografica
+    /// </summary>
+    public float closeZoomClamp = 3f;
+    /// <summary>
+    /// Tamaño maximo de la vista ortografica
+    /// </summary>
+    public float farZoomClamp = 8f;
 
     [Header("Teclas control")]
 
@@ -41,4 +49,16 @@ public class DCameraInfo : ScriptableObject
     /// Codigo de tecla para rotar -90º
     /// </sumary>
     public KeyCode moveRight = KeyCode.RightArrow;
+
+    [Header("Starting Position")]
+    /// <summary>
+    /// Posicion de la camara con respecto al target
+    /// </summary>
+    public Vector3 position = new Vector3(-9.31f, 7.6f, -9.31f);
+
+    /// <summary>
+    /// Rotacion de la camara con respecto al target
+    /// </summary>
+    public Vector3 rotation = new Vector3(30f, 45f, 0f);
+
 }

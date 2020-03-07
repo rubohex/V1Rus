@@ -20,3 +20,5 @@ MonoBehaviour:
   x: 1
   y: 1
   z: 0
+  player: {fileID: 2669629464896358478, guid: ec3356b094921f847a151481851f1713, type: 3}
+  camera: {fileID: 1201422438372477632, guid: 028796b4635925b4bb6a42c5cb7ca6ee, type: 3}

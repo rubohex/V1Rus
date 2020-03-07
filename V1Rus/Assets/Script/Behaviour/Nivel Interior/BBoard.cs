@@ -15,6 +15,16 @@ public class BBoard : MonoBehaviour
     public DBoardInfo boardInfo;
 
     /// <summary>
+    /// Datos del jugador en el nivel
+    /// </summary>
+    public DPlayerInfo playerInfo;
+
+    /// <summary>
+    /// Datos de la camara del nivel
+    /// </summary>
+    public DCameraInfo cameraInfo;
+
+    /// <summary>
     /// Prefab con la casilla basica
     /// </summary>
     public GameObject Tile;
@@ -81,6 +91,12 @@ public class BBoard : MonoBehaviour
     /// Coordenada de la superficie
     private float surfaceCoord;
 
+    /// Manager del nivel
+    private BGameManager gameManager;
+
+    /// Camara asociada al nivel
+    private BCameraController camera;
+
     /// Script del jugador
     private BPlayer player;
 
@@ -91,9 +107,16 @@ public class BBoard : MonoBehaviour
 
     #region METHODS
 
-    #region AWAKE START UPDATE
-    private void Awake()
+    #region UPDATE SETUP DESTROY
+
+    /// <summary>
+    /// Funcion encargada de hacer el Setup del Board iniciando todas sus estructuras logicas
+    /// </summary>
+    /// <param name="manager">Manager del cubo</param>
+    public void SetupBoard(BGameManager manager)
     {
+        // GUardamos el manager
+        gameManager = manager;
 
         // Primero observamos el sistema de coordenadas que vamos a utilizar
         // El sistema elegido dependera de las coordenadas que provengan del boardInfo
@@ -101,11 +124,11 @@ public class BBoard : MonoBehaviour
         {
             coordSys = ECord.XY;
         }
-        else if(boardInfo.x && boardInfo.z)
+        else if (boardInfo.x && boardInfo.z)
         {
             coordSys = ECord.XZ;
         }
-        else if(boardInfo.y && boardInfo.z)
+        else if (boardInfo.y && boardInfo.z)
         {
             coordSys = ECord.YZ;
         }
@@ -114,20 +137,17 @@ public class BBoard : MonoBehaviour
             Debug.LogError("Por favor indique en la informacion del tablero dos coordenadas para el systema de coordenadas");
         }
 
-        // Cambiamos el nombre a Board para poder detectar las colisiones mejor mas tarde
-        gameObject.name = "Board";
-
         // Obtenemos el tamaño de la casilla base y lo guardamos para usarlo mas tarde
         Vector3 tileSize = Tile.GetComponent<Renderer>().bounds.size;
-        tileSize1 = (int) tileSize.x;
-        tileSize2 = (int) tileSize.z;
+        tileSize1 = (int)tileSize.x;
+        tileSize2 = (int)tileSize.z;
         tileSize3 = tileSize.y;
 
         // Obtenemos todas las casillas de la escena activas
-        Object[] boardTiles = FindObjectsOfType(typeof(BTile));
+        Object[] boardTiles = GetComponentsInChildren<BTile>();
 
         // Obtenemos la coordenada de la superficie para poder spawnear particulas mas tarde en esta
-        BTile aux = (BTile) boardTiles[0];
+        BTile aux = (BTile)boardTiles[0];
         switch (coordSys)
         {
             case ECord.XY:
@@ -143,10 +163,10 @@ public class BBoard : MonoBehaviour
                 break;
         }
 
-
         // A partir de todas estas casillas obtenemos sus posiciones en el sistema
         List<float> firstPositions = new List<float>();
         List<float> secondPositions = new List<float>();
+
         foreach (BTile item in boardTiles)
         {
             // Dependiendo del sistema de coordenadas guardamos unos valores diferentes
@@ -176,8 +196,8 @@ public class BBoard : MonoBehaviour
         max2 = secondPositions.Max();
 
         // Calculamos el tamaño del tablero a partir de las posiciones y de los tamaños
-        size1 = (int)((max1 - min1) / tileSize1) + 1;
-        size2 = (int)((max2 - min2) / tileSize2) + 1;
+        size1 = Mathf.RoundToInt((max1 - min1) / tileSize1) + 1;
+        size2 = Mathf.RoundToInt((max2 - min2) / tileSize2) + 1;
 
         // Spawneamos el plano de collision para detectar los clicks
         SpawnCollisionPlane();
@@ -194,15 +214,15 @@ public class BBoard : MonoBehaviour
             //Calculamos el nuevo indice para guardar en el diccionario de localizaciones
             Vector3 position = item.gameObject.transform.position;
             int firstIndex = 0;
-            int secondIndex = 0; 
+            int secondIndex = 0;
 
             switch (coordSys)
             {
                 case ECord.XY:
 
                     // Calculamos los indices respecto a las posiciones
-                    firstIndex = (int)(position.x - min1 / tileSize1);
-                    secondIndex = (int)(position.y - min2 / tileSize2) * size1;
+                    firstIndex = Mathf.RoundToInt((position.x - min1) / tileSize1) ;
+                    secondIndex = Mathf.RoundToInt((position.y - min2) / tileSize2) * size1;
                     // Guardamos en el diccionario el index con su respectiva posicion
                     locations.Add((firstIndex + secondIndex), new Vector2(position.x, position.y));
                     tiles.Add((firstIndex + secondIndex), item);
@@ -210,8 +230,8 @@ public class BBoard : MonoBehaviour
                 case ECord.XZ:
 
                     // Calculamos los indices respecto a las posiciones
-                    firstIndex = (int)(position.x - min1 / tileSize1);
-                    secondIndex = (int)(position.z - min2 / tileSize2) * size1;
+                    firstIndex = Mathf.RoundToInt((position.x - min1) / tileSize1);
+                    secondIndex = Mathf.RoundToInt((position.z - min2) / tileSize2) * size1;
                     // Guardamos en el diccionario el index con su respectiva posicion
                     locations.Add((firstIndex + secondIndex), new Vector2(position.x, position.z));
                     tiles.Add((firstIndex + secondIndex), item);
@@ -219,8 +239,8 @@ public class BBoard : MonoBehaviour
                 case ECord.YZ:
 
                     // Calculamos los indices respecto a las posiciones
-                    firstIndex = (int)(position.y - min1 / tileSize1);
-                    secondIndex = (int)(position.z - min2 / tileSize2) * size1;
+                    firstIndex = Mathf.RoundToInt((position.y - min1) / tileSize1);
+                    secondIndex = Mathf.RoundToInt((position.z - min2) / tileSize2) * size1;
                     // Guardamos en el diccionario el index con su respectiva posicion
                     locations.Add((firstIndex + secondIndex), new Vector2(position.y, position.z));
                     tiles.Add((firstIndex + secondIndex), item);
@@ -230,17 +250,15 @@ public class BBoard : MonoBehaviour
             }
 
             //Guardamos el indice de la casilla inicial y final
-            if(item.currentState == BTile.ETileState.Start)
+            if (item.currentState == BTile.ETileState.Start)
             {
                 startIndex = firstIndex + secondIndex;
 
-            }else if (item.currentState == BTile.ETileState.End)
+            }
+            else if (item.currentState == BTile.ETileState.End)
             {
                 endIndex = firstIndex + secondIndex;
             }
-
-            //Debug.Log("Indice " + (firstIndex + secondIndex) + " localizacion " + locations[(firstIndex + secondIndex)]);
-
         }
 
         // Para cada casilla almacenamos sus bordes usando como referente su indice en el array
@@ -256,22 +274,79 @@ public class BBoard : MonoBehaviour
         // Ponemos a 0 los bordes del tablero
         SetBorderEdges();
 
-        // Obtenemos los jugadores 
-        player = FindObjectOfType<BPlayer>();
+        // Obtenemos la posicion y rotacion para instanciar al jugador
+        Vector3 playerPos = GetPlayerSpawnPos(boardInfo.player.GetComponent<Renderer>().bounds.size.y);
+        Quaternion playerRot = GetPlayerSpawnRot();
 
-    }
+        // Instanciamos al jugador
+        GameObject playerGO = Instantiate(boardInfo.player,playerPos,playerRot);
 
-    private void Start()
-    {
+        // Obtenemos el script del jugador y lo guardamos
+        player = playerGO.GetComponent<BPlayer>();
+
+        player.transform.parent = this.transform;
+
+        // Hacemos el setup del jugador
+        player.SetupPlayer(manager, playerInfo);
+
+        
 
         // Obtenemos la roatacion de los elementos del tablero para cuando spawneemos particulas
         spawnRotation = player.transform.rotation;
 
         // Obtenemos todos los enemigos y los guardamos en la lista
-        foreach (BEnemy enemy in FindObjectsOfType<BEnemy>())
+        foreach (BEnemy enemy in GetComponentsInChildren<BEnemy>())
         {
             enemiesPos.Add(enemy.GetEnemyIndex());
+            enemy.SetupEnemy(manager);
         }
+
+        // Spawneamos el target de la camara y lo colocamos en el centro
+        GameObject target = new GameObject("Camera Target");
+
+        target.transform.position = Vector3.zero;
+        target.transform.rotation = Quaternion.identity;
+
+        target.transform.parent = this.transform;
+
+        // Instanciamos la camara
+        GameObject cameraGO = Instantiate(boardInfo.camera, cameraInfo.position, Quaternion.Euler(cameraInfo.rotation));
+
+        cameraGO.transform.parent = target.transform;
+
+        // Guardamos el script de la camara
+        camera = cameraGO.GetComponent<BCameraController>();
+
+        // Ejecutamos el Setup
+        camera.SetupCamera(manager, cameraInfo);
+
+        // Iniciamos las puertas del nivel
+        foreach (BPuerta puerta in GetComponentsInChildren<BPuerta>())
+        {
+            puerta.SetupDoor(manager);
+        } 
+    }
+
+    /// <summary>
+    /// Elimina al jugador y la camara del nivel
+    /// </summary>
+    public void EndBoard()
+    {
+        Destroy(camera.transform.parent.gameObject);
+
+        Destroy(camera.gameObject);
+
+        Destroy(player.gameObject);
+
+        locations.Clear();
+
+        tiles.Clear();
+
+        edges.Clear();
+
+        walls.Clear();
+
+        indexDirections.Clear();
     }
     #endregion
 
@@ -322,7 +397,7 @@ public class BBoard : MonoBehaviour
     /// <returns></returns>
     public Vector3 GetBoardUp()
     {
-        return FindObjectOfType<BTile>().transform.up;
+        return tiles[startIndex].transform.up;
     }
 
     /// <summary>
@@ -332,19 +407,16 @@ public class BBoard : MonoBehaviour
     /// <returns></returns>
     public Vector3 GetEnemySpawnPos(Vector3 pos, float enemyHeight)
     {
-        // Obtenemos el vector para decidir hacia donte apunta parte superior
-        Vector3 vectorUp = FindObjectOfType<BTile>().transform.up;
-
         switch (coordSys)
         {
             case ECord.XY:
-                return new Vector3(pos.x, pos.y, surfaceCoord + vectorUp.z * enemyHeight / 2);
+                return new Vector3(pos.x, pos.y, surfaceCoord + GetBoardUp().z * enemyHeight / 2);
             case ECord.XZ:
-                return new Vector3(pos.x, surfaceCoord + vectorUp.y * enemyHeight / 2, pos.z);
+                return new Vector3(pos.x, surfaceCoord + GetBoardUp().y * enemyHeight / 2, pos.z);
             case ECord.YZ:
-                return new Vector3(surfaceCoord + vectorUp.z * enemyHeight / 2, pos.y, pos.z);
+                return new Vector3(surfaceCoord + GetBoardUp().z * enemyHeight / 2, pos.y, pos.z);
             default:
-                return vectorUp;
+                return GetBoardUp();
         }
     }
 
@@ -355,19 +427,16 @@ public class BBoard : MonoBehaviour
     /// <returns></returns>
     public Vector3 GetPlayerSpawnPos(float playerHeight)
     {
-        // Obtenemos el vector para decidir hacia donte apunta parte superior
-        Vector3 vectorUp = FindObjectOfType<BTile>().transform.up;
-
         switch (coordSys)
         {
             case ECord.XY:
-                return IndexToPosition(startIndex, null, surfaceCoord + vectorUp.z * playerHeight / 2);
+                return IndexToPosition(startIndex, null, surfaceCoord + GetBoardUp().z * playerHeight / 2);
             case ECord.XZ:
-                return IndexToPosition(startIndex, null, surfaceCoord + vectorUp.y * playerHeight / 2);
+                return IndexToPosition(startIndex, null, surfaceCoord + GetBoardUp().y * playerHeight / 2);
             case ECord.YZ:
-                return IndexToPosition(startIndex, null, surfaceCoord + vectorUp.x * playerHeight / 2);
+                return IndexToPosition(startIndex, null, surfaceCoord + GetBoardUp().x * playerHeight / 2);
             default:
-                return vectorUp;
+                return GetBoardUp();
         }
     }
 
@@ -377,8 +446,7 @@ public class BBoard : MonoBehaviour
     /// <returns></returns>
     public Quaternion GetPlayerSpawnRot()
     {
-        GameObject aux = FindObjectOfType<BTile>().gameObject;
-        return Quaternion.LookRotation(aux.transform.forward, aux.transform.up);
+        return Quaternion.LookRotation(tiles[startIndex].transform.forward, GetBoardUp());
     }
 
     /// <summary>
@@ -398,6 +466,33 @@ public class BBoard : MonoBehaviour
     public bool isWall(int index)
     {
         return walls.ContainsKey(index);
+    }
+
+    /// <summary>
+    /// Devolvemos un array de los enemigos
+    /// </summary>
+    /// <returns> Array de enemigos </returns>
+    public BEnemy[] GetBoardEnemies()
+    {
+        return GetComponentsInChildren<BEnemy>();
+    }
+
+    /// <summary>
+    /// Devolvemos el jugador del tablero
+    /// </summary>
+    /// <returns> Jugador del tablero </returns>
+    public BPlayer GetPlayer()
+    {
+        return player;
+    }
+
+    /// <summary>
+    /// Devolvemos la camara del tablero
+    /// </summary>
+    /// <returns> Camara del tablero</returns>
+    public BCameraController GetCamera()
+    {
+        return camera;
     }
 
     #endregion
@@ -483,7 +578,7 @@ public class BBoard : MonoBehaviour
     private void AddWallsEdges()
     {
         // Buscamos todos los muros y los guardamos en un array
-        BMuro[] walls = FindObjectsOfType<BMuro>();
+        BMuro[] walls = GetComponentsInChildren<BMuro>();
 
         // Realizamos el mismo proceso para cada mur
         foreach (BMuro wall in walls)
@@ -553,7 +648,7 @@ public class BBoard : MonoBehaviour
         // Para cada uno de las casillas que lo rodea actualizamos el eje en ambos sentidos
         // Al sumarle size1 obtenemos la casilla norte
         auxIndex = index + indexDirections["Up"];
-        if (locations.ContainsKey(auxIndex))
+        if (locations.ContainsKey(auxIndex) && locations.ContainsKey(index))
         {
             edges[index][auxIndex] *= wall.upEdge;
             edges[auxIndex][index] *= wall.upEdge;
@@ -561,7 +656,7 @@ public class BBoard : MonoBehaviour
 
         // Al sumarle uno obtenemos la casilla al oeste
         auxIndex = index + indexDirections["Left"];
-        if (locations.ContainsKey(auxIndex))
+        if (locations.ContainsKey(auxIndex) && locations.ContainsKey(index))
         {
             edges[index][auxIndex] *= wall.leftEdge;
             edges[auxIndex][index] *= wall.leftEdge;
@@ -569,7 +664,7 @@ public class BBoard : MonoBehaviour
 
         // Al restar size1 obtenemos la casilla al sur
         auxIndex = index + indexDirections["Down"];
-        if (locations.ContainsKey(auxIndex))
+        if (locations.ContainsKey(auxIndex) && locations.ContainsKey(index))
         {
             edges[index][auxIndex] *= wall.downEdge;
             edges[auxIndex][index] *= wall.downEdge;
@@ -577,7 +672,7 @@ public class BBoard : MonoBehaviour
 
         // Al restar 1 obtenemos la casilla al este
         auxIndex = index + indexDirections["Right"];
-        if (locations.ContainsKey(auxIndex))
+        if (locations.ContainsKey(auxIndex) && locations.ContainsKey(index))
         {
             edges[index][auxIndex] *= wall.rightEdge;
             edges[auxIndex][index] *= wall.rightEdge;
@@ -840,19 +935,19 @@ public class BBoard : MonoBehaviour
                 // Calculamos el tamaño del plano
                 boxCollider.size = new Vector3(size1, size2, 0);
                 // Calculamos el punto central del plano 
-                boxCollider.center = new Vector3((max1 + min1) / 2 - transform.position.x, (max2 + min2) / 2 - transform.position.y, surfaceCoord);
+                boxCollider.center = new Vector3((max1 + min1) / 2 - transform.position.x, (max2 + min2) / 2 - transform.position.y, surfaceCoord - transform.position.z);
                 break;
             case ECord.XZ:
                 // Calculamos el tamaño del plano
                 boxCollider.size = new Vector3(size1, 0, size2);
                 // Calculamos el punto central del plano 
-                boxCollider.center = new Vector3((max1 + min1) / 2 - transform.position.x, surfaceCoord, (max2 + min2) / 2 - transform.position.z);
+                boxCollider.center = new Vector3((max1 + min1) / 2 - transform.position.x, surfaceCoord - transform.position.y, (max2 + min2) / 2 - transform.position.z);
                 break;
             case ECord.YZ:
                 // Calculamos el tamaño del plano
                 boxCollider.size = new Vector3(0,size1, size2);
                 // Calculamos el punto central del plano 
-                boxCollider.center = new Vector3(surfaceCoord,(max1 + min1) / 2 - transform.position.y, (max2 + min2) / 2 - transform.position.z);
+                boxCollider.center = new Vector3(surfaceCoord - transform.position.x, (max1 + min1) / 2 - transform.position.y, (max2 + min2) / 2 - transform.position.z);
                 break;
             default:
                 break;

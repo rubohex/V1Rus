@@ -9,8 +9,11 @@ public class BPlayer : MonoBehaviour
     #region ATRIBUTES
     [Header("Data")]
 
-    /// Datos de la Camara
-    public DPlayerInfo playerInfo;
+    /// Material de cursor en casilla
+    public Material cursorMaterial;
+
+    /// Material de casilla seleccionada
+    public Material selectedMaterial;
 
     /// Codigo de tecla para rotar -90º
     private KeyCode rotateLeft;
@@ -41,16 +44,11 @@ public class BPlayer : MonoBehaviour
     /// Tablero del nivel
     private BBoard board;
 
-    private BGameManager manager;
+    /// Game manager del nivel
+    private BGameManager gameManager;
 
     /// Texto del canvas de prueba
     private Text textAp;
-
-    /// Material de cursor en casilla
-    public Material cursorMaterial;
-
-    /// Material de casilla seleccionada
-    public Material selectedMaterial;
 
     /// Rayo lanzado desde la camara para detectar objetos
     private Ray cameraRay;
@@ -74,32 +72,27 @@ public class BPlayer : MonoBehaviour
     #region METHODS
 
     #region AWAKE START UPDATE
-    private void Awake()
+
+    public void SetupPlayer(BGameManager manager, DPlayerInfo playerInfo)
     {
+        // Cargamos los datos basicos del jugador
         rotateLeft = playerInfo.rotateLeft;
         rotateRight = playerInfo.rotateRight;
         move = playerInfo.move;
         rotationTime = playerInfo.rotationTime;
         moveTime = playerInfo.moveTime;
         recogerCable = playerInfo.recogerCable;
-    }
 
-    // Start is called before the first frame update
-    void Start()
-    {
+        // Cargamos el manager del nivel
+        gameManager = manager;
+
         // Obtenemos el tablero
-        board = FindObjectOfType<BBoard>();
+        board = gameManager.GetActiveBoard();
 
-        manager = FindObjectOfType<BGameManager>();
         // Actualizamos los Ap que tenemos para el nivel
         Ap = maxAP = board.GetBoardAp();
 
-        //Obtenemos el tamaño del jugador
-        float playerHeight = GetComponent<Renderer>().bounds.size.y;
-
         // Colocamos al jugador en la casilla de salida y guardamos su indice
-        transform.rotation = board.GetPlayerSpawnRot();
-        transform.position = board.GetPlayerSpawnPos(playerHeight);
         tileIndex = board.PositionToIndex(transform.position);
 
         // Inicializa el camino
@@ -108,13 +101,12 @@ public class BPlayer : MonoBehaviour
         // Temporal
         textAp = GameObject.Find("TextApPrueba").GetComponent<Text>();
         textAp.text = "AP: " + Ap;
-
     }
 
     // Update is called once per frame
     void Update()
     {
-        UpdateUI();
+        //UpdateUI();
         // Control del giro a la izquierda
         if (Input.GetKeyDown(rotateLeft) && !isMoving)
         {
@@ -197,7 +189,7 @@ public class BPlayer : MonoBehaviour
                     ChangeAP((int)-cost);
                 }
 
-                manager.EnemyTurn();
+                gameManager.EnemyTurn();
             }
 
             // Temporal
@@ -213,7 +205,7 @@ public class BPlayer : MonoBehaviour
         // Hacemos el raycast y vemos si hemos golpeado alguna casilla
         if (Physics.Raycast(cameraRay, out cameraHit))
         {
-            if (cameraHit.collider.name == "Board" && !isMoving)
+            if (cameraHit.collider.name.Contains("Plataforma") && !isMoving)
             {
                 actualHit = board.PositionToIndex(cameraHit.point);
 
@@ -353,7 +345,7 @@ public class BPlayer : MonoBehaviour
                 }
             }
 
-            manager.EnemyTurn();
+            gameManager.EnemyTurn();
         }
 
         RestartPath();

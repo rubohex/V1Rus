@@ -7,11 +7,9 @@ public class BCameraController : MonoBehaviour
 
     [Header("Data")]
 
-    /// Datos de la Camara
-    public DCameraInfo cameraInfo;
-
     /// Codigo de tecla para rotar -90º
     private KeyCode rotateLeft;
+
     /// Codigo de tecla para rotar -90º
     private KeyCode rotateRight;
 
@@ -32,6 +30,12 @@ public class BCameraController : MonoBehaviour
 
     /// Velocidad de rotacion de la camara
     private float cameraRotationTime;
+
+    /// Tamaño minimo de la camara
+    private float cameraOrtoMax;
+
+    /// Tamaño maximo de la camara
+    private float cameraOrtoMin;
 
     /// Borde a partir del que notamos el raton en el mapa
     private float mapBorderThickness = 10f;
@@ -55,7 +59,7 @@ public class BCameraController : MonoBehaviour
 
     #region METHODS
 
-    private void Awake()
+    public void SetupCamera(BGameManager manager, DCameraInfo cameraInfo)
     {
         // Inicializamos los valores en funcion de los datos
         rotateLeft = cameraInfo.rotateLeft;
@@ -66,11 +70,8 @@ public class BCameraController : MonoBehaviour
         moveRight = cameraInfo.moveRight;
         cameraMoveSpeed = cameraInfo.cameraSpeed;
         cameraRotationTime = cameraInfo.rotationTime;
-    }
+        cameraOrtoMax = cameraInfo.farZoomClamp;
 
-    /// Start is called before the first frame update
-    void Start()
-    {
         // Guardamos el target
         parentT = transform.parent;
 
@@ -78,7 +79,7 @@ public class BCameraController : MonoBehaviour
         transform.LookAt(parentT);
 
         // Obtenemos el tablero
-        BBoard board = FindObjectOfType<BBoard>();
+        BBoard board = manager.GetActiveBoard();
 
         // Obtenemos los limites del tablero
         Vector4 aux = board.GetBoardLimits();
@@ -91,7 +92,9 @@ public class BCameraController : MonoBehaviour
         parentT.position = board.GetPlayerSpawnPos(0f);
         parentT.rotation = board.GetPlayerSpawnRot();
 
+        // Obtenemos el sistema de coordenadas
         coordSys = board.GetCoordSys();
+
     }
 
     /// Update is called once per frame
@@ -153,13 +156,13 @@ public class BCameraController : MonoBehaviour
         switch (coordSys)
         {
             case BBoard.ECord.XY:
-                parentT.position = new Vector3(Mathf.Clamp(pos.x,min1,max1), Mathf.Clamp(pos.y, min2, max2),0);
+                parentT.position = new Vector3(Mathf.Clamp(pos.x,min1,max1), Mathf.Clamp(pos.y, min2, max2), parentT.position.z);
                 break;
             case BBoard.ECord.XZ:
-                parentT.position = new Vector3(Mathf.Clamp(pos.x, min1, max1),0,Mathf.Clamp(pos.z, min2, max2));
+                parentT.position = new Vector3(Mathf.Clamp(pos.x, min1, max1),parentT.position.y,Mathf.Clamp(pos.z, min2, max2));
                 break;
             case BBoard.ECord.YZ:
-                parentT.position = new Vector3(0, Mathf.Clamp(pos.y, min1, max1), Mathf.Clamp(pos.z, min2, max2));
+                parentT.position = new Vector3(parentT.position.x, Mathf.Clamp(pos.y, min1, max1), Mathf.Clamp(pos.z, min2, max2));
                 break;
             default:
                 break;
@@ -178,7 +181,7 @@ public class BCameraController : MonoBehaviour
         float newSize = Camera.main.orthographicSize - scrollValue;
 
         // Colocamos el nuevo valor de la camara
-        Camera.main.orthographicSize = Mathf.Clamp(newSize,3.0f,20.0f);
+        Camera.main.orthographicSize = Mathf.Clamp(newSize,cameraOrtoMin,cameraOrtoMax);
     }
 
     /// <summary>

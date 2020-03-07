@@ -12,11 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cf9ab8025aa5bfb42b357ee291a58f54, type: 3}
   m_Name: BasicCameraInfo
   m_EditorClassIdentifier: 
-  moveSpeed: 20
-  rotationSpeed: 2
+  cameraSpeed: 20
+  rotationTime: 2
+  closeZoomClamp: 3
+  farZoomClamp: 8
   rotateLeft: 101
   rotateRight: 113
   moveUp: 273
   moveDown: 274
   moveLeft: 276
   moveRight: 275
+  position: {x: -9.31, y: 7.6, z: -9.31}
+  rotation: {x: 30, y: 45, z: 0}

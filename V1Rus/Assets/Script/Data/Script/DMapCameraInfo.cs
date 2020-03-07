@@ -15,6 +15,7 @@ public class DMapCameraInfo : ScriptableObject
     /// </summary>
     public float rotationSpeed = 2f;
 
+
     [Header("Teclas control")]
 
     /// <sumary>
