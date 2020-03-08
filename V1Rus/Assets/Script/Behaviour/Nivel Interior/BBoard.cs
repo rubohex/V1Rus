@@ -324,7 +324,11 @@ public class BBoard : MonoBehaviour
         foreach (BPuerta puerta in GetComponentsInChildren<BPuerta>())
         {
             puerta.SetupDoor(manager);
-        } 
+        }
+        foreach (BTerminalTesting terminal in GetComponentsInChildren<BTerminalTesting>())
+        {
+            terminal.SetupTerminal(manager);
+        }
     }
 
     /// <summary>

@@ -23,45 +23,64 @@ public class BTerminalTesting : MonoBehaviour
     private int numInteracciones;
 
     private string mensaje1;
-    private string mensaje2;
     private bool hackeable;
 
     private GameObject testPantalla;
+    private BGameManager gameManager;
+
+    private bool active = false;
     #endregion
 
-    private Camera cam;
 
     // Start is called before the first frame update
-    void Start()
+    public void SetupTerminal(BGameManager manager)
     {
-        pantalla1 = GameObject.Find("Pantalla1");
+        active = true;
 
+        gameManager = manager;
+
+        pantalla1 = this.transform.Find("Pantalla1").gameObject;
         pantalla1.SetActive(false);
+
         mensaje1 = ("\nNIVEL=" + Nivel + "\n\n" + "INFECTADO\n " + numInteracciones / Nivel * 100 + "%");
-        mensaje2 = ("Proceso Hackeo\n" + "Interacciones necesarias: \n " + Nivel + "\nInteracciones actuales: " + numInteracciones);
+
         hackeable = false;
 
-        testPantalla = GameObject.Find("Image");
+        testPantalla = this.transform.Find("CanvasPrueba2/Image").gameObject;
         testPantalla.SetActive(false);
-        cam = GameObject.Find("Main Camera").GetComponent<Camera>();
-    }
 
+    }
+    
+    void Start()
+    {
+                pantalla1 = this.transform.Find("Pantalla1").gameObject;
+        pantalla1.SetActive(false);
+
+        testPantalla = this.transform.Find("CanvasPrueba2/Image").gameObject;
+        testPantalla.SetActive(false);
+    }
+    
     // Update is called once per frame
     void Update()
     {
-
-        if (numInteracciones == Nivel)
+        if (active)
         {
-            accionTrasHackear();
+            if (numInteracciones == Nivel)
+            {
+                accionTrasHackear();
+            }
+            BBoard board = gameManager.GetActiveBoard();
+            Camera cam = board.GetCamera().GetComponent<Camera>();
+            Vector3 newPos = cam.WorldToScreenPoint(pantalla1.transform.position);
+            testPantalla.transform.position = newPos;
         }
-        testPantalla.transform.position = cam.WorldToScreenPoint(pantalla1.transform.position);
+        
     }
 
     private void OnTriggerStay(Collider other)
     {
-        if (other.gameObject.name == "Player")
+        if (other.gameObject.name.Contains("Player"))
         {
-            //pantalla1.SetActive(true);
             testPantalla.SetActive(true);
             if (this.numInteracciones < this.Nivel)
             {
@@ -71,12 +90,12 @@ public class BTerminalTesting : MonoBehaviour
             {
                 hackeable = false;
             }
-            GameObject.Find("TextTest").GetComponent<Text>().text = mensaje1;
+            this.transform.Find("CanvasPrueba2/Image/TextTest").GetComponent<Text>().text = mensaje1;
         }
     }
     private void OnTriggerExit(Collider other)
     {
-        if (other.gameObject.name == "Player")
+        if (other.gameObject.name.Contains("Player"))
         {
             pantalla1.SetActive(false);
             testPantalla.SetActive(false);
@@ -90,7 +109,6 @@ public class BTerminalTesting : MonoBehaviour
     {
         this.numInteracciones = interacciones;
         this.mensaje1 = ("\nNIVEL=" + this.Nivel + "\n\n" + "INFECTADO\n " + (((float)interacciones / (float)this.Nivel) * 100) + "%");
-        this.mensaje2 = ("Proceso Hackeo\n" + "Interacciones necesarias: \n " + Nivel + "\nInteracciones actuales: " + this.numInteracciones);
     }
 
     public int getInteracciones()
