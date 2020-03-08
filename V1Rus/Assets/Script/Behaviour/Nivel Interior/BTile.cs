@@ -23,12 +23,16 @@ public class BTile : MonoBehaviour
 
     /// Material anterior de la casilla
     private Material oldMaterial;
+
+    /// Material original de la casilla
+    private Material originalMaterial;
+
     #endregion
 
     #region METHODS
     private void Awake()
     {
-        oldMaterial = GetComponent<Renderer>().material;
+        originalMaterial = oldMaterial = GetComponent<Renderer>().material;
     }
 
     /// <summary>
@@ -52,11 +56,19 @@ public class BTile : MonoBehaviour
     }
 
     /// <summary>
-    /// Devuelve el material a su antiguo material
+    /// Devuelve el material de la casilla al anterior o al original
     /// </summary>
-    public void ResetMaterial()
+    /// <param name="original">True si queremos volver al original</param>
+    public void ResetMaterial(bool original = false)
     {
-        GetComponent<Renderer>().material = oldMaterial;
+        if (original)
+        {
+            GetComponent<Renderer>().material = originalMaterial;
+        }
+        else
+        {
+            GetComponent<Renderer>().material = oldMaterial;
+        }
     }
 
     #endregion

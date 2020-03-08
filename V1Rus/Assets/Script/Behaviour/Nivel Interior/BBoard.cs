@@ -336,11 +336,13 @@ public class BBoard : MonoBehaviour
     /// </summary>
     public void EndBoard()
     {
+        player.DestroyPath();
+
+        Destroy(player.gameObject);
+        
         Destroy(camera.transform.parent.gameObject);
 
         Destroy(camera.gameObject);
-
-        Destroy(player.gameObject);
 
         locations.Clear();
 
@@ -466,10 +468,20 @@ public class BBoard : MonoBehaviour
     /// La funcion devuelve true si hay un muro en el indice
     /// </summary>
     /// <param name="index">Indice en el que queremos saber si hay un muro</param>
-    /// <returns> True en caso de haber muro False en casod e que no</returns>
+    /// <returns> True en caso de haber muro False en caso contrario</returns>
     public bool isWall(int index)
     {
         return walls.ContainsKey(index);
+    }
+
+    /// <summary>
+    /// La funcion devuelve true si hay una casilla en el indice
+    /// </summary>
+    /// <param name="index">Indice en el que queremos saber si hay tile</param>
+    /// <returns>True en caso de haber una casilla false en caso contrario</returns>
+    public bool isTile(int index)
+    {
+        return tiles.ContainsKey(index);
     }
 
     /// <summary>
@@ -695,10 +707,10 @@ public class BBoard : MonoBehaviour
             if ((index / size1) == 0)
             {
                 int auxIndex = index + indexDirections["Down"];
-                edges[index][auxIndex] = 0;
+                edges[index][auxIndex] = -1;
                 if (edges.ContainsKey(auxIndex))
                 {
-                    edges[auxIndex][index] = 0;
+                    edges[auxIndex][index] = -1;
                 }
             }
 
@@ -706,10 +718,10 @@ public class BBoard : MonoBehaviour
             if ((index % size1) == 0)
             {
                 int auxIndex = index + indexDirections["Left"];
-                edges[index][auxIndex] = 0;
+                edges[index][auxIndex] = -1;
                 if (edges.ContainsKey(auxIndex))
                 {
-                    edges[auxIndex][index] = 0;
+                    edges[auxIndex][index] = -1;
                 }
             }
 
@@ -717,10 +729,10 @@ public class BBoard : MonoBehaviour
             if ((index / size1) == size2)
             {
                 int auxIndex = index + indexDirections["Up"];
-                edges[index][auxIndex] = 0;
+                edges[index][auxIndex] = -1;
                 if (edges.ContainsKey(auxIndex))
                 {
-                    edges[auxIndex][index] = 0;
+                    edges[auxIndex][index] = -1;
                 }
             }
 
@@ -728,10 +740,10 @@ public class BBoard : MonoBehaviour
             if ((index % size1) == size1 - 1)
             {
                 int auxIndex = index + indexDirections["Right"];
-                edges[index][auxIndex] = 0;
+                edges[index][auxIndex] = -1;
                 if (edges.ContainsKey(auxIndex))
                 {
-                    edges[auxIndex][index] = 0;
+                    edges[auxIndex][index] = -1;
                 }
             }
         }
@@ -809,23 +821,34 @@ public class BBoard : MonoBehaviour
     /// <returns> Int que representa el coste del movimiento</returns>
     public float CostToEnter(int actualTile, int objectiveTile, bool activeAbility)
     {
-        if (edges.ContainsKey(actualTile) && edges[actualTile].ContainsKey(objectiveTile) && edges[actualTile][objectiveTile] != 0 && !enemiesPos.Contains(objectiveTile))
+        if (edges.ContainsKey(actualTile) && edges[actualTile].ContainsKey(objectiveTile) && !enemiesPos.Contains(objectiveTile))
         {
-            if (activeAbility && dataParticles.ContainsKey(objectiveTile))
-            {
-                return -edges[actualTile][objectiveTile];
 
+            if (edges[actualTile][objectiveTile] == -1)
+            {
+                return Mathf.Infinity;
+            }
+            else if (edges[actualTile][objectiveTile] != 0)
+            {
+                if (activeAbility && dataParticles.ContainsKey(objectiveTile))
+                {
+                    return -edges[actualTile][objectiveTile];
+
+                }
+                else
+                {
+                    return edges[actualTile][objectiveTile];
+                }
             }
             else
             {
-                return edges[actualTile][objectiveTile];
+                return 2000f;
             }
         }
         else
         {
             return Mathf.Infinity;
         }
-
     }
 
     /// <summary>
@@ -836,7 +859,7 @@ public class BBoard : MonoBehaviour
     /// <param name="activeAbility"> Booleano que nos indica si la abilidad de recoger codigo esta activa</param>
     /// <param name="AP"> Float indica la cantidad de ap que tiene el jugador</param>
     /// <returns> Una Lista con los indices desde objective hasta start</returns>
-    public List<int> AStarAlgorithm(int start, int objective, bool activeAbility = false)
+    public List<int> AStarAlgorithm(int start, int objective, bool activeAbility = false, bool id = true)
     {
         Dictionary<int, float> openSet = new Dictionary<int, float>();
 
@@ -859,7 +882,7 @@ public class BBoard : MonoBehaviour
             
             if (current == objective)
             {
-                return ReconstructPath(cameFrom, current);
+                return ReconstructPath(cameFrom, current,id);
             }
 
             neighbours.Add(current + size1);
@@ -871,7 +894,8 @@ public class BBoard : MonoBehaviour
 
             foreach (int neighbor in neighbours)
             {
-                float neighborGScore = gScore[current] + CostToEnter(current,neighbor,activeAbility);
+
+                float neighborGScore = gScore[current] + CostToEnter(current, neighbor, activeAbility);
 
                 if (neighborGScore != Mathf.Infinity && (!gScore.ContainsKey(neighbor) || neighborGScore < gScore[neighbor]))
                 {
@@ -887,7 +911,8 @@ public class BBoard : MonoBehaviour
 
             neighbours.Clear();
         }
-        return null;
+
+        return ReconstructPath(cameFrom, current,id);
     }
 
     /// <summary>
@@ -896,20 +921,48 @@ public class BBoard : MonoBehaviour
     /// <param name="cameFrom"> Diccionario en el que cada indice contiene al indice del que viene</param>
     /// <param name="current"> Indice de la ultima casilla</param>
     /// <returns></returns>
-    private List<int> ReconstructPath(Dictionary<int,int> cameFrom, int current)
+    private List<int> ReconstructPath(Dictionary<int,int> cameFrom, int current,bool id)
     {
-        List<int> path = new List<int>();
-        path.Add(current);
+        List<int> initialPath = new List<int>();
+        List<int> finalPath = new List<int>();
+
+        initialPath.Add(current);
 
         while (cameFrom.ContainsKey(current))
         {
             current = cameFrom[current];
-            path.Insert(0,current);
+            initialPath.Insert(0,current);
         }
 
-        path.RemoveAt(0);
+        if (id)
+        {
+            initialPath.RemoveAt(0);
+            return initialPath;
+        }
+        else
+        {
+            
+            finalPath.Add(initialPath[0]);
 
-        return path;
+            for (int i = 0; i < initialPath.Count-1; i++)
+            {
+                float cost = CostToEnter(initialPath[i], initialPath[i + 1],false);
+                if(cost < 2000f)
+                {
+                    finalPath.Add(initialPath[i + 1]);
+                }
+                else
+                {
+                    finalPath.RemoveAt(0);
+                    return finalPath;
+                }
+                
+            }
+
+            initialPath.RemoveAt(0);
+            return initialPath;
+        }
+        
     }
 
     /// <summary>
@@ -939,19 +992,19 @@ public class BBoard : MonoBehaviour
                 // Calculamos el tamaño del plano
                 boxCollider.size = new Vector3(size1, size2, 0);
                 // Calculamos el punto central del plano 
-                boxCollider.center = new Vector3((max1 + min1) / 2 - transform.position.x, (max2 + min2) / 2 - transform.position.y, surfaceCoord - transform.position.z);
+                boxCollider.center = transform.InverseTransformPoint(new Vector3((max1 + min1) / 2, (max2 + min2) / 2, surfaceCoord));
                 break;
             case ECord.XZ:
                 // Calculamos el tamaño del plano
                 boxCollider.size = new Vector3(size1, 0, size2);
                 // Calculamos el punto central del plano 
-                boxCollider.center = new Vector3((max1 + min1) / 2 - transform.position.x, surfaceCoord - transform.position.y, (max2 + min2) / 2 - transform.position.z);
+                boxCollider.center = transform.InverseTransformPoint(new Vector3((max1 + min1) / 2, surfaceCoord, (max2 + min2) / 2));
                 break;
             case ECord.YZ:
                 // Calculamos el tamaño del plano
                 boxCollider.size = new Vector3(0,size1, size2);
                 // Calculamos el punto central del plano 
-                boxCollider.center = new Vector3(surfaceCoord - transform.position.x, (max1 + min1) / 2 - transform.position.y, (max2 + min2) / 2 - transform.position.z);
+                boxCollider.center = transform.InverseTransformPoint(new Vector3(surfaceCoord, (max1 + min1) / 2, (max2 + min2) / 2));
                 break;
             default:
                 break;
@@ -1019,11 +1072,12 @@ public class BBoard : MonoBehaviour
     /// Devuelve el material de la casilla en la posicion index
     /// </summary>
     /// <param name="index">Indice de la casilla</param>
-    public void ResetMaterial(int index)
+    /// <param name="original">True si queremos mantener el orignal</param>
+    public void ResetMaterial(int index, bool original = false)
     {
         if (tiles.ContainsKey(index))
         {
-            tiles[index].ResetMaterial();
+            tiles[index].ResetMaterial(original);
         }
     }
 

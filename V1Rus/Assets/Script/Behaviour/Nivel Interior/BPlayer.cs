@@ -65,8 +65,6 @@ public class BPlayer : MonoBehaviour
     /// Camino que seguira el jugador
     private List<int> path = new List<int>();
 
-    private List<int> cursorPointers = new List<int>();
-
     #endregion
 
     #region METHODS
@@ -121,30 +119,12 @@ public class BPlayer : MonoBehaviour
 
         if (Input.GetMouseButtonDown(0) && !isMoving)
         {
-            path.AddRange(board.AStarAlgorithm(path[path.Count - 1], actualHit, recogerCable));
+            if(path.Count > 0)
+            {
+                previousHit = -1;
 
-            board.ResetMaterial(actualHit);
-
-            board.ChangeTileMaterial(actualHit, selectedMaterial);
-
-            cursorPointers.Add(actualHit);
-
-            previousHit = -1;
-        }
-
-        if (Input.GetMouseButtonDown(1) && !isMoving)
-        {
-            path.AddRange(board.AStarAlgorithm(path[path.Count - 1], actualHit, recogerCable));
-
-            board.ResetMaterial(actualHit);
-
-            board.ChangeTileMaterial(actualHit, selectedMaterial);
-
-            cursorPointers.Add(actualHit);
-
-            previousHit = -1;
-
-            StartCoroutine(MakePath());
+                StartCoroutine(MakePath());
+            }
         }
 
         // Control movimiento
@@ -157,8 +137,6 @@ public class BPlayer : MonoBehaviour
 
             // Obtenemos tambien el coste de dicha casilla
             float cost = board.CostToEnter(tileIndex, objectiveIndex, recogerCable);
-
-            //Debug.Log("Coste: " + cost);
 
             // Obsevamos que el coste es distinto de cero
             //maxAP == 0 sería considerado AP infinito(sala del boss)
@@ -209,22 +187,38 @@ public class BPlayer : MonoBehaviour
             {
                 actualHit = board.PositionToIndex(cameraHit.point);
 
-                if(previousHit != actualHit)
+                if (board.isTile(actualHit))
                 {
-                    // Cambiamos el material de la anterior casillas
-                    board.ResetMaterial(previousHit);
-
-                    if (!board.GetTileMaterial(actualHit).name.Contains(selectedMaterial.name))
+                    if (previousHit != actualHit)
                     {
+                        // Vaciamos el camino anterior
+                        RestartPath();
 
-                        // Cambiamos el material por el del cursor
-                        board.ChangeTileMaterial(actualHit, cursorMaterial);
+                        // Calculamos el camino
+                        path.AddRange(board.AStarAlgorithm(path[path.Count - 1], actualHit, recogerCable,false));
+
+                        // Dibujamos el camino
+                        DrawPath();
 
                         // Guardamos el indice de la casilla cambiada
                         previousHit = actualHit;
+                        
                     }
                 }
+                else if(previousHit != -1)
+                {
+                    // Cambiamos el material de la anterior casillas
+                    path.ForEach(tile => board.ResetMaterial(tile, true));
+                    previousHit = -1;
+                }
             }
+        }
+        else if (previousHit != -1)
+        {
+            // Cambiamos el material de la anterior casillas
+            path.ForEach(tile => board.ResetMaterial(tile, true));
+            previousHit = -1;
+            path.Clear();
         }
 
         //Temporal activacion de recogerDatos hasta que tengamos la habilidad util para pruebas
@@ -233,8 +227,18 @@ public class BPlayer : MonoBehaviour
             recogerCable = !recogerCable;
         }
     }
+
+    /// <summary>
+    /// Funcion usada antes de destruir al jugador
+    /// </summary>
+    public void DestroyPath()
+    {
+        path.ForEach(tile => board.ResetMaterial(tile, true));
+
+        path.Clear();
+    }
     #endregion
-    
+
     #region GETTERS
     /// <summary>
     /// Devuelve el indice del jugador
@@ -281,9 +285,18 @@ public class BPlayer : MonoBehaviour
     /// </summary>
     private void RestartPath()
     {
+        path.ForEach(tile => board.ResetMaterial(tile, true));
+
         path.Clear();
 
         path.Add(tileIndex);
+    }
+
+    private void DrawPath()
+    {
+        path.ForEach(tile => board.ChangeTileMaterial(tile, cursorMaterial));
+
+        board.ChangeTileMaterial(path[path.Count - 1], selectedMaterial);
     }
 
     #endregion
@@ -295,8 +308,7 @@ public class BPlayer : MonoBehaviour
         // Unformamos de que el jugador se esta moviendo
         isMoving = true;
 
-        // Limpiamos la lista de indices
-        cursorPointers.ForEach( tile => board.ResetMaterial(tile));
+        board.ResetMaterial(path[0], true);
 
         for (int i = 0; i < path.Count - 1; i++)
         {
@@ -323,6 +335,8 @@ public class BPlayer : MonoBehaviour
             {
                 // Llamamos a la corutina para que se encargue del movimiento
                 yield return StartCoroutine(MoveOverTimeCoroutine(this.gameObject, moveTime, transform.position, board.IndexToPosition(objectiveIndex, gameObject)));
+
+                board.ResetMaterial(objectiveIndex, true);
 
                 // Miramos si la casilla en la que entramos tiene particuals de datos o no esto lo podemos ver con el coste
                 if (cost > 0)
@@ -364,8 +378,6 @@ public class BPlayer : MonoBehaviour
     /// <param name="target"> Vector3 marca la posicion final </param>
     private IEnumerator MoveOverTimeCoroutine(GameObject targetObject, float transitionDuration, Vector3 start, Vector3 target)
         {
-            // Marcamos que el jugador se esta moviendo
-            isMoving = true;
 
             // Iniciamos el timer a 0
             float timer = 0.0f;
@@ -386,8 +398,6 @@ public class BPlayer : MonoBehaviour
                 yield return null;
             }
 
-            isMoving = false;
-
             yield return null;
 
     }
@@ -401,8 +411,6 @@ public class BPlayer : MonoBehaviour
     /// <param name="target"> Quaternion Marca la rotacion final </param>
     private IEnumerator RotateOverTimeCoroutine(GameObject targetObject, float transitionDuration, Quaternion start, Quaternion target)
     {
-        // Marcamos que el jugador se esta moviendo
-        isMoving = true;
 
         // Iniciamos el timer a 0
         float timer = 0.0f;
@@ -422,8 +430,6 @@ public class BPlayer : MonoBehaviour
 
             yield return null;
         }
-
-        isMoving = false;
 
         yield return null;
     }

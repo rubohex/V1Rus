@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 1701537868353255870}
   - component: {fileID: 1701537868353255869}
   - component: {fileID: 1701537868353255868}
-  - component: {fileID: 9099589387094511056}
   m_Layer: 0
   m_Name: Particulas de Datos
   m_TagString: Untagged
@@ -41,7 +40,7 @@ VisualEffect:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1701537868353255867}
   m_Enabled: 1
-  m_Asset: {fileID: 8926484042661614526, guid: bba7b7e5f77275b4093117de0bb17ab5, type: 3}
+  m_Asset: {fileID: 0}
   m_StartSeed: 0
   m_ResetSeedOnPlay: 1
   m_PropertySheet:
@@ -83,8 +82,7 @@ VFXRenderer:
   m_ReflectionProbeUsage: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
-  m_Materials:
-  - {fileID: 0}
+  m_Materials: []
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -105,19 +103,3 @@ VFXRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!114 &9099589387094511056
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1701537868353255867}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7680fba14faa8d548a2e39ff31f900f4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  upEdge: -1
-  leftEdge: -1
-  rightEdge: -1
-  downEdge: -1
