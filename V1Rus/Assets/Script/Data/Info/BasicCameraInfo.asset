@@ -22,5 +22,5 @@ MonoBehaviour:
   moveDown: 274
   moveLeft: 276
   moveRight: 275
-  position: {x: -9.31, y: 7.6, z: -9.31}
+  position: {x: -9.31, y: 5, z: -9.31}
   rotation: {x: 30, y: 45, z: 0}
