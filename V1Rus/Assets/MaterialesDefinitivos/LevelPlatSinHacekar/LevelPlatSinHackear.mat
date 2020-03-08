@@ -47,6 +47,10 @@ Material:
         m_Texture: {fileID: 2800000, guid: fc37b2506fed6bf40813e558b7a4cd37, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _DisolutionNoise:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _DisplacementMask:
         m_Texture: {fileID: 2800000, guid: d44051fb22f168d4fb2ccc80576a7359, type: 3}
         m_Scale: {x: 1, y: 1}
@@ -107,6 +111,7 @@ Material:
     - _DefaultShrink: 0
     - _DetailNormalMapScale: 1
     - _DirectionChange: 0
+    - _DisolutionValue: 0
     - _DstBlend: 0
     - _ExtrudeUpFaces: 1
     - _FrontFace_Intensity: 0.84
