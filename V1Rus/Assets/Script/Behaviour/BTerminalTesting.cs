@@ -22,7 +22,7 @@ public class BTerminalTesting : MonoBehaviour
     /// <summary>
     /// Guardamos el array de objetos sobre los que se realizará la acción del hackeo
     /// </summary>
-    public GameObject[] objetoHackeado;
+    private GameObject[] objetoHackeado;
 
     /// Lugar que ocupará la pantalla de la terminal
     private GameObject pantalla1;
@@ -66,6 +66,8 @@ public class BTerminalTesting : MonoBehaviour
         testPantalla = this.transform.Find("CanvasPrueba2/Pantalla").gameObject;
         testPantalla.SetActive(false);
 
+        objetoHackeado = this.GetComponent<BTerminal>().objetoHackeado;
+        hackAction = EAccionHack.Door;
     }
     
     void Start()
@@ -83,7 +85,9 @@ public class BTerminalTesting : MonoBehaviour
         {
             if (numInteracciones == Nivel)
             {
-                accionTrasHackear();
+                AccionTrasHackear();
+                transform.Find("CanvasPrueba2/Pantalla/Boton").GetComponent<Button>().interactable = false;
+                //System.Array.Reverse(this.GetComponent<MeshRenderer>().materials);
             }
 
             // Actualiza la posición de la pantalla en el canvas
@@ -133,7 +137,7 @@ public class BTerminalTesting : MonoBehaviour
     /// Actualiza el numero de interacciones realizadas
     /// </summary>
     /// <param name="interacciones">Nuevo número de actualizaciones</param>
-    public void actualizaInteracciones(int interacciones)
+    public void ActualizaInteracciones(int interacciones)
     {
         this.numInteracciones = interacciones;
 
@@ -147,7 +151,7 @@ public class BTerminalTesting : MonoBehaviour
     /// <returns>
     /// Int con el numero de interacciones
     /// </returns>
-    public int getInteracciones()
+    public int GetInteracciones()
     {
         return this.numInteracciones;
     }
@@ -158,21 +162,25 @@ public class BTerminalTesting : MonoBehaviour
     /// <returns>
     /// Bool con el estado de si es o no hackeable
     /// </returns>
-    public bool getHackeable()
+    public bool GetHackeable()
     {
         return this.hackeable;
     }
 
     /// Acción que se realiza al ser hackeada
-    private void accionTrasHackear()
+    private void AccionTrasHackear()
     {
         if (hackAction == EAccionHack.Door)
         {
             foreach (GameObject p in objetoHackeado)
             {
-                p.GetComponent<BPuerta>().updateAbierta(true);
+                p.GetComponent<BPuerta>().UpdateAbierta(true);
             }
         }
     }
 
+    public GameObject GetPlayer()
+    {
+        return gameManager.GetActviePlayer().gameObject;
+    }
 }

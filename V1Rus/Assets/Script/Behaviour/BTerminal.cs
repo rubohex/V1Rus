@@ -118,7 +118,7 @@ public class BTerminal : MonoBehaviour
         {
             foreach(GameObject p in objetoHackeado)
             {
-                p.GetComponent<BPuerta>().updateAbierta(true);
+                p.GetComponent<BPuerta>().UpdateAbierta(true);
             }
         }
     }

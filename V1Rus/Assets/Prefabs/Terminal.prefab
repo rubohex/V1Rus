@@ -576,13 +576,13 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: -1.6410778, w: -29.240923}
   m_textInfo:
     textComponent: {fileID: 4850509895336183864}
-    characterCount: 18
+    characterCount: 0
     spriteCount: 0
-    spaceCount: 4
-    wordCount: 2
+    spaceCount: 0
+    wordCount: 0
     linkCount: 0
-    lineCount: 4
-    pageCount: 1
+    lineCount: 0
+    pageCount: 0
     materialCount: 1
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
@@ -899,13 +899,13 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: -1.6410778, w: -16.528318}
   m_textInfo:
     textComponent: {fileID: 4978695484912073732}
-    characterCount: 18
+    characterCount: 0
     spriteCount: 0
-    spaceCount: 4
-    wordCount: 2
+    spaceCount: 0
+    wordCount: 0
     linkCount: 0
-    lineCount: 4
-    pageCount: 1
+    lineCount: 0
+    pageCount: 0
     materialCount: 1
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
@@ -1032,6 +1032,7 @@ GameObject:
   - component: {fileID: 1778653582}
   - component: {fileID: 2933559153333140920}
   - component: {fileID: 729799691}
+  - component: {fileID: 559705522}
   m_Layer: 0
   m_Name: Terminal
   m_TagString: Untagged
@@ -1121,7 +1122,7 @@ MonoBehaviour:
   objetoHackeado:
   - {fileID: 0}
   - {fileID: 0}
-  Nivel: 2
+  Nivel: 1
 --- !u!65 &1778653582
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1163,10 +1164,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bfe4ddd6c1b1de84a99dca43687d168c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  objetoHackeado:
-  - {fileID: 0}
-  - {fileID: 0}
   Nivel: 2
+--- !u!114 &559705522
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4978695485263253521}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed0f4306fa722dd43abb55c6f4d571bf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  tHack: 0
 --- !u!1 &7732163686516338158
 GameObject:
   m_ObjectHideFlags: 0
@@ -1286,7 +1297,6 @@ GameObject:
   - component: {fileID: 7937443649293730159}
   - component: {fileID: 2066739898957238588}
   - component: {fileID: 2683126389868888781}
-  - component: {fileID: 6860574611468229655}
   m_Layer: 5
   m_Name: Boton
   m_TagString: Untagged
@@ -1393,8 +1403,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 6860574611468229655}
-        m_MethodName: hackeo
+      - m_Target: {fileID: 559705522}
+        m_MethodName: Hackeo
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1404,19 +1414,6 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
---- !u!114 &6860574611468229655
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8533916110206870200}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ed0f4306fa722dd43abb55c6f4d571bf, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  tHack: 0
 --- !u!1001 &7333203505641089033
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1499,6 +1496,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Terminal
       objectReference: {fileID: 0}
+    - target: {fileID: -157825318150610632, guid: 8bc6d2782aa136344aca99923113ecd2,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: a7ec5be0c59ac8a4fb95cf61392e7b01, type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8bc6d2782aa136344aca99923113ecd2, type: 3}
 --- !u!4 &2359447992500175635 stripped

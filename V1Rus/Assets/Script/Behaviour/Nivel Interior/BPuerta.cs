@@ -20,7 +20,7 @@ public class BPuerta : MonoBehaviour
     /// Actualiza el estado de la puerta y de la casilla en la que se encuentra
     /// </summary>
     /// <param name="abierta">Nuevo estado</param>
-    public void updateAbierta(bool abierta)
+    public void UpdateAbierta(bool abierta)
     {
         this.abierta = abierta;
         int edge = System.Convert.ToInt32(abierta);
@@ -29,12 +29,13 @@ public class BPuerta : MonoBehaviour
         this.GetComponent<BMuro>().leftEdge = edge;
         this.GetComponent<BMuro>().rightEdge = edge;
         boardScript.UpdateWallsEdges(boardScript.PositionToIndex(this.transform.position), edge, edge, edge, edge);
+        this.transform.Find("Cube").gameObject.SetActive(!abierta);
     }
 
     /// <summary>
     /// Devuelve el estado actual de abierta
     /// </summary>
-    public bool getAbierta()
+    public bool GetAbierta()
     {
         return this.abierta;
     }

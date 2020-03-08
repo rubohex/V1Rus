@@ -13,7 +13,6 @@ public class BHackeo : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        player = GameObject.Find("Player");
     }
 
     // Update is called once per frame
@@ -41,10 +40,10 @@ public class BHackeo : MonoBehaviour
         */
     }
     
-    public void hackeo()
+    public void Hackeo()
     {
-        this.GetComponentInParent<BTerminal>().actualizaInteracciones(this.GetComponentInParent<BTerminal>().getInteracciones() + 1);
-        //player.GetComponent<BPlayer>().ChangeAP(-1);
+        this.GetComponent<BTerminalTesting>().ActualizaInteracciones(this.GetComponentInParent<BTerminalTesting>().GetInteracciones() + 1);
+        this.GetComponent<BTerminalTesting>().GetPlayer().GetComponent<BPlayer>().ChangeAP(-1);
     }
     
 }
