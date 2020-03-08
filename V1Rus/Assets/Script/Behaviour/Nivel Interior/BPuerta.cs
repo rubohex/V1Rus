@@ -4,10 +4,10 @@ using UnityEngine;
 
 public class BPuerta : MonoBehaviour
 {
+    /// Estado de la puerta
     private bool abierta;
     private BBoard boardScript;
     private BGameManager gameManager;
-    // Start is called before the first frame update
 
     public void SetupDoor(BGameManager manager)
     {
@@ -16,28 +16,26 @@ public class BPuerta : MonoBehaviour
         boardScript = manager.GetActiveBoard();
     }
 
-    // Update is called once per frame
-    void Update()
+    /// <summary>
+    /// Actualiza el estado de la puerta y de la casilla en la que se encuentra
+    /// </summary>
+    /// <param name="abierta">Nuevo estado</param>
+    public void updateAbierta(bool abierta)
     {
-        
-    }
-    public void abrir()
-    {
-        abierta = true;
-        this.GetComponent<BMuro>().upEdge = 1;
-        this.GetComponent<BMuro>().downEdge = 1;
-        this.GetComponent<BMuro>().leftEdge = 1;
-        this.GetComponent<BMuro>().rightEdge = 1;
-        boardScript.UpdateWallsEdges(boardScript.PositionToIndex(this.transform.position), 1, 1, 1, 1);
+        this.abierta = abierta;
+        int edge = System.Convert.ToInt32(abierta);
+        this.GetComponent<BMuro>().upEdge = edge;
+        this.GetComponent<BMuro>().downEdge = edge;
+        this.GetComponent<BMuro>().leftEdge = edge;
+        this.GetComponent<BMuro>().rightEdge = edge;
+        boardScript.UpdateWallsEdges(boardScript.PositionToIndex(this.transform.position), edge, edge, edge, edge);
     }
 
-    public void cerrar()
+    /// <summary>
+    /// Devuelve el estado actual de abierta
+    /// </summary>
+    public bool getAbierta()
     {
-        abierta = false;
-        this.GetComponent<BMuro>().upEdge = 0;
-        this.GetComponent<BMuro>().downEdge = 0;
-        this.GetComponent<BMuro>().leftEdge = 0;
-        this.GetComponent<BMuro>().rightEdge = 0;
-        boardScript.UpdateWallsEdges(boardScript.PositionToIndex(this.transform.position), 0, 0, 0, 0);
+        return this.abierta;
     }
 }
