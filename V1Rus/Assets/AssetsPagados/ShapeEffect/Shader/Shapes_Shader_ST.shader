@@ -36,13 +36,20 @@ Shader "Shapes_Shader_Pack"
 		[HideInInspector]_Activate_Target("Activate_Target", Float) = 0
 		[HideInInspector] _texcoord3( "", 2D ) = "white" {}
 
+_Color("Color", Color) = (1,1,1,1)
+		_MainTex("Albedo (RGB)", 2D) = "white" {}
+		_Glossiness("Smoothness", Range(0,1)) = 0.5
+		_Metallic("Metallic", Range(0,1)) = 0.0
+		_DisolutionNoise("Disolution Noise", 2D) = "white" {}
+		_DisolutionValue("DisolutionValue", Range(0, 1)) = 0
+
 	}
 	
 	SubShader
 	{
 		
 		
-		Tags { "RenderType"="Opaque" }
+		Tags { "RenderType"="Transparent" }
 	LOD 0
 
 		CGINCLUDE
@@ -102,6 +109,14 @@ Shader "Shapes_Shader_Pack"
 				float4 ase_texcoord2 : TEXCOORD2;
 			};
 
+			struct VertexOutput {
+				float4 pos : SV_POSITION;
+				float2 uv0 : TEXCOORD0;
+				float4 posWorld : TEXCOORD1;
+				float3 normalDir : TEXCOORD2;
+				UNITY_FOG_COORDS(3)
+			};
+
 			uniform float _ExtrudeUpFaces;
 			uniform sampler2D _DisplacementMask;
 			uniform float _Animation_speed;
@@ -131,6 +146,10 @@ Shader "Shapes_Shader_Pack"
 			uniform float4 _Outline_Color;
 			uniform float _DefaultOutlineOpacity;
 			uniform float _Outline_Opacity;
+
+			uniform sampler2D _DisolutionNoise; uniform float4 _DisolutionNoise_ST;
+			uniform float _DisolutionValue;
+
 			float2 MyCustomExpression146( float3 normal )
 			{
 				float2 uv_matcap = normal *0.5 + float2(0.5,0.5); float2(0.5,0.5);
@@ -260,8 +279,19 @@ Shader "Shapes_Shader_Pack"
 				
 				
 				finalColor = (( _Debug_Mask )?( temp_cast_6 ):( temp_output_58_0 ));
+
+
+
+				float4 _DisolutionTexture_var = tex2D(_DisolutionNoise, TRANSFORM_TEX(i.ase_texcoord, _DisolutionNoise));
+				float node_2717 = step(_DisolutionValue, _DisolutionTexture_var.r);
+				clip(node_2717 - 0.5);
+
+
 				return finalColor;
 			}
+
+
+			
 			ENDCG
 		}
 	}

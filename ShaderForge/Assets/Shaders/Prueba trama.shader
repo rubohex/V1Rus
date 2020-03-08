@@ -57,10 +57,8 @@ Shader "Shader Forge/Prueba trama" {
                 float3 normalDirection = i.normalDir;
                 float3 lightDirection = normalize(_WorldSpaceLightPos0.xyz);
 ////// Lighting:
-                float node_182 = floor(dot(lightDirection,i.normalDir) * _Bands) / (_Bands - 1);
                 float4 _Trama_var = tex2D(_Trama,TRANSFORM_TEX(i.uv0, _Trama));
-                float3 node_983 = saturate(_Trama_var.rgb);
-                float3 finalColor = step((_ValorTrama+saturate((0.5 - 2.0*(node_182-0.5)*(1.0-0.5)))),node_983);
+                float3 finalColor = step((_ValorTrama+saturate((0.5 - 2.0*(floor(dot(lightDirection,i.normalDir) * _Bands) / (_Bands - 1)-0.5)*(1.0-0.5)))),saturate(_Trama_var.rgb));
                 return fixed4(finalColor,1);
             }
             ENDCG
@@ -110,10 +108,8 @@ Shader "Shader Forge/Prueba trama" {
                 float3 normalDirection = i.normalDir;
                 float3 lightDirection = normalize(lerp(_WorldSpaceLightPos0.xyz, _WorldSpaceLightPos0.xyz - i.posWorld.xyz,_WorldSpaceLightPos0.w));
 ////// Lighting:
-                float node_182 = floor(dot(lightDirection,i.normalDir) * _Bands) / (_Bands - 1);
                 float4 _Trama_var = tex2D(_Trama,TRANSFORM_TEX(i.uv0, _Trama));
-                float3 node_983 = saturate(_Trama_var.rgb);
-                float3 finalColor = step((_ValorTrama+saturate((0.5 - 2.0*(node_182-0.5)*(1.0-0.5)))),node_983);
+                float3 finalColor = step((_ValorTrama+saturate((0.5 - 2.0*(floor(dot(lightDirection,i.normalDir) * _Bands) / (_Bands - 1)-0.5)*(1.0-0.5)))),saturate(_Trama_var.rgb));
                 return fixed4(finalColor * 1,0);
             }
             ENDCG

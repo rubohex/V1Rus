@@ -55,6 +55,9 @@ public class ShapeFxPackUI : ShaderGUI
 		MaterialProperty _FrontFace_Intensity = FindProperty("_FrontFace_Intensity");
 		editor.ShaderProperty(_FrontFace_Intensity, MakeLabel(_FrontFace_Intensity));
 
+
+        
+
         /*
 		//--------------------
 
@@ -74,8 +77,8 @@ public class ShapeFxPackUI : ShaderGUI
 
 		//--------------------
         */
-		//LABELS
-		GUILayout.Label("OUTLINE", EditorStyles.helpBox);
+        //LABELS
+        GUILayout.Label("OUTLINE", EditorStyles.helpBox);
 
 		// get properties
 		MaterialProperty _OutlineTex = ShaderGUI.FindProperty("_OutlineTex", properties);
@@ -173,6 +176,14 @@ public class ShapeFxPackUI : ShaderGUI
         MaterialProperty _Debug_Mask = FindProperty("_Debug_Mask");
         editor.ShaderProperty(_Debug_Mask, MakeLabel(_Debug_Mask));
 
-        
+        GUILayout.Label("DISOLUTION", EditorStyles.helpBox);
+
+        MaterialProperty _DisolutionNoise = FindProperty("_DisolutionNoise");
+        editor.ShaderProperty(_DisolutionNoise, MakeLabel(_DisolutionNoise));
+
+        MaterialProperty _DisolutionValue = FindProperty("_DisolutionValue");
+        editor.ShaderProperty(_DisolutionValue, MakeLabel(_DisolutionValue));
+
+
     }
 }
