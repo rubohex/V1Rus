@@ -19,7 +19,8 @@ public class BHackeo : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKey(KeyCode.X)/* && t <= tHack */ && this.GetComponent<BTerminal>().getHackeable() && listo)
+        /*
+        if (Input.GetKey(KeyCode.X)/* && t <= tHack  && this.GetComponent<BTerminal>().getHackeable() && listo)
         {
             t += Time.deltaTime;
             if(t >= tHack)
@@ -37,11 +38,13 @@ public class BHackeo : MonoBehaviour
         {
             listo = true;
         }
+        */
     }
-    /*
-    public void hackeo(BTerminal terminal)
+    
+    public void hackeo()
     {
-
+        this.GetComponentInParent<BTerminal>().actualizaInteracciones(this.GetComponentInParent<BTerminal>().getInteracciones() + 1);
+        //player.GetComponent<BPlayer>().ChangeAP(-1);
     }
-    */
+    
 }

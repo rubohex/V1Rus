@@ -273,7 +273,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 639b16efde9ed884c998e87d6c735b90, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerInfo: {fileID: 11400000, guid: f6d39c23aacbbd2419fa203000203361, type: 2}
   cursorMaterial: {fileID: 2100000, guid: b80e5488df50d964db8d0dd6dff2cf00, type: 2}
   selectedMaterial: {fileID: 2100000, guid: a0ed56b3a7202604aa9ab0e0c7748874, type: 2}
 --- !u!54 &-6602727264786866544

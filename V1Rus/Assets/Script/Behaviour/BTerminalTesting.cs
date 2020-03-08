@@ -36,6 +36,7 @@ public class BTerminalTesting : MonoBehaviour
 
     /// Texto del mesaje de la pantalla
     private string mensaje1;
+    private string mensaje2;
     /// Guarda si la terminal es hackeable o no, ya sea por distancia u otros motivos
     private bool hackeable;
 
@@ -57,11 +58,12 @@ public class BTerminalTesting : MonoBehaviour
 
         pantalla1 = this.transform.Find("Pantalla").gameObject;
 
-        mensaje1 = ("\nNIVEL=" + Nivel + "\n\n" + "INFECTADO\n " + numInteracciones / Nivel * 100 + "%");
+        mensaje1 = ("NIVEL TERMINAL " + Nivel);
+        mensaje2 = ("Proceso " + numInteracciones / Nivel * 100 + "%");
 
         hackeable = false;
 
-        testPantalla = this.transform.Find("CanvasPrueba2/Image").gameObject;
+        testPantalla = this.transform.Find("CanvasPrueba2/Pantalla").gameObject;
         testPantalla.SetActive(false);
 
     }
@@ -70,7 +72,7 @@ public class BTerminalTesting : MonoBehaviour
     {
         pantalla1 = this.transform.Find("Pantalla").gameObject;
 
-        testPantalla = this.transform.Find("CanvasPrueba2/Image").gameObject;
+        testPantalla = this.transform.Find("CanvasPrueba2/Pantalla").gameObject;
         testPantalla.SetActive(false);
     }
     
@@ -111,7 +113,8 @@ public class BTerminalTesting : MonoBehaviour
             {
                 hackeable = false;
             }
-            this.transform.Find("CanvasPrueba2/Image/TextTest").GetComponent<Text>().text = mensaje1;
+            this.transform.Find("CanvasPrueba2/Pantalla/Textos/TextTest1").GetComponent<Text>().text = mensaje1;
+            this.transform.Find("CanvasPrueba2/Pantalla/Textos/TextTest2").GetComponent<Text>().text = mensaje2;
         }
     }
     private void OnTriggerExit(Collider other)
@@ -133,7 +136,9 @@ public class BTerminalTesting : MonoBehaviour
     public void actualizaInteracciones(int interacciones)
     {
         this.numInteracciones = interacciones;
-        this.mensaje1 = ("\nNIVEL=" + this.Nivel + "\n\n" + "INFECTADO\n " + (((float)interacciones / (float)this.Nivel) * 100) + "%");
+
+        this.mensaje1 = ("NIVEL TERMINAL " + this.Nivel);
+        this.mensaje2 = ("Proceso " + (((float)interacciones / (float)this.Nivel) * 100) + "%");
     }
 
     /// <summary>
