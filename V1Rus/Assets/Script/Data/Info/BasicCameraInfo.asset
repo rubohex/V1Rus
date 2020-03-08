@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: BasicCameraInfo
   m_EditorClassIdentifier: 
   cameraSpeed: 20
-  rotationTime: 2
-  closeZoomClamp: 3
-  farZoomClamp: 8
+  rotationTime: 1
+  closeZoomClamp: 10
+  farZoomClamp: 10
   rotateLeft: 101
   rotateRight: 113
   moveUp: 273
