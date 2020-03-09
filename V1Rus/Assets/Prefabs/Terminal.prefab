@@ -1028,10 +1028,9 @@ GameObject:
   - component: {fileID: 4978695485263253525}
   - component: {fileID: 4978695485263253522}
   - component: {fileID: 4978695485263253523}
-  - component: {fileID: 4978695485263253524}
   - component: {fileID: 1778653582}
+  - component: {fileID: 4978695485263253524}
   - component: {fileID: 2933559153333140920}
-  - component: {fileID: 729799691}
   - component: {fileID: 559705522}
   m_Layer: 0
   m_Name: Terminal
@@ -1106,23 +1105,6 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!114 &4978695485263253524
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4978695485263253521}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6bff985239ece44cb9d1bda04f34b495, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  hackAction: 1
-  objetoHackeado:
-  - {fileID: 0}
-  - {fileID: 0}
-  Nivel: 1
 --- !u!65 &1778653582
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1136,6 +1118,25 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1.326793, y: 2, z: 1.247966}
   m_Center: {x: 0.013602614, y: 1, z: 0.011030674}
+--- !u!114 &4978695485263253524
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4978695485263253521}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6bff985239ece44cb9d1bda04f34b495, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hackAction: 1
+  objetoHackeado:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  Nivel: 2
 --- !u!114 &2933559153333140920
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1152,19 +1153,6 @@ MonoBehaviour:
   leftEdge: 0
   rightEdge: 0
   downEdge: 0
---- !u!114 &729799691
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4978695485263253521}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bfe4ddd6c1b1de84a99dca43687d168c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Nivel: 2
 --- !u!114 &559705522
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1421,6 +1409,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 4978695485263253525}
     m_Modifications:
+    - target: {fileID: -927199367670048503, guid: 8bc6d2782aa136344aca99923113ecd2,
+        type: 3}
+      propertyPath: m_Name
+      value: Terminal
+      objectReference: {fileID: 0}
     - target: {fileID: -4216859302048453862, guid: 8bc6d2782aa136344aca99923113ecd2,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -1490,11 +1483,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalScale.z
       value: 50
-      objectReference: {fileID: 0}
-    - target: {fileID: -927199367670048503, guid: 8bc6d2782aa136344aca99923113ecd2,
-        type: 3}
-      propertyPath: m_Name
-      value: Terminal
       objectReference: {fileID: 0}
     - target: {fileID: -157825318150610632, guid: 8bc6d2782aa136344aca99923113ecd2,
         type: 3}

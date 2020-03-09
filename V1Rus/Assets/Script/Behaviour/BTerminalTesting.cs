@@ -6,6 +6,7 @@ using TMPro;
 
 public class BTerminalTesting : MonoBehaviour
 {
+    /*
     #region Atributos
 
     /// <summary>
@@ -183,4 +184,5 @@ public class BTerminalTesting : MonoBehaviour
     {
         return gameManager.GetActviePlayer().gameObject;
     }
+    */
 }

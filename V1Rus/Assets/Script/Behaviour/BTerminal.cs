@@ -1,126 +1,186 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using TMPro;
 
 public class BTerminal : MonoBehaviour
 {
     #region Atributos
 
+    /// <summary>
+    /// Enumerado para definir la accion que se realizará al hackear
+    /// </summary>
     public enum EAccionHack
     {
         Ability,
         Door,
     }
-
+    /// <summary>
+    /// </summary>
+    /// Guardamos la acción realizada al hackear
     public EAccionHack hackAction;
+    /// <summary>
+    /// Guardamos el array de objetos sobre los que se realizará la acción del hackeo
+    /// </summary>
     public GameObject[] objetoHackeado;
 
+    /// Lugar que ocupará la pantalla de la terminal
     private GameObject pantalla1;
-    private GameObject pantalla2;
-    private GameObject camara;
-    private Vector3 direccionPantalla;
-    private Quaternion cuaternion;
-    private float giroY;
-    private float giroX;
-    private Vector2 orientacion_camera_y;
-    private Vector2 orientacion_camera_x;
+
+    /// <summary>
+    /// Número de interacciones necesarias para hackear
+    /// </summary>
     public int Nivel;
+    /// Contador de las interacciones realizadas
     private int numInteracciones;
-    private TextMeshPro texto1;
-    private TextMeshPro texto2;
+
+    /// Textos del mesaje de la pantalla
     private string mensaje1;
     private string mensaje2;
+    /// Guarda si la terminal es hackeable o no, ya sea por distancia u otros motivos
     private bool hackeable;
 
+    /// Pantalla de la terminal (todavía en pruebas)
+    private GameObject testPantalla;
+
+    private BGameManager gameManager;
+
+    /// Guarda si la terminal está activa en el nivel global
+    private bool active = false;
     #endregion
 
 
-    // Start is called before the first frame update
-    void Start()
+    public void SetupTerminal(BGameManager manager)
     {
-        pantalla1 = GameObject.Find("Pantalla1");
-        camara = GameObject.Find("Main Camera");
-        texto1 = GameObject.Find("Text1").GetComponent<TextMeshPro>();
-        texto2 = GameObject.Find("Text2").GetComponent<TextMeshPro>();
-        pantalla1.SetActive(false);
-        mensaje1 = ("\nNIVEL=" + Nivel + "\n\n" + "INFECTADO\n " + numInteracciones/Nivel*100 + "%");
-        mensaje2= ("Proceso Hackeo\n" + "Interacciones necesarias: \n " + Nivel + "\nInteracciones actuales: " + numInteracciones);
+        active = true;
+
+        gameManager = manager;
+
+        pantalla1 = this.transform.Find("Pantalla").gameObject;
+
+        mensaje1 = ("NIVEL TERMINAL " + Nivel);
+        mensaje2 = ("Proceso " + numInteracciones / Nivel * 100 + "%");
+
         hackeable = false;
 
+        testPantalla = this.transform.Find("CanvasPrueba2/Pantalla").gameObject;
+        testPantalla.SetActive(false);
+
+        objetoHackeado = this.GetComponent<BTerminal>().objetoHackeado;
+        hackAction = EAccionHack.Door;
+    }
+
+    void Start()
+    {
+        pantalla1 = this.transform.Find("Pantalla").gameObject;
+
+        testPantalla = this.transform.Find("CanvasPrueba2/Pantalla").gameObject;
+        testPantalla.SetActive(false);
     }
 
     // Update is called once per frame
     void Update()
     {
-        direccionPantalla = (camara.transform.position - pantalla1.transform.position);
-        orientacion_camera_y = new Vector2(direccionPantalla[0], direccionPantalla[2]);
-        orientacion_camera_x = new Vector2(direccionPantalla[1], direccionPantalla[2]);
-        giroY = Vector2.Angle(orientacion_camera_y,new Vector2(0, -1));
+        if (active)
+        {
+            if (numInteracciones == Nivel)
+            {
+                AccionTrasHackear();
+                transform.Find("CanvasPrueba2/Pantalla/Boton").GetComponent<Button>().interactable = false;
+                //System.Array.Reverse(this.GetComponent<MeshRenderer>().materials);
+            }
 
-        if(camara.transform.position.x<=this.transform.position.x){
-            //giroY se queda igual
-        }
-        else{
-            giroY = -giroY;
-        }
+            // Actualiza la posición de la pantalla en el canvas
+            BBoard board = gameManager.GetActiveBoard();
+            Camera cam = board.GetCamera().GetComponent<Camera>();
+            Vector3 newPos = cam.WorldToScreenPoint(pantalla1.transform.position);
+            testPantalla.transform.position = newPos;
 
-        giroX = Vector3.Angle(direccionPantalla, new Vector3(0,1,0));
-        pantalla1.transform.eulerAngles = new Vector3(-giroX, giroY, 0);
-
-        if(numInteracciones==Nivel){
-            accionTrasHackear();
+            // Actualiza la escala de la pantalla para simular la perspectiva
+            float dist = Vector3.Distance(cam.transform.position, this.transform.position);
+            testPantalla.transform.localScale = Vector3.one / dist * 10f;
         }
 
     }
-
-    private void OnTriggerStay  (Collider other)
+    /// Mientras el jugador esté al lado de la terminal se muestra la pantalla y se actualiza el texto
+    private void OnTriggerStay(Collider other)
     {
-        if(other.gameObject.name=="Player"){
-            texto1.text = mensaje1;
-            texto2.text = mensaje2;
-            pantalla1.SetActive(true);
-            if (this.numInteracciones<this.Nivel){
+        if (other.gameObject.name.Contains("Player"))
+        {
+            testPantalla.SetActive(true);
+            if (this.numInteracciones < this.Nivel)
+            {
                 hackeable = true;
             }
-            else{
+            else
+            {
                 hackeable = false;
             }
+            this.transform.Find("CanvasPrueba2/Pantalla/Textos/TextTest1").GetComponent<Text>().text = mensaje1;
+            this.transform.Find("CanvasPrueba2/Pantalla/Textos/TextTest2").GetComponent<Text>().text = mensaje2;
         }
     }
     private void OnTriggerExit(Collider other)
     {
-        if (other.gameObject.name == "Player")
+        if (other.gameObject.name.Contains("Player"))
         {
             pantalla1.SetActive(false);
+            testPantalla.SetActive(false);
+
             hackeable = false;
 
         }
     }
 
-    public void actualizaInteracciones(int interacciones){
+    /// <summary>
+    /// Actualiza el numero de interacciones realizadas
+    /// </summary>
+    /// <param name="interacciones">Nuevo número de actualizaciones</param>
+    public void ActualizaInteracciones(int interacciones)
+    {
         this.numInteracciones = interacciones;
-        this.mensaje1=("\nNIVEL=" + this.Nivel + "\n\n" + "INFECTADO\n " + (((float)interacciones / (float)this.Nivel) * 100) + "%");
-        this.mensaje2=("Proceso Hackeo\n" + "Interacciones necesarias: \n " + Nivel + "\nInteracciones actuales: " + this.numInteracciones);
+
+        this.mensaje1 = ("NIVEL TERMINAL " + this.Nivel);
+        this.mensaje2 = ("Proceso " + (((float)interacciones / (float)this.Nivel) * 100) + "%");
     }
 
-    public int getInteracciones(){
+    /// <summary>
+    /// Devuelve el número de interacciones
+    /// </summary>
+    /// <returns>
+    /// Int con el numero de interacciones
+    /// </returns>
+    public int GetInteracciones()
+    {
         return this.numInteracciones;
     }
 
-    public bool getHackeable()
+    /// <summary>
+    /// Devuelve el estado de la terminal
+    /// </summary>
+    /// <returns>
+    /// Bool con el estado de si es o no hackeable
+    /// </returns>
+    public bool GetHackeable()
     {
         return this.hackeable;
     }
 
-    private void accionTrasHackear(){
-        if(hackAction == EAccionHack.Door)
+    /// Acción que se realiza al ser hackeada
+    private void AccionTrasHackear()
+    {
+        if (hackAction == EAccionHack.Door)
         {
-            foreach(GameObject p in objetoHackeado)
+            foreach (GameObject p in objetoHackeado)
             {
                 p.GetComponent<BPuerta>().UpdateAbierta(true);
             }
         }
     }
 
+    public GameObject GetPlayer()
+    {
+        return gameManager.GetActviePlayer().gameObject;
+    }
 }

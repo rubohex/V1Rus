@@ -42,8 +42,8 @@ public class BHackeo : MonoBehaviour
     
     public void Hackeo()
     {
-        this.GetComponent<BTerminalTesting>().ActualizaInteracciones(this.GetComponentInParent<BTerminalTesting>().GetInteracciones() + 1);
-        this.GetComponent<BTerminalTesting>().GetPlayer().GetComponent<BPlayer>().ChangeAP(-1);
+        this.GetComponent<BTerminal>().ActualizaInteracciones(this.GetComponentInParent<BTerminal>().GetInteracciones() + 1);
+        this.GetComponent<BTerminal>().GetPlayer().GetComponent<BPlayer>().ChangeAP(-1);
     }
     
 }
