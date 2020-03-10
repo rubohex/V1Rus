@@ -9,6 +9,10 @@ public class BPuerta : MonoBehaviour
     private BBoard boardScript;
     private BGameManager gameManager;
 
+    public void Start()
+    {
+        this.transform.Find("Sphere").gameObject.SetActive(false);
+    }
     public void SetupDoor(BGameManager manager)
     {
         abierta = false;
