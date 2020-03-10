@@ -1,34 +1,32 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿
+//Script name : CustomList.cs
 using UnityEngine;
+using System;
+using System.Collections.Generic; // Import the System.Collections.Generic class to give us access to List<>
 
 public class BEventPoint : MonoBehaviour
 {
-    public GameObject FrontTarget;
-    public GameObject BackTarget;
-    public GameObject RightTarget;
-    public GameObject LeftTarget;
 
-    // Diccionario con los objetivos (Event Points) por defecto en cada dirección
-    public Dictionary<string, GameObject> Targets = new Dictionary<string, GameObject>();
-
-    public void Awake()
+    //This is our custom class with our variables
+    [System.Serializable]
+    public class MyClass
     {
-        Targets.Add("Front", FrontTarget);
-        Targets.Add("Back", BackTarget);
-        Targets.Add("Left", LeftTarget);
-        Targets.Add("Right", RightTarget);
+        public GameObject[] Path = new GameObject[0];
     }
 
-    // Start is called before the first frame update
-    void Start()
+    //This is our list we want to use to represent our class as an array.
+    public List<MyClass> MyList = new List<MyClass>(1);
+
+
+    void AddNew()
     {
-        
+        //Add a new index position to the end of our list
+        MyList.Add(new MyClass());
     }
 
-    // Update is called once per frame
-    void Update()
+    void Remove(int index)
     {
-        
+        //Remove an index position from our list at a point in our list array
+        MyList.RemoveAt(index);
     }
 }

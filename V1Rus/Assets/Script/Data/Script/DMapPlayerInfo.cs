@@ -16,6 +16,7 @@ public class DMapPlayerInfo : ScriptableObject
 
     [Header("Teclas control")]
 
+    public KeyCode movement = KeyCode.Space;
     /// <sumary>
     /// Codigo de tecla para mover hacia la Izquierda
     /// </sumary>

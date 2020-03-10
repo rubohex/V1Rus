@@ -11,21 +11,18 @@ public class BMapPlayer : MonoBehaviour
     /// Datos de la Camara
     public DMapPlayerInfo mapPlayerInfo;
 
-    /// Codigo de tecla para mover a la izquierda
-    private KeyCode moveLeft;
-    /// Codigo de tecla para mover a la derecha
-    private KeyCode moveRight;
-    /// Codigo de tecla para mover hacia adelante
-    private KeyCode moveFront;
-    /// Codigo de tecla para mover hacia atrás
-    private KeyCode moveBack;
+    ///Movierse hacia el EventPoint Seleccionado
+    private KeyCode movement;
 
     /// Tester para ver si se puede mover hacia adelante
     public bool CanMove = true;
 
     /// El EventPoint actual en el que se situa
-    public GameObject CurrentEventpoint;
-    public GameObject NewEventPoint;
+    public GameObject currentEventpoint;
+    public GameObject targetEventPoint;
+    public GameObject selectedEventPoint;
+    private GameObject[] currentPath;
+    private int pathPos;
 
     private Vector3 desplazamiento = Vector3.zero;
 
@@ -33,14 +30,19 @@ public class BMapPlayer : MonoBehaviour
     private string Direction = "null";
     private string PrevDirection = "Front";
 
+    //Es posible ir al EventPoint Seleccionado no
+    private bool canGoToEP;
+
     /// Tiempo total del movimiento del muelle
     float lerpTime = 5f;
     /// Tiempo que lleva desplazandose en el movimiento del muelle
     float currentLerpTime;
 
-    // Diccionario con los objetivos (Event Points) por defecto en cada dirección
-    public Dictionary<string, GameObject> Targets = new Dictionary<string, GameObject>();
+    
 
+    // Diccionario con los objetivos (Event Points) por defecto en cada dirección
+    public Dictionary<GameObject, int> Targets = new Dictionary<GameObject, int>();
+    public Dictionary<string, List<GameObject>> Paths = new Dictionary<string, List<GameObject>>();
     public enum ECord
     {
         XY,
@@ -54,136 +56,110 @@ public class BMapPlayer : MonoBehaviour
 
     private void Awake()
     {
-        moveLeft = mapPlayerInfo.moveLeft;
-        moveRight = mapPlayerInfo.moveRight;
-        moveFront = mapPlayerInfo.moveFront;
-        moveBack = mapPlayerInfo.moveBack;
+        movement = mapPlayerInfo.movement;
         lerpTime = mapPlayerInfo.moveTime;
+        pathPos = 0;
 
-        
     }
     // Start is called before the first frame update
     void Start()
     {
-        Targets = CurrentEventpoint.gameObject.GetComponent<BEventPoint>().Targets;
+        Targets = GetTargets(currentEventpoint.gameObject.GetComponent<BEventPoint>().MyList);
     }
-    
+
 
     // Update is called once per frame
     void Update()
     {
-
-        //Control de movimiento hacia adelante
-        if (Input.GetKey(moveFront) && (CanMove || Direction == "Front"))
+        RaycastHit hitInfo = new RaycastHit();
+        if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hitInfo) && hitInfo.transform.tag == "EventPoint")
         {
-            if (Direction != "Front")
+            targetEventPoint = hitInfo.transform.gameObject;
+            if (Targets.ContainsKey(targetEventPoint))
             {
-                RestartMovement("Front");
+                print("Se puede ir aquí");
+                canGoToEP = true;
             }
-            CanMove = false;
-        }
-        //Control de movimiento hacia atrás
-        else if (Input.GetKey(moveBack) && (CanMove || Direction == "Back"))
-        {
-            if (Direction != "Back")
+            else
             {
-                RestartMovement("Back");
+                print("No se puede ir aquí");
+                canGoToEP = false;
             }
-            CanMove = false;
-        }
-        //Control de movimiento hacia la izquierda
-        else if (Input.GetKey(moveLeft) && (CanMove || Direction == "Left"))
-        {
-            if (Direction != "Left")
+            if (Input.GetMouseButtonDown(0) && canGoToEP)
             {
-                RestartMovement("Left");
+                if (selectedEventPoint == targetEventPoint)
+                {
+                    selectedEventPoint = null;
+                }
+                else
+                {
+                    
+                    selectedEventPoint = targetEventPoint;
+                    currentPath = currentEventpoint.GetComponent<BEventPoint>().MyList[Targets[selectedEventPoint]].Path;
+                }
             }
-            CanMove = false;
-        }
-        //Control de movimiento hacia la derecha
-        else if (Input.GetKey(moveRight) && (CanMove || Direction == "Right"))
-        {
-            if (Direction != "Right")
-            {
-                RestartMovement("Right");
-            }
-            CanMove = false;
-        }
-        else
-        {
-            transform.position = CurrentEventpoint.transform.position;
-            currentLerpTime = 0f;
-            CanMove = true;
-            desplazamiento = Vector3.zero;
-            NewEventPoint = Targets[PrevDirection];
         }
 
-        //Desplazamiento
-        if (!CanMove && NewEventPoint != null)
+        if (Input.GetKey(movement))
         {
-            Move(CurrentEventpoint.transform.position + desplazamiento, NewEventPoint.transform.position);
-        }    
+            if (Targets.ContainsKey(selectedEventPoint) && currentPath != null)
+            {
+                if (pathPos == 0)
+                {
+                    Move(currentEventpoint.transform.position, currentPath[pathPos].transform.position);
+                }
+                else
+                {
+                    Move(currentPath[pathPos-1].transform.position, currentPath[pathPos].transform.position);
+                }
+            }
+        }
 
     }
 
     #endregion
 
+
     void Move(Vector3 startPos, Vector3 endPos)
     {
+        lerpTime = Vector3.Distance(startPos, endPos) / 5f;
         currentLerpTime += Time.deltaTime;
         if (currentLerpTime > lerpTime)
         {
             currentLerpTime = lerpTime;
-            CurrentEventpoint = NewEventPoint;
-            Targets = CurrentEventpoint.gameObject.GetComponent<BEventPoint>().Targets;
         }
 
         float t = currentLerpTime / lerpTime;
-        t = Mathf.Sin(t * Mathf.PI * 0.5f);
         transform.position = Vector3.Lerp(startPos, endPos, t);
 
-        
-    }
-
-    private void RestartMovement(string dir)
-    {
-        transform.position = CurrentEventpoint.transform.position;
-        //currentLerpTime = 0f;
-        PrevDirection = dir;
-        Direction = dir;
-        NewEventPoint = Targets[dir];
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        GameObject col = other.gameObject;
-        if (col.GetComponent<BJunction>() != null)
+        if (currentLerpTime >= lerpTime)
         {
-            if (Direction != "Front" && Input.GetKey(moveFront) && col.GetComponent<BJunction>().Targets["Front"])
+            if (pathPos >= currentPath.Length - 1)
             {
-                DestinationChange("Front", col);
+                currentEventpoint = selectedEventPoint;
+                Targets = GetTargets(currentEventpoint.gameObject.GetComponent<BEventPoint>().MyList);
+                pathPos = 0;
+                currentLerpTime = 0f;
+                currentPath = null;
             }
-            else if (Direction != "Back" && Input.GetKey(moveBack) && col.GetComponent<BJunction>().Targets["Back"])
+            else
             {
-                DestinationChange("Back", col);
-            }
-            else if (Direction != "Left" && Input.GetKey(moveLeft) && col.GetComponent<BJunction>().Targets["Left"])
-            {
-                DestinationChange("Left", col);
-            }
-            else if (Direction != "Right" && Input.GetKey(moveRight) && col.GetComponent<BJunction>().Targets["Right"])
-            {
-                DestinationChange("Right", col);
+                pathPos += 1;
+                currentLerpTime = 0f;
             }
         }
+
     }
 
-    private void DestinationChange(string dir, GameObject col)
+    private Dictionary<GameObject, int> GetTargets(List<BEventPoint.MyClass> ItemGroups)
     {
-        Direction = dir;
-        desplazamiento = col.transform.position - CurrentEventpoint.transform.position;
-        NewEventPoint = col.GetComponent<BJunction>().Targets[Direction];
-        currentLerpTime = 0f;
+        int j = 0;
+        Dictionary<GameObject, int>  targets = new Dictionary<GameObject, int>();
+        foreach (BEventPoint.MyClass i in ItemGroups)
+        {
+            targets.Add(i.Path[i.Path.Length - 1],j);
+            j += 1;
+        }
+        return targets;
     }
-
 }
