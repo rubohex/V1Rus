@@ -75,7 +75,7 @@ public class BPuerta : MonoBehaviour
         this.GetComponent<BMuro>().downEdge = 1;
         this.GetComponent<BMuro>().leftEdge = 1;
         this.GetComponent<BMuro>().rightEdge = 1;
-
+        
         int dir = indexSigPuerta - indexSuelo;
         if(dir == 1)
         {
