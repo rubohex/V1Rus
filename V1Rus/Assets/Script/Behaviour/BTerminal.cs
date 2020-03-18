@@ -87,6 +87,7 @@ public class BTerminal : MonoBehaviour
             if (numInteracciones == Nivel && hackeable)
             {
                 AccionTrasHackear();
+                hackeable = false;
                 transform.Find("CanvasPrueba2/Pantalla/Boton").GetComponent<Button>().interactable = hackeable;
                 //System.Array.Reverse(this.GetComponent<MeshRenderer>().materials);
             }
