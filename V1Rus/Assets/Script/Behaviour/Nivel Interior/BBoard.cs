@@ -651,6 +651,7 @@ public class BBoard : MonoBehaviour
             edges[index][auxIndex] = rightEdge;
             edges[auxIndex][index] = rightEdge;
         }
+        SetBorderEdges();
     }
 
     /// <summary>

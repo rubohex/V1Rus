@@ -24,6 +24,7 @@ public class BPuerta : MonoBehaviour
         boardScript = manager.GetActiveBoard();
 
         setEdges(boardScript, abierta);
+        
     }
 
     /// <summary>
@@ -36,8 +37,6 @@ public class BPuerta : MonoBehaviour
 
         setEdges(boardScript, abierta);
         this.transform.Find("Cube").gameObject.SetActive(!abierta);
-
-        
     }
 
     /// <summary>
@@ -67,31 +66,42 @@ public class BPuerta : MonoBehaviour
 
         int edge = System.Convert.ToInt32(abierta);
 
+        int up = 1;
+        int down = 1;
+        int left = 1;
+        int rigth = 1;
+
         this.GetComponent<BMuro>().upEdge = 1;
         this.GetComponent<BMuro>().downEdge = 1;
         this.GetComponent<BMuro>().leftEdge = 1;
         this.GetComponent<BMuro>().rightEdge = 1;
-
-
+        
         int dir = indexSigPuerta - indexSuelo;
         if(dir == 1)
         {
             this.GetComponent<BMuro>().rightEdge = edge;
-        }else if(dir == -1)
+            rigth = edge;
+        }
+        else if(dir == -1)
         {
             this.GetComponent<BMuro>().leftEdge = edge;
+            left = edge;
 
-        }else if(dir > 1)
+        }
+        else if(dir > 1)
         {
             this.GetComponent<BMuro>().upEdge = edge;
-        }else if(dir < -1)
+            up = edge;
+        }
+        else if(dir < -1)
         {
             this.GetComponent<BMuro>().downEdge = edge;
+            down = edge;
         }
 
         if (active /*TODO desactivar o comprobar board activo*/)
         {
-            boardScript.UpdateWallsEdges(boardScript.PositionToIndex(this.transform.position), this.GetComponent<BMuro>().upEdge, this.GetComponent<BMuro>().leftEdge, this.GetComponent<BMuro>().downEdge, this.GetComponent<BMuro>().rightEdge);
+            boardScript.UpdateWallsEdges(boardScript.PositionToIndex(this.transform.position), up, left, down, rigth);
             string bordes = this.GetComponent<BMuro>().upEdge.ToString() + this.GetComponent<BMuro>().downEdge.ToString() + this.GetComponent<BMuro>().leftEdge.ToString() + this.GetComponent<BMuro>().rightEdge.ToString();
             print(bordes);
         }
