@@ -23,7 +23,7 @@ public class BPuerta : MonoBehaviour
         gameManager = manager;
         boardScript = manager.GetActiveBoard();
 
-        setEdges(boardScript, abierta);
+        setEdges(abierta);
     }
 
     /// <summary>
@@ -34,10 +34,9 @@ public class BPuerta : MonoBehaviour
     {
         this.abierta = abierta;
 
-        setEdges(boardScript, abierta);
-        this.transform.Find("Cube").gameObject.SetActive(!abierta);
+        setEdges(abierta);
 
-        
+        transform.Find("Cube").gameObject.SetActive(!abierta);
     }
 
     /// <summary>
@@ -51,12 +50,11 @@ public class BPuerta : MonoBehaviour
     /// <summary>
     /// Establece los bordes de la puerta de forma automática
     /// </summary>
-    /// <param name="activeBoard">Tablero activo</param>
     /// <param name="abierta">Estado de abierta</param>
-    private void setEdges(BBoard activeBoard, bool abierta)
+    private void setEdges(bool abierta)
     {
-        Vector3 posCentro = this.transform.position;
-        Vector3 posPuerta = this.transform.Find("Cube/Suelo").transform.position;
+        Vector3 posCentro = transform.position;
+        Vector3 posPuerta = transform.Find("Cube/Suelo").transform.position;
         Vector3 dirPuerta = (posPuerta - posCentro).normalized;
 
 
@@ -65,35 +63,29 @@ public class BPuerta : MonoBehaviour
         int indexSuelo = boardScript.PositionToIndex(this.transform.position);
         int indexSigPuerta = boardScript.PositionToIndex(this.transform.position + dirPuerta);
 
-        int edge = System.Convert.ToInt32(abierta);
-
-        this.GetComponent<BMuro>().upEdge = 1;
-        this.GetComponent<BMuro>().downEdge = 1;
-        this.GetComponent<BMuro>().leftEdge = 1;
-        this.GetComponent<BMuro>().rightEdge = 1;
-
+        int edge = Convert.ToInt32(abierta);
 
         int dir = indexSigPuerta - indexSuelo;
-        if(dir == 1)
-        {
-            this.GetComponent<BMuro>().rightEdge = edge;
-        }else if(dir == -1)
-        {
-            this.GetComponent<BMuro>().leftEdge = edge;
 
-        }else if(dir > 1)
+        if (active)
         {
-            this.GetComponent<BMuro>().upEdge = edge;
-        }else if(dir < -1)
-        {
-            this.GetComponent<BMuro>().downEdge = edge;
-        }
+            if (dir == 1)
+            {
+                boardScript.UpdateWallsEdges(indexSuelo, rightEdge: edge);
+            }
+            else if (dir == -1)
+            {
+                boardScript.UpdateWallsEdges(indexSuelo, leftEdge: edge);
 
-        if (active /*TODO desactivar o comprobar board activo*/)
-        {
-            boardScript.UpdateWallsEdges(boardScript.PositionToIndex(this.transform.position), this.GetComponent<BMuro>().upEdge, this.GetComponent<BMuro>().leftEdge, this.GetComponent<BMuro>().downEdge, this.GetComponent<BMuro>().rightEdge);
-            string bordes = this.GetComponent<BMuro>().upEdge.ToString() + this.GetComponent<BMuro>().downEdge.ToString() + this.GetComponent<BMuro>().leftEdge.ToString() + this.GetComponent<BMuro>().rightEdge.ToString();
-            print(bordes);
+            }
+            else if (dir > 1)
+            {
+                boardScript.UpdateWallsEdges(indexSuelo, upEdge: edge);
+            }
+            else if (dir < -1)
+            {
+                boardScript.UpdateWallsEdges(indexSuelo, downEdge: edge);
+            }
         }
     }
 

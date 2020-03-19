@@ -174,6 +174,12 @@ public class BPlayer : MonoBehaviour
             // Temporal
             RestartPath();
         }
+
+        //Temporal activacion de recogerDatos hasta que tengamos la habilidad util para pruebas
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            recogerCable = !recogerCable;
+        }
     }
 
     void FixedUpdate(){
@@ -196,7 +202,7 @@ public class BPlayer : MonoBehaviour
                         RestartPath();
 
                         // Calculamos el camino
-                        path.AddRange(board.AStarAlgorithm(path[path.Count - 1], actualHit, recogerCable, false));
+                        path.AddRange(board.AStarAlgorithm(path[path.Count - 1], actualHit, false));
 
                         // Dibujamos el camino
                         DrawPath();
@@ -220,12 +226,6 @@ public class BPlayer : MonoBehaviour
             path.ForEach(tile => board.ResetMaterial(tile));
             previousHit = -1;
             path.Clear();
-        }
-
-        //Temporal activacion de recogerDatos hasta que tengamos la habilidad util para pruebas
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            recogerCable = !recogerCable;
         }
     }
 
@@ -319,8 +319,6 @@ public class BPlayer : MonoBehaviour
         // Informamos de que el jugador se esta moviendo
         isMoving = true;
 
-        bool enemyFinish = true;
-
         board.ResetMaterial(path[0]);
 
         for (int i = 0; i < path.Count - 1; i++)
@@ -349,7 +347,15 @@ public class BPlayer : MonoBehaviour
                 // Llamamos a la corutina para que se encargue del movimiento
                 yield return StartCoroutine(MoveOverTimeCoroutine(this.gameObject, moveTime, transform.position, board.IndexToPosition(objectiveIndex, gameObject)));
 
-                board.ResetMaterial(objectiveIndex);
+                if(i == path.Count - 2)
+                {
+                    board.RemoveMaterial(objectiveIndex, selectedMaterial);
+                }
+                else
+                {
+                    board.RemoveMaterial(objectiveIndex, cursorMaterial);
+                }
+                
 
                 // Miramos si la casilla en la que entramos tiene particuals de datos o no esto lo podemos ver con el coste
                 if (cost > 0)

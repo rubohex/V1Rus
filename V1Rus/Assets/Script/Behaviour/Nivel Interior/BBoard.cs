@@ -618,11 +618,11 @@ public class BBoard : MonoBehaviour
     /// <param name="leftEdge"> Eje izquierdo de la casilla</param>
     /// <param name="downEdge"> Eje inferior de la casilla</param>
     /// <param name="rightEdge"> Eje derecho de la casilla</param>
-    public void UpdateWallsEdges(int index, int upEdge, int leftEdge, int downEdge, int rightEdge)
+    public void UpdateWallsEdges(int index, int upEdge = -2, int leftEdge = -2, int downEdge = -2, int rightEdge = -2)
     {
 
         int auxIndex = index + indexDirections["Up"];
-        if (locations.ContainsKey(auxIndex))
+        if (locations.ContainsKey(auxIndex) && upEdge != -2)
         {
             edges[index][auxIndex] = upEdge;
             edges[auxIndex][index] = upEdge;
@@ -630,7 +630,7 @@ public class BBoard : MonoBehaviour
 
         // Al sumarle uno obtenemos la casilla al oeste
         auxIndex = index + indexDirections["Left"];
-        if (locations.ContainsKey(auxIndex))
+        if (locations.ContainsKey(auxIndex) && leftEdge != -2)
         {
             edges[index][auxIndex] = leftEdge;
             edges[auxIndex][index] = leftEdge;
@@ -638,7 +638,7 @@ public class BBoard : MonoBehaviour
 
         // Al restar size1 obtenemos la casilla al sur
         auxIndex = index + indexDirections["Down"];
-        if (locations.ContainsKey(auxIndex))
+        if (locations.ContainsKey(auxIndex) && downEdge != -2)
         {
             edges[index][auxIndex] = downEdge;
             edges[auxIndex][index] = downEdge;
@@ -646,7 +646,7 @@ public class BBoard : MonoBehaviour
 
         // Al restar 1 obtenemos la casilla al este
         auxIndex = index + indexDirections["Right"];
-        if (locations.ContainsKey(auxIndex))
+        if (locations.ContainsKey(auxIndex) && rightEdge != -2)
         {
             edges[index][auxIndex] = rightEdge;
             edges[auxIndex][index] = rightEdge;
@@ -861,7 +861,7 @@ public class BBoard : MonoBehaviour
     /// <param name="activeAbility"> Booleano que nos indica si la abilidad de recoger codigo esta activa</param>
     /// <param name="AP"> Float indica la cantidad de ap que tiene el jugador</param>
     /// <returns> Una Lista con los indices desde objective hasta start</returns>
-    public List<int> AStarAlgorithm(int start, int objective, bool activeAbility = false, bool id = true)
+    public List<int> AStarAlgorithm(int start, int objective, bool id = true)
     {
         Dictionary<int, float> openSet = new Dictionary<int, float>();
 
@@ -897,7 +897,7 @@ public class BBoard : MonoBehaviour
             foreach (int neighbor in neighbours)
             {
 
-                float neighborGScore = gScore[current] + CostToEnter(current, neighbor, activeAbility);
+                float neighborGScore = gScore[current] + CostToEnter(current, neighbor, false);
 
                 if (neighborGScore != Mathf.Infinity && (!gScore.ContainsKey(neighbor) || neighborGScore < gScore[neighbor]))
                 {
@@ -906,7 +906,7 @@ public class BBoard : MonoBehaviour
                     fScore[neighbor] = gScore[neighbor] + Heuristic(neighbor, objective);
                     if (!openSet.ContainsKey(neighbor))
                     {
-                        openSet.Add(neighbor, neighborGScore);
+                        openSet.Add(neighbor, fScore[neighbor]);
                     }
                 }
             }
