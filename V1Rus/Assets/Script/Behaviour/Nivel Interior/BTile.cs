@@ -22,17 +22,15 @@ public class BTile : MonoBehaviour
     public ETileState currentState;
 
     /// Material anterior de la casilla
-    private Material oldMaterial;
-
-    /// Material original de la casilla
-    private Material originalMaterial;
+    private List<Material> materials;
 
     #endregion
 
     #region METHODS
     private void Awake()
     {
-        originalMaterial = oldMaterial = GetComponent<Renderer>().material;
+        materials = new List<Material>();
+        materials.Add(GetComponent<Renderer>().material);
     }
 
     /// <summary>
@@ -50,7 +48,8 @@ public class BTile : MonoBehaviour
     /// <param name="newMaterial">Nuevo Material</param>
     public void ChangeMaterial(Material newMaterial)
     {
-        oldMaterial = GetComponent<Renderer>().material;
+           
+        materials.Insert(materials.Count,newMaterial);
 
         GetComponent<Renderer>().material = newMaterial;
     }
@@ -58,17 +57,30 @@ public class BTile : MonoBehaviour
     /// <summary>
     /// Devuelve el material de la casilla al anterior o al original
     /// </summary>
-    /// <param name="original">True si queremos volver al original</param>
-    public void ResetMaterial(bool original = false)
+    public void ResetMaterial()
     {
-        if (original)
+        if(materials.Count > 1)
         {
-            GetComponent<Renderer>().material = originalMaterial;
+            GetComponent<Renderer>().material = materials[materials.Count - 2];
+
+            materials.RemoveAt(materials.Count - 1);
+
         }
-        else
+    }
+
+    /// <summary>
+    /// Elimina el material que recibe de su lista de materiales
+    /// </summary>
+    /// <param name="material">Material a eliminar</param>
+    public void RemoveMaterial(Material material)
+    {
+
+        if (materials.Contains(material))
         {
-            GetComponent<Renderer>().material = oldMaterial;
+            materials.Remove(material);
+            GetComponent<Renderer>().material = materials[materials.Count - 1];
         }
+
     }
 
     #endregion

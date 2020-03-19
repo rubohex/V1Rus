@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 public class BPlayer : MonoBehaviour
 {
@@ -117,7 +118,7 @@ public class BPlayer : MonoBehaviour
             StartCoroutine(RotateOverTimeCoroutine(this.gameObject, rotationTime, transform.rotation, Quaternion.LookRotation(transform.right, transform.up)));
         }
 
-        if (Input.GetMouseButtonDown(0) && !isMoving)
+        if (Input.GetMouseButtonDown(0) && !isMoving && !EventSystem.current.IsPointerOverGameObject())
         {
             if(path.Count > 0)
             {
@@ -181,9 +182,9 @@ public class BPlayer : MonoBehaviour
         cameraRay = Camera.main.ScreenPointToRay(Input.mousePosition);
 
         // Hacemos el raycast y vemos si hemos golpeado alguna casilla
-        if (Physics.Raycast(cameraRay, out cameraHit))
+        if (Physics.Raycast(cameraRay, out cameraHit) && !EventSystem.current.IsPointerOverGameObject() && !isMoving)
         {
-            if (cameraHit.collider.name.Contains("Plataforma") && !isMoving)
+            if (cameraHit.collider.name.Contains("Plataforma"))
             {
                 actualHit = board.PositionToIndex(cameraHit.point);
 
@@ -195,28 +196,28 @@ public class BPlayer : MonoBehaviour
                         RestartPath();
 
                         // Calculamos el camino
-                        path.AddRange(board.AStarAlgorithm(path[path.Count - 1], actualHit, recogerCable,false));
+                        path.AddRange(board.AStarAlgorithm(path[path.Count - 1], actualHit, recogerCable, false));
 
                         // Dibujamos el camino
                         DrawPath();
 
                         // Guardamos el indice de la casilla cambiada
                         previousHit = actualHit;
-                        
+
                     }
                 }
-                else if(previousHit != -1)
+                else if (previousHit != -1)
                 {
                     // Cambiamos el material de la anterior casillas
-                    path.ForEach(tile => board.ResetMaterial(tile, true));
+                    path.ForEach(tile => board.ResetMaterial(tile));
                     previousHit = -1;
+                    path.Clear();
                 }
             }
         }
-        else if (previousHit != -1)
+        else if (previousHit != -1 && path.Count > 1)
         {
-            // Cambiamos el material de la anterior casillas
-            path.ForEach(tile => board.ResetMaterial(tile, true));
+            path.ForEach(tile => board.ResetMaterial(tile));
             previousHit = -1;
             path.Clear();
         }
@@ -233,7 +234,7 @@ public class BPlayer : MonoBehaviour
     /// </summary>
     public void DestroyPath()
     {
-        path.ForEach(tile => board.ResetMaterial(tile, true));
+        path.ForEach(tile => board.ResetMaterial(tile));
 
         path.Clear();
     }
@@ -285,16 +286,22 @@ public class BPlayer : MonoBehaviour
     /// </summary>
     private void RestartPath()
     {
-        path.ForEach(tile => board.ResetMaterial(tile, true));
+        path.ForEach(tile => board.ResetMaterial(tile));
 
         path.Clear();
 
         path.Add(tileIndex);
     }
 
+    /// <summary>
+    /// La funcion dibuja el camino que lleva hasta el cursor en el tablero
+    /// </summary>
     private void DrawPath()
     {
-        path.ForEach(tile => board.ChangeTileMaterial(tile, cursorMaterial));
+        for (int i = 0; i < path.Count-1; i++)
+        {
+            board.ChangeTileMaterial(path[i], cursorMaterial);
+        }
 
         board.ChangeTileMaterial(path[path.Count - 1], selectedMaterial);
     }
@@ -303,12 +310,18 @@ public class BPlayer : MonoBehaviour
 
     #region COROUTINES 
 
+    /// <summary>
+    /// Coorutina encargada de realizar todo el movimiento del jugador avisando al game manager cuando se deben mover los enemigos
+    /// </summary>
+    /// <returns></returns>
     private IEnumerator MakePath()
     {
-        // Unformamos de que el jugador se esta moviendo
+        // Informamos de que el jugador se esta moviendo
         isMoving = true;
 
-        board.ResetMaterial(path[0], true);
+        bool enemyFinish = true;
+
+        board.ResetMaterial(path[0]);
 
         for (int i = 0; i < path.Count - 1; i++)
         {
@@ -336,7 +349,7 @@ public class BPlayer : MonoBehaviour
                 // Llamamos a la corutina para que se encargue del movimiento
                 yield return StartCoroutine(MoveOverTimeCoroutine(this.gameObject, moveTime, transform.position, board.IndexToPosition(objectiveIndex, gameObject)));
 
-                board.ResetMaterial(objectiveIndex, true);
+                board.ResetMaterial(objectiveIndex);
 
                 // Miramos si la casilla en la que entramos tiene particuals de datos o no esto lo podemos ver con el coste
                 if (cost > 0)
@@ -359,7 +372,8 @@ public class BPlayer : MonoBehaviour
                 }
             }
 
-            gameManager.EnemyTurn();
+            yield return StartCoroutine(gameManager.EnemyTurn());
+            yield return new WaitForSeconds(0.05f);
         }
 
         RestartPath();

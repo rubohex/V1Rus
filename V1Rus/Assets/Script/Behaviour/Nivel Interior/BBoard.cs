@@ -411,19 +411,20 @@ public class BBoard : MonoBehaviour
     /// </summary>
     /// <param name="pos"> Posicion del waypoint en el que queremos spawnear</param>
     /// <returns></returns>
-    public Vector3 GetEnemySpawnPos(Vector3 pos, float enemyHeight)
+    public Vector3 GetEnemySpawnPos(Vector3 pos, Vector3 enemySize)
     {
         switch (coordSys)
         {
             case ECord.XY:
-                return new Vector3(pos.x, pos.y, surfaceCoord + GetBoardUp().z * enemyHeight / 2);
+                return new Vector3(pos.x, pos.y, surfaceCoord + GetBoardUp().z * enemySize.z / 2);
             case ECord.XZ:
-                return new Vector3(pos.x, surfaceCoord + GetBoardUp().y * enemyHeight / 2, pos.z);
+                return new Vector3(pos.x, surfaceCoord + GetBoardUp().y * enemySize.y / 2, pos.z);
             case ECord.YZ:
-                return new Vector3(surfaceCoord + GetBoardUp().z * enemyHeight / 2, pos.y, pos.z);
+                return new Vector3(surfaceCoord + GetBoardUp().x * enemySize.x / 2, pos.y, pos.z);
             default:
                 return GetBoardUp();
         }
+
     }
 
     /// <summary>
@@ -433,6 +434,7 @@ public class BBoard : MonoBehaviour
     /// <returns></returns>
     public Vector3 GetPlayerSpawnPos(float playerHeight)
     {
+
         switch (coordSys)
         {
             case ECord.XY:
@@ -1072,12 +1074,23 @@ public class BBoard : MonoBehaviour
     /// Devuelve el material de la casilla en la posicion index
     /// </summary>
     /// <param name="index">Indice de la casilla</param>
-    /// <param name="original">True si queremos mantener el orignal</param>
-    public void ResetMaterial(int index, bool original = false)
+    public void ResetMaterial(int index)
     {
         if (tiles.ContainsKey(index))
         {
-            tiles[index].ResetMaterial(original);
+            tiles[index].ResetMaterial();
+        }
+    }
+
+    /// <summary>
+    /// Elimina el material que recibe por parametro de la lista de materiales de la casilla
+    /// </summary>
+    /// <param name="index">Indice de la casilla</param>
+    public void RemoveMaterial(int index, Material material)
+    {
+        if (tiles.ContainsKey(index))
+        {
+            tiles[index].RemoveMaterial(material);
         }
     }
 

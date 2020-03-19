@@ -90,14 +90,11 @@ public class BEnemy : MonoBehaviour
         // Obtenemos el tablero
         board = gameManager.GetActiveBoard();
 
-        // Posicion inicial del jugador en el waypoint 0
-        transform.position = board.GetEnemySpawnPos(wayPoints[0].position, GetComponent<Renderer>().bounds.size.y);
-
         // Obtenemos el vector hacia arriba del tablero
         boardUP = board.GetBoardUp();
 
-        // Añadimos la posicion actual como inicial en el camino
-        path.Add(transform.position);
+        // Posicion inicial del jugador en el waypoint 0
+        transform.position = board.GetEnemySpawnPos(wayPoints[0].position, GetComponent<Renderer>().bounds.size);
 
         // Obtenemos el camino que tendra que recorrer el enemigo
         CreatePath();
@@ -107,25 +104,18 @@ public class BEnemy : MonoBehaviour
 
         // Obtenemos el indice del tablero en el que estamos
         boardIndex = board.PositionToIndex(transform.position);
+
         // Obtenemos el indice del array de waypoints en el que estamos
         pathIndex = 0;
 
         // Calculamos la zona de vision
         ComputeVisionSet();
+
         // Cambiamos los materiales de las casillas de vision del enemigo
         ChangeVisionRangeMaterial(visionMaterial);
 
-
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.L) && !isMoving)
-        {
-            NextMovement();
-        }
-    }
 
     #endregion
 
@@ -133,7 +123,7 @@ public class BEnemy : MonoBehaviour
     /// <summary>
     /// Devuelve el indice de la casilla en la que se encentra el enemigo
     /// </summary>
-    /// <returns></returns>
+    /// <returns>Indice de la casilla sobre la que esta el enemigo</returns>
     public int GetEnemyIndex()
     {
         return boardIndex;
@@ -141,38 +131,15 @@ public class BEnemy : MonoBehaviour
     #endregion
 
     #region PATH
-    /// <summary>
-    /// Cuando se llama a este metodo el enemigo hace su siguiente movimiento mirando al siguiente wayPoint
-    /// </summary>
-    public void NextMovement()
-    {
-        // Cambiamos el material de las celdas de vision
-        ChangeVisionRangeMaterial(normalMaterial);
-
-        // Obtenemos la rotacion que tendra que tener el enemigo
-        Quaternion enemyRotation = Quaternion.LookRotation(path[ComputeNextPathIndex(pathIndex)] - path[pathIndex], boardUP);
-
-        // Iniciamos una corutina que se encargara de hacer rotar al enemigo
-        StartCoroutine(RotateOverTimeCoroutine(this.gameObject, rotationTime, transform.rotation, enemyRotation));
-
-        // Actualizamos la variable para indicar que el enemigo esta rotando
-        isMoving = true;
-
-        // Obtenemos el Indice al que queremos movernos
-        pathIndex = ComputeNextPathIndex(pathIndex);
-        int newBoardIndex = board.PositionToIndex(path[pathIndex]);
-
-        // Actualizamos la posicion del enemigo
-        board.UpdateEnemy(boardIndex, newBoardIndex);
-        boardIndex = newBoardIndex;
-
-    }
 
     /// <summary>
     /// La funcion se encarga de crear el camino que seguira el enemigo a partir de los waypoints y si el camino es cerrado o no
     /// </summary>
     private void CreatePath()
     {
+        // Añadimos la posicion actual como inicial en el camino
+        path.Add(transform.position);
+
         // Para cada waypoint calculamos su camino al siguiente
         for (int i = 0; i < wayPoints.Length - 1; i++)
         {
@@ -239,12 +206,25 @@ public class BEnemy : MonoBehaviour
     /// <summary>
     /// Cambia el material de todas las casillas en el rango de vision
     /// </summary>
-    /// <param name="newMaterial"></param>
+    /// <param name="newMaterial">Nuevo material que le asignaremos a la casillas</param>
     private void ChangeVisionRangeMaterial(Material newMaterial)
     {
         foreach (int tile in visionTiles)
         {
             board.ChangeTileMaterial(tile, newMaterial);
+        }
+    }
+
+    /// <summary>
+    /// Devuelve el material de todas las casillas del rango de vision a su estado anterior
+    /// </summary>
+    private void ResetVisionRange()
+    {
+        foreach (int tile in visionTiles)
+        {
+
+           board.RemoveMaterial(tile,visionMaterial);
+
         }
     }
 
@@ -357,6 +337,47 @@ public class BEnemy : MonoBehaviour
     #region COROUTINES 
 
     /// <summary>
+    /// Cuando se llama a este metodo el enemigo hace su siguiente movimiento mirando al siguiente wayPoint
+    /// </summary>
+    public IEnumerator NextMovement()
+    {
+        // Cambiamos el material de las celdas de vision
+        ResetVisionRange();
+
+        // Obtenemos el vector al que miraremos
+        Vector3 lookAt = path[ComputeNextPathIndex(pathIndex)];
+
+        // Actualizamos la variable para indicar que el enemigo esta rotando
+        isMoving = true;
+
+        // Iniciamos una corutina que se encargara de hacer rotar al enemigo
+        if (Vector3.Distance(transform.position + transform.forward, lookAt) > 0.001f)
+        {
+            yield return StartCoroutine(RotateOverTimeCoroutine(this.gameObject, rotationTime, transform.rotation, Quaternion.LookRotation(lookAt - path[pathIndex], boardUP)));
+        }
+
+        // Obtenemos el Indice al que queremos movernos
+        pathIndex = ComputeNextPathIndex(pathIndex);
+
+        // Obtenemos el indice del tablero al que nos moveremos
+        boardIndex = board.PositionToIndex(path[pathIndex]);
+
+        // Actualizamos la posicion del enemigo
+        board.UpdateEnemy(board.PositionToIndex(transform.position), boardIndex);
+
+        // Una vez terminada la rotacion iniciamos una corutina para que el jugador se mueva
+        yield return StartCoroutine(MoveOverTimeCoroutine(gameObject, moveTime, transform.position, board.IndexToPosition(boardIndex, gameObject)));
+
+        // Calculamos el nuevo campo de vision
+        ComputeVisionSet();
+
+        // Pintamos las casillas del campo de vision
+        ChangeVisionRangeMaterial(visionMaterial);
+     
+        yield return null;
+    }
+
+    /// <summary>
     /// Corutina encargada de mover un objeto al lugar indicado en el tiempo indicado
     /// </summary>
     /// <param name="targetObject"> GameObject Objeto que vamos a mover </param>
@@ -390,9 +411,6 @@ public class BEnemy : MonoBehaviour
         // Informamos que el enemigo ya no se mueve
         isMoving = false;
 
-        ComputeVisionSet();
-        ChangeVisionRangeMaterial(visionMaterial);
-
         yield return null;
 
     }
@@ -422,9 +440,6 @@ public class BEnemy : MonoBehaviour
 
             yield return null;
         }
-
-        // Una vez terminada la rotacion iniciamos una corutina para que el jugador se mueva
-        StartCoroutine(MoveOverTimeCoroutine(gameObject, moveTime, transform.position, board.IndexToPosition(boardIndex, gameObject)));
 
         yield return null;
     }

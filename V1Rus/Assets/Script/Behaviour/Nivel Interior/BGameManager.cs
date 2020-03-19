@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -71,9 +72,16 @@ public class BGameManager : MonoBehaviour
     }
 
 
-    public void EnemyTurn()
+    public IEnumerator EnemyTurn()
     {
-        activeEnemies.ForEach(enemy => enemy.NextMovement());
+        RunInfo info = new RunInfo();
+
+        foreach (BEnemy enemy in activeEnemies)
+        {
+           info = enemy.NextMovement().ParallelCoroutine("enemies");
+        }
+
+        yield return new WaitUntil(() => info.count <= 0);
     }
 
     public BBoard GetActiveBoard()
