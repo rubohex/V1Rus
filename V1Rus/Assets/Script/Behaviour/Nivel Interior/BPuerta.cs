@@ -66,8 +66,7 @@ public class BPuerta : MonoBehaviour
         int edge = Convert.ToInt32(abierta);
 
         int dir = indexSigPuerta - indexSuelo;
-
-        if (active)
+        if (boardScript == gameManager.GetActiveBoard())
         {
             if (dir == 1)
             {
