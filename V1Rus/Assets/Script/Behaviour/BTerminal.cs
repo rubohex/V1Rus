@@ -48,12 +48,14 @@ public class BTerminal : MonoBehaviour
 
     /// Guarda si la terminal está activa en el nivel global
     private bool active = false;
+    private BBoard boardScript;
     #endregion
 
 
     public void SetupTerminal(BGameManager manager)
     {
         active = true;
+        boardScript = manager.GetActiveBoard();
 
         gameManager = manager;
 
@@ -82,6 +84,8 @@ public class BTerminal : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        active = (boardScript != null) && (boardScript == gameManager.GetActiveBoard());
+
         if (active)
         {
             if (numInteracciones == Nivel && hackeable)
@@ -101,6 +105,13 @@ public class BTerminal : MonoBehaviour
             // Actualiza la escala de la pantalla para simular la perspectiva
             float dist = Vector3.Distance(cam.transform.position, this.transform.position);
             testPantalla.transform.localScale = Vector3.one / dist * 10f;
+        }
+        else
+        {
+            pantalla1.SetActive(false);
+            testPantalla.SetActive(false);
+
+            hackeable = false;
         }
 
     }

@@ -15,6 +15,10 @@ public class BPuerta : MonoBehaviour
     {
         this.transform.Find("Sphere").gameObject.SetActive(false);
     }
+    public void Update()
+    {
+        active = (boardScript != null) && (boardScript == gameManager.GetActiveBoard());
+    }
 
     public void SetupDoor(BGameManager manager)
     {
@@ -66,7 +70,7 @@ public class BPuerta : MonoBehaviour
         int edge = Convert.ToInt32(abierta);
 
         int dir = indexSigPuerta - indexSuelo;
-        if (boardScript == gameManager.GetActiveBoard())
+        if (active)
         {
             if (dir == 1)
             {
