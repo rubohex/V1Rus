@@ -18,6 +18,10 @@ Properties {
 	_FresPowOut("Edge Factor", float) = 0
 	_FresMultOut("Edge Mult", float) = 0
 
+
+		_DisolutionTexture("DisolutionTexture", 2D) = "white" {}
+		_DisolutionValue("DisolutionValue", Range(0, 1)) = 0
+
 	_InvFade ("Soft Fade Factor", Range(0.01,3.0)) = 1.0
 	_Fade ("Fade Factor", Range(0.0,1.0)) = 1.0
 }
@@ -64,6 +68,9 @@ Category {
 			sampler2D _MainTex;
 
 			fixed4 _bLayerColorA, _bLayerColorB, _bLayerColorC;
+
+			uniform sampler2D _DisolutionTexture; uniform float4 _DisolutionTexture_ST;
+			uniform float _DisolutionValue;
 
 			float4 _MainTex_ST;
 			float _FresPow, _FresMult;
@@ -128,6 +135,10 @@ Category {
 		    	float3 bLayerC = _bLayerColorC * fresnelOut;
 
 		    	float3 final = saturate(bLayer + bLayerC + hMask * (bLayer + bLayerC) + nMask * (bLayer + bLayerC)) * i.color.a;
+
+				float4 _DisolutionTexture_var = tex2D(_DisolutionTexture, TRANSFORM_TEX(i.texcoord, _DisolutionTexture));
+				float node_2717 = step(_DisolutionValue, _DisolutionTexture_var.r);
+				clip(node_2717 - 0.5);
 			
 		    	return float4(final * _Fade, 1);
 		    
