@@ -1,0 +1,61 @@
+<!-- Time for a little CSS! -->
+<style type='text/css'>
+
+    #centralita {
+        position: absolute;
+        bottom: 10px;
+        left: 10px;
+        width: 25%;
+        height: 25%;
+        padding: 20px;
+        border: 3px solid #000;
+        color: #000000;
+        background: #fff;
+    }
+
+    #textoScroll {
+        height:100%;
+        width:100%;
+        overflow:auto;
+    }
+</style>
+<div id="centralita" >
+    <div id="textoScroll" >
+        <center>
+            ##ELEM##
+            <div id="##NAME##">
+                ##NAME##
+                ##POWER##
+                <br>
+                <label for="##NAME##Power">POWER</label>
+                <select id="##NAME##Power"style="width:50px">
+                    <option value="0">OFF</option>
+                    <option value="1">ON</option>
+                </select>
+                ##POWER##
+                ##ROTATION##
+                <br>
+                <label for="##NAME##Rotation">ROTATION</label>
+                <select id="##NAME##Rotation" style="width:50px">
+                    <option value="0">0</option>
+                    <option value="90">90</option>
+                    <option value="180">180</option>
+                    <option value="270">270</option>
+                </select>
+                ##ROTATION##
+                ##POSITION##
+                <br>
+                <label for="##NAME##Position">POSITION</label>
+                <div id="##NAME##Position">
+                    (
+                    <input id="##NAME##Position1" type="text" min="-10" max="10"style="width:25px" />
+                    ,
+                    <input id="##NAME##Position2" type="text" min="-10" max="10"style="width:25px" />
+                    )
+                </div>
+                ##POSITION##
+            </div>
+            ##ELEM##
+        </center>
+    </div>
+</div>
