@@ -19,10 +19,6 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
-    - _DisolutionTexture:
-        m_Texture: {fileID: 2800000, guid: 266d745949f648f4dad92c59ddb9b5db, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
     - _MainTex:
         m_Texture: {fileID: 2800000, guid: 2331a5a0008d09b428d80d3f554b6ef6, type: 3}
         m_Scale: {x: 0, y: 50}
@@ -32,7 +28,6 @@ Material:
         m_Scale: {x: 5, y: 5}
         m_Offset: {x: 0, y: 0}
     m_Floats:
-    - _DisolutionValue: 1
     - _Fade: 1
     - _FresMult: 0
     - _FresMultOut: 0
