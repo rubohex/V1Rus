@@ -66,8 +66,11 @@ public class BPlayer : MonoBehaviour
     /// Camino que seguira el jugador
     private List<int> path = new List<int>();
 
+    /// Liste de indices finales
+    private List<int> endIndex;
+
     /// Variable que indica si el jugador esta lsito para actuar o no
-    private bool canPlay = false;
+    private bool canPlay = false; 
 
     #endregion
 
@@ -75,7 +78,7 @@ public class BPlayer : MonoBehaviour
 
     #region AWAKE START UPDATE
 
-    public void SetupPlayer(BGameManager manager, DPlayerInfo playerInfo)
+    public void SetupPlayer(BGameManager manager, DPlayerInfo playerInfo, List<int> endIndex)
     {
         // Cargamos los datos basicos del jugador
         rotateLeft = playerInfo.rotateLeft;
@@ -99,6 +102,9 @@ public class BPlayer : MonoBehaviour
 
         // Inicializa el camino
         RestartPath();
+
+        // Guardamos los indices finales
+        this.endIndex = endIndex;
 
         // Temporal
         textAp = GameObject.Find("TextApPrueba").GetComponent<Text>();
@@ -394,6 +400,12 @@ public class BPlayer : MonoBehaviour
                 {
                     ChangeAP((int)-cost);
                 }
+            }
+
+            // Comprobamos si hemos llegado a la casilla objetivo
+            if (endIndex.Contains(tileIndex))
+            {
+                gameManager.BoardCompleted();
             }
 
             yield return StartCoroutine(gameManager.EnemyTurn());

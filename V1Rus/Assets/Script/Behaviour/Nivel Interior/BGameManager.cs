@@ -28,11 +28,14 @@ public class BGameManager : MonoBehaviour
     // Board activos actualmente
     private BBoard activeBoard;
 
+    private bool boardCompleted;
+
     // Debug
     public GameObject[] debugArray;
 
     // Tiempo de desolucion
-    public float disolveTimer;
+    public float maxDisolveTimer;
+    public float minDisolveTimer;
 
     private int iter = 0;
 
@@ -55,33 +58,47 @@ public class BGameManager : MonoBehaviour
 
         // Llamamos a la coorutina encargada de mostrar todos los objetos
         StartCoroutine(LoadObjects());
+
+        boardCompleted = false;
     }
 
     // Update is called every time per frame
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Tab))
+        if (Input.GetKeyDown(KeyCode.Tab) || boardCompleted)
         {
-            StartCoroutine(SwapActiveBoard(null));
+            boardCompleted = false;
+            StartCoroutine(SwapActiveBoard());
         }
     }
 
-
+    private void FixedUpdate()
+    {
+        if (boardCompleted)
+        {
+            boardCompleted = false;
+            StartCoroutine(SwapActiveBoard());
+        }
+    }
     /// <summary>
     /// Actualiza todos los objetos que estan activos actualmente en escena
     /// </summary>
     private void UpdateActive()
     {
         // Guardamos los enemigos
+        activeEnemies.Clear();
         activeEnemies.AddRange(activeBoard.GetBoardEnemies());
 
         // Guardamos los enemigos
+        activeWalls.Clear();
         activeWalls.AddRange(activeBoard.GetBoardWalls());
 
         // Guardamos los enemigos
+        activeTerminals.Clear();
         activeTerminals.AddRange(activeBoard.GetBoardTerminals());
 
         // Guardamos los enemigos
+        activeDoors.Clear();
         activeDoors.AddRange(activeBoard.GetBoardDoors());
 
         // Guardamos el jugador
@@ -112,10 +129,16 @@ public class BGameManager : MonoBehaviour
     {
         return activePlayer;
     }
+
+    public void BoardCompleted()
+    {
+        boardCompleted = true;
+    }
     #endregion
 
     #region CORUTINES
-    public IEnumerator SwapActiveBoard(BBoard newBoard)
+
+    public IEnumerator SwapActiveBoard()
     {
 
         yield return StartCoroutine(DisolveObjects());
@@ -172,8 +195,11 @@ public class BGameManager : MonoBehaviour
         // Seguidamente de todas las puertas y las temrinales
         foreach (BPuerta puerta in activeDoors)
         {
-            Material doorMaterial = puerta.GetComponentInChildren<Renderer>().material;
-            info = DisolveObject(doorMaterial, "_DisolutionValue").ParallelCoroutine("loadDisolve");
+            if (!puerta.GetAbierta())
+            {
+                Material doorMaterial = puerta.GetComponentInChildren<Renderer>().material;
+                info = DisolveObject(doorMaterial, "_DisolutionValue").ParallelCoroutine("loadDisolve");
+            }
         }
 
         foreach (BTerminal terminal in activeTerminals)
@@ -213,6 +239,9 @@ public class BGameManager : MonoBehaviour
         // Iniciamos el timer a 0
         float timer = 0.0f;
 
+        // Tiempo que tardara la disolucion
+        float disolveTimer = UnityEngine.Random.Range(minDisolveTimer, maxDisolveTimer);
+
         // Mientras el tiempo sea menor que la duracion de la transicion repetimos
         while (timer < disolveTimer)
         {
@@ -247,8 +276,11 @@ public class BGameManager : MonoBehaviour
         // Seguidamente de todas las puertas y las temrinales
         foreach (BPuerta puerta in activeDoors)
         {
-            Material doorMaterial = puerta.GetComponentInChildren<Renderer>().material;
-            info = LoadObject(doorMaterial, "_DisolutionValue").ParallelCoroutine("loadDisolve");
+            if (!puerta.GetAbierta())
+            {
+                Material doorMaterial = puerta.GetComponentInChildren<Renderer>().material;
+                info = LoadObject(doorMaterial, "_DisolutionValue").ParallelCoroutine("loadDisolve");
+            }
         }
 
         foreach (BTerminal terminal in activeTerminals)
@@ -274,7 +306,7 @@ public class BGameManager : MonoBehaviour
 
         activePlayer.setPlay(true);
 
-
+        
         foreach (BEnemy enemy in activeEnemies)
         {
             enemy.SetupEnemyVision();
@@ -294,6 +326,9 @@ public class BGameManager : MonoBehaviour
 
         // Iniciamos el timer a 0
         float timer = 0.0f;
+
+        // Tiempo que tardara la disolucion
+        float disolveTimer = UnityEngine.Random.Range(minDisolveTimer, maxDisolveTimer);
 
         // Mientras el tiempo sea menor que la duracion de la transicion repetimos
         while (timer < disolveTimer)

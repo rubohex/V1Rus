@@ -74,7 +74,7 @@ public class BBoard : MonoBehaviour
 
     /// Indice de la casilla incial y de la casilla final
     private int startIndex;
-    private int endIndex;
+    private List<int> endIndex = new List<int>();
 
     /// Tamaño en casillas del tablero en la primera Coordenada
     private int size1;
@@ -261,8 +261,7 @@ public class BBoard : MonoBehaviour
             }
             else if (item.currentState == BTile.ETileState.End)
             {
-                endIndex = firstIndex + secondIndex;
-            }
+                endIndex.Add(firstIndex + secondIndex);            }
         }
 
         // Para cada casilla almacenamos sus bordes usando como referente su indice en el array
@@ -291,7 +290,7 @@ public class BBoard : MonoBehaviour
         player.transform.parent = this.transform;
 
         // Hacemos el setup del jugador
-        player.SetupPlayer(manager, playerInfo);
+        player.SetupPlayer(manager, playerInfo, endIndex);
 
 
         // Obtenemos la roatacion de los elementos del tablero para cuando spawneemos particulas
