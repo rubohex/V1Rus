@@ -48,7 +48,7 @@ public class BEnemy : MonoBehaviour
     private float moveTime;
 
     /// Indica si el enemigo moviendose
-    private bool isMoving = false;
+    private bool isMoving;
 
     /// Indice al que debe ir el enemigo
     private int boardIndex;
@@ -57,7 +57,7 @@ public class BEnemy : MonoBehaviour
     private int pathIndex;
 
     /// Indica el sentido del camino en el que vamos para caminos no cerrados
-    private int pathDirection = 1;
+    private int pathDirection;
 
     /// Vector que apunta hacia arriba en el tablero
     private Vector3 boardUP;
@@ -108,11 +108,35 @@ public class BEnemy : MonoBehaviour
         // Obtenemos el indice del array de waypoints en el que estamos
         pathIndex = 0;
 
+        // Iniciamos la variable del pathDirection
+        pathDirection = 1;
+
+        // Definimos que el enemigo no se esta moviendo
+        isMoving = false;
+
+    }
+
+    public void SetupEnemyVision()
+    {
+
         // Calculamos la zona de vision
         ComputeVisionSet();
 
         // Cambiamos los materiales de las casillas de vision del enemigo
         ChangeVisionRangeMaterial(visionMaterial);
+    }
+
+    /// <summary>
+    /// Funcion encargada de eliminar la vision del enemigo y sus estructuras de informacion para cuando se complete el tablero
+    /// </summary>
+    public void EndEnemy()
+    {
+        // Eliminamos el campo de vision y lo vaciamos
+        ResetVisionRange();
+        visionTiles.Clear();
+
+        // Vaciamos el path
+        path.Clear();
 
     }
 

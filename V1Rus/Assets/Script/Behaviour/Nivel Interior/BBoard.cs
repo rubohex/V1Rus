@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -70,7 +71,7 @@ public class BBoard : MonoBehaviour
 
     /// Indice de la casilla incial y de la casilla final
     private int startIndex;
-    private int endIndex;
+    private List<int> endIndex = new List<int>();
 
     /// Tamaño en casillas del tablero en la primera Coordenada
     private int size1;
@@ -257,7 +258,7 @@ public class BBoard : MonoBehaviour
             }
             else if (item.currentState == BTile.ETileState.End)
             {
-                endIndex = firstIndex + secondIndex;
+                endIndex.Add(firstIndex + secondIndex);
             }
         }
 
@@ -287,9 +288,9 @@ public class BBoard : MonoBehaviour
         player.transform.parent = this.transform;
 
         // Hacemos el setup del jugador
-        player.SetupPlayer(manager, playerInfo);
+        player.SetupPlayer(manager, playerInfo, endIndex);
 
-        
+
 
         // Obtenemos la roatacion de los elementos del tablero para cuando spawneemos particulas
         spawnRotation = player.transform.rotation;
@@ -336,8 +337,6 @@ public class BBoard : MonoBehaviour
     /// </summary>
     public void EndBoard()
     {
-        player.DestroyPath();
-
         Destroy(player.gameObject);
         
         Destroy(camera.transform.parent.gameObject);
@@ -386,6 +385,33 @@ public class BBoard : MonoBehaviour
     public Vector2 GetBoardShape()
     {
         return new Vector2(size1, size2);
+    }
+
+    /// <summary>
+    /// Devolvemos una array de las puertas
+    /// </summary>
+    /// <returns> Array de puertas</returns>
+    public BPuerta[] GetBoardDoors()
+    {
+        return GetComponentsInChildren<BPuerta>();
+    }
+
+    /// <summary>
+    /// Devolvemos una array de las terminales
+    /// </summary>
+    /// <returns> Array de terminales</returns>
+    public BTerminal[] GetBoardTerminals()
+    {
+        return GetComponentsInChildren<BTerminal>();
+    }
+
+    /// <summary>
+    /// Devolvemos un array con los muros
+    /// </summary>
+    /// <returns>Array de muros</returns>
+    public BMuro[] GetBoardWalls()
+    {
+        return GetComponentsInChildren<BMuro>();
     }
 
     /// <summary>
