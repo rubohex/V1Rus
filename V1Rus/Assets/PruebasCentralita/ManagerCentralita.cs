@@ -16,7 +16,7 @@ public class ManagerCentralita : MonoBehaviour
     HtmlElement Scrolling;
     HtmlDocument file;
 
-    int accionesMax = 3;
+    public int accionesMax = 3;
 
     int seed = 0;
     int nRelleno = 0;
@@ -208,7 +208,7 @@ public class ManagerCentralita : MonoBehaviour
             string trozoFin = trozosAux[2];
 
             string trozoTot = "";
-            if (g.name.Contains("Cube"))
+            if (g.name.Contains("Terminal"))
             {
                 trozoTot = trozoPower;
             }
@@ -301,7 +301,7 @@ public class ManagerCentralita : MonoBehaviour
         file = UI.document;
         foreach (GameObject g in objetos)
         {
-            if (g.name.Contains("Cube"))
+            if (g.name.Contains("Terminal"))
             {
                 file.getElementById(g.name + "Power").addEventListener("change", changedValuePower);
             }
