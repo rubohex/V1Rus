@@ -37,7 +37,7 @@ public class BGameManager : MonoBehaviour
     public float maxDisolveTimer;
     public float minDisolveTimer;
 
-    private int iter = 7;
+    private int iter = 0;
 
     #endregion
 
