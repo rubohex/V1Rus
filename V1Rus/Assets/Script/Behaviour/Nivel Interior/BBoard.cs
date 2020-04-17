@@ -1,7 +1,6 @@
 ﻿using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
-using System.Collections;
 
 public class BBoard : MonoBehaviour
 {
@@ -48,9 +47,6 @@ public class BBoard : MonoBehaviour
     /// Guardamos los valores que tenemos que sumarle al indice actual para conseguir el indice asociado al string
     public Dictionary<string, int> indexDirections = new Dictionary<string, int>();
 
-    /// Tiempo que tardaran en aparecer y desaparecer los objetos
-    private float disolveTime = 2f;
-
     /// Guardamos el valor del systema de coordenadas
     private ECord coordSys;
 
@@ -74,7 +70,7 @@ public class BBoard : MonoBehaviour
 
     /// Indice de la casilla incial y de la casilla final
     private int startIndex;
-    private List<int> endIndex = new List<int>();
+    private int endIndex;
 
     /// Tamaño en casillas del tablero en la primera Coordenada
     private int size1;
@@ -261,7 +257,8 @@ public class BBoard : MonoBehaviour
             }
             else if (item.currentState == BTile.ETileState.End)
             {
-                endIndex.Add(firstIndex + secondIndex);            }
+                endIndex = firstIndex + secondIndex;
+            }
         }
 
         // Para cada casilla almacenamos sus bordes usando como referente su indice en el array
@@ -290,8 +287,9 @@ public class BBoard : MonoBehaviour
         player.transform.parent = this.transform;
 
         // Hacemos el setup del jugador
-        player.SetupPlayer(manager, playerInfo, endIndex);
+        player.SetupPlayer(manager, playerInfo);
 
+        
 
         // Obtenemos la roatacion de los elementos del tablero para cuando spawneemos particulas
         spawnRotation = player.transform.rotation;
@@ -338,6 +336,7 @@ public class BBoard : MonoBehaviour
     /// </summary>
     public void EndBoard()
     {
+        player.DestroyPath();
 
         Destroy(player.gameObject);
         
@@ -494,33 +493,6 @@ public class BBoard : MonoBehaviour
     public BEnemy[] GetBoardEnemies()
     {
         return GetComponentsInChildren<BEnemy>();
-    }
-
-    /// <summary>
-    /// Devolvemos una array de las puertas
-    /// </summary>
-    /// <returns> Array de puertas</returns>
-    public BPuerta[] GetBoardDoors()
-    {
-        return GetComponentsInChildren<BPuerta>();
-    }
-
-    /// <summary>
-    /// Devolvemos una array de las terminales
-    /// </summary>
-    /// <returns> Array de terminales</returns>
-    public BTerminal[] GetBoardTerminals()
-    {
-        return GetComponentsInChildren<BTerminal>();
-    }
-
-    /// <summary>
-    /// Devolvemos un array con los muros
-    /// </summary>
-    /// <returns>Array de muros</returns>
-    public BMuro[] GetBoardWalls()
-    {
-        return GetComponentsInChildren<BMuro>();
     }
 
     /// <summary>
