@@ -66,13 +66,19 @@ public class BPlayer : MonoBehaviour
     /// Camino que seguira el jugador
     private List<int> path = new List<int>();
 
+    /// Liste de indices finales
+    private List<int> endIndex;
+
+    /// Variable que indica si el jugador esta lsito para actuar o no
+    private bool canPlay = false; 
+
     #endregion
 
     #region METHODS
 
     #region AWAKE START UPDATE
 
-    public void SetupPlayer(BGameManager manager, DPlayerInfo playerInfo)
+    public void SetupPlayer(BGameManager manager, DPlayerInfo playerInfo, List<int> endIndex)
     {
         // Cargamos los datos basicos del jugador
         rotateLeft = playerInfo.rotateLeft;
@@ -97,6 +103,9 @@ public class BPlayer : MonoBehaviour
         // Inicializa el camino
         RestartPath();
 
+        // Guardamos los indices finales
+        this.endIndex = endIndex;
+
         // Temporal
         textAp = GameObject.Find("TextApPrueba").GetComponent<Text>();
         textAp.text = "AP: " + Ap;
@@ -105,128 +114,136 @@ public class BPlayer : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //UpdateUI();
-        // Control del giro a la izquierda
-        if (Input.GetKeyDown(rotateLeft) && !isMoving)
-        {
-            StartCoroutine(RotateOverTimeCoroutine(this.gameObject, rotationTime, transform.rotation, Quaternion.LookRotation(-transform.right, transform.up)));
-        }
 
-        // Control del giro a la derecha
-        if (Input.GetKeyDown(rotateRight) && !isMoving)
+        if (canPlay)
         {
-            StartCoroutine(RotateOverTimeCoroutine(this.gameObject, rotationTime, transform.rotation, Quaternion.LookRotation(transform.right, transform.up)));
-        }
-
-        if (Input.GetMouseButtonDown(0) && !isMoving && !EventSystem.current.IsPointerOverGameObject())
-        {
-            if(path.Count > 0)
+            //UpdateUI();
+            // Control del giro a la izquierda
+            if (Input.GetKeyDown(rotateLeft) && !isMoving)
             {
-                previousHit = -1;
+                StartCoroutine(RotateOverTimeCoroutine(this.gameObject, rotationTime, transform.rotation, Quaternion.LookRotation(-transform.right, transform.up)));
+            }
 
-                StartCoroutine(MakePath());
+            // Control del giro a la derecha
+            if (Input.GetKeyDown(rotateRight) && !isMoving)
+            {
+                StartCoroutine(RotateOverTimeCoroutine(this.gameObject, rotationTime, transform.rotation, Quaternion.LookRotation(transform.right, transform.up)));
+            }
+
+            if (Input.GetMouseButtonDown(0) && !isMoving && !EventSystem.current.IsPointerOverGameObject())
+            {
+                if (path.Count > 0)
+                {
+                    previousHit = -1;
+
+                    StartCoroutine(MakePath());
+                }
+            }
+
+            // Control movimiento
+            if (Input.GetKeyDown(move) && !isMoving)
+            {
+                // Vector de posicion de la casilla objetivo
+                Vector3 objectivePos = board.IndexToPosition(tileIndex) + transform.forward;
+                // Obtenemos el indice de la casilla a la que queremos ir a partir de la casilla acutal y la casilla a la que miramos
+                int objectiveIndex = board.PositionToIndex(objectivePos);
+
+                // Obtenemos tambien el coste de dicha casilla
+                float cost = board.CostToEnter(tileIndex, objectiveIndex, recogerCable);
+
+                // Obsevamos que el coste es distinto de cero
+                //maxAP == 0 sería considerado AP infinito(sala del boss)
+                if (cost != Mathf.Infinity && (cost <= Ap || maxAP == 0))
+                {
+                    // Informamos de que nos estamos moviendo
+                    isMoving = true;
+
+                    // Llamamos a la corutina para que se encargue del movimiento
+                    StartCoroutine(MoveOverTimeCoroutine(this.gameObject, moveTime, transform.position, board.IndexToPosition(objectiveIndex, gameObject)));
+
+                    // Miramos si la casilla en la que entramos tiene particuals de datos o no esto lo podemos ver con el coste
+                    if (cost > 0)
+                    {
+                        // Spawneamos las particulas
+                        board.SpawnParticle(tileIndex, recogerCable);
+                    }
+                    else if (cost < 0 && recogerCable)
+                    {
+                        // Eliminamos la particula
+                        board.DespawnParticle(objectiveIndex);
+                    }
+
+                    // Cambiamos a casilla en la que estamos y el coste
+                    tileIndex = objectiveIndex;
+                    if (maxAP != 0)
+                    {
+                        ChangeAP((int)-cost);
+                    }
+
+                    gameManager.EnemyTurn();
+                }
+
+                // Temporal
+                RestartPath();
+            }
+
+            //Temporal activacion de recogerDatos hasta que tengamos la habilidad util para pruebas
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                recogerCable = !recogerCable;
             }
         }
 
-        // Control movimiento
-        if (Input.GetKeyDown(move) && !isMoving)
-        {
-            // Vector de posicion de la casilla objetivo
-            Vector3 objectivePos = board.IndexToPosition(tileIndex) + transform.forward;
-            // Obtenemos el indice de la casilla a la que queremos ir a partir de la casilla acutal y la casilla a la que miramos
-            int objectiveIndex = board.PositionToIndex(objectivePos);
-
-            // Obtenemos tambien el coste de dicha casilla
-            float cost = board.CostToEnter(tileIndex, objectiveIndex, recogerCable);
-
-            // Obsevamos que el coste es distinto de cero
-            //maxAP == 0 sería considerado AP infinito(sala del boss)
-            if (cost != Mathf.Infinity && (cost <= Ap || maxAP == 0))
-            {
-                // Informamos de que nos estamos moviendo
-                isMoving = true;
-
-                // Llamamos a la corutina para que se encargue del movimiento
-                StartCoroutine(MoveOverTimeCoroutine(this.gameObject, moveTime, transform.position, board.IndexToPosition(objectiveIndex, gameObject)));
-
-                // Miramos si la casilla en la que entramos tiene particuals de datos o no esto lo podemos ver con el coste
-                if (cost > 0)
-                {
-                    // Spawneamos las particulas
-                    board.SpawnParticle(tileIndex, recogerCable);
-                }
-                else if (cost < 0 && recogerCable)
-                {
-                    // Eliminamos la particula
-                    board.DespawnParticle(objectiveIndex);
-                }
-
-                // Cambiamos a casilla en la que estamos y el coste
-                tileIndex = objectiveIndex;
-                if (maxAP != 0)
-                {
-                    ChangeAP((int)-cost);
-                }
-
-                gameManager.EnemyTurn();
-            }
-
-            // Temporal
-            RestartPath();
-        }
-
-        //Temporal activacion de recogerDatos hasta que tengamos la habilidad util para pruebas
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            recogerCable = !recogerCable;
-        }
     }
 
     void FixedUpdate(){
-        
-        // Elegimos el rayo que vamos a usar para el raycast
-        cameraRay = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-        // Hacemos el raycast y vemos si hemos golpeado alguna casilla
-        if (Physics.Raycast(cameraRay, out cameraHit) && !EventSystem.current.IsPointerOverGameObject() && !isMoving)
+        if (canPlay)
         {
-            if (cameraHit.collider.name.Contains("Plataforma"))
+            // Elegimos el rayo que vamos a usar para el raycast
+            cameraRay = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+            // Hacemos el raycast y vemos si hemos golpeado alguna casilla
+            if (Physics.Raycast(cameraRay, out cameraHit) && !EventSystem.current.IsPointerOverGameObject() && !isMoving)
             {
-                actualHit = board.PositionToIndex(cameraHit.point);
-
-                if (board.isTile(actualHit))
+                if (cameraHit.collider.name.Contains("Plataforma"))
                 {
-                    if (previousHit != actualHit)
+                    actualHit = board.PositionToIndex(cameraHit.point);
+
+                    if (board.isTile(actualHit))
                     {
-                        // Vaciamos el camino anterior
-                        RestartPath();
+                        if (previousHit != actualHit)
+                        {
+                            // Vaciamos el camino anterior
+                            RestartPath();
 
-                        // Calculamos el camino
-                        path.AddRange(board.AStarAlgorithm(path[path.Count - 1], actualHit, false));
+                            // Calculamos el camino
+                            path.AddRange(board.AStarAlgorithm(path[path.Count - 1], actualHit, false));
 
-                        // Dibujamos el camino
-                        DrawPath();
+                            // Dibujamos el camino
+                            DrawPath();
 
-                        // Guardamos el indice de la casilla cambiada
-                        previousHit = actualHit;
+                            // Guardamos el indice de la casilla cambiada
+                            previousHit = actualHit;
 
+                        }
+                    }
+                    else if (previousHit != -1)
+                    {
+                        // Cambiamos el material de la anterior casillas
+                        path.ForEach(tile => board.ResetMaterial(tile));
+                        previousHit = -1;
+                        path.Clear();
                     }
                 }
-                else if (previousHit != -1)
-                {
-                    // Cambiamos el material de la anterior casillas
-                    path.ForEach(tile => board.ResetMaterial(tile));
-                    previousHit = -1;
-                    path.Clear();
-                }
             }
-        }
-        else if (previousHit != -1 && path.Count > 1)
-        {
-            path.ForEach(tile => board.ResetMaterial(tile));
-            previousHit = -1;
-            path.Clear();
-        }
+            else if (previousHit != -1 && path.Count > 1)
+            {
+                path.ForEach(tile => board.ResetMaterial(tile));
+                previousHit = -1;
+                path.Clear();
+            }
+        } 
     }
 
     /// <summary>
@@ -276,7 +293,14 @@ public class BPlayer : MonoBehaviour
         }
     }
 
-
+    /// <summary>
+    /// Funcion que sirve para indicar al jugador cuando el jugador puede interactuar
+    /// </summary>
+    /// <param name="play"></param>
+    public void setPlay(bool play)
+    {
+        canPlay = play;
+    }
     #endregion
 
     #region PATH
@@ -376,6 +400,12 @@ public class BPlayer : MonoBehaviour
                 {
                     ChangeAP((int)-cost);
                 }
+            }
+
+            // Comprobamos si hemos llegado a la casilla objetivo
+            if (endIndex.Contains(tileIndex))
+            {
+                gameManager.BoardCompleted();
             }
 
             yield return StartCoroutine(gameManager.EnemyTurn());
