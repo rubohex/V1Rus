@@ -38,8 +38,10 @@ public class BTerminal : MonoBehaviour
     /// Textos del mesaje de la pantalla
     private string mensaje1;
     private string mensaje2;
-    /// Guarda si la terminal es hackeable o no, ya sea por distancia u otros motivos
+    /// Guarda si la terminal es hackeable o no por distancia
     private bool hackeable;
+    //Guarda si la terminal está activada por su centralita correspondiente
+    private bool activada = false;
 
     /// Pantalla de la terminal (todavía en pruebas)
     private GameObject testPantalla;
@@ -114,11 +116,24 @@ public class BTerminal : MonoBehaviour
             hackeable = false;
         }
 
+        if (!activada)
+        {
+            //TODO shader o color ¿gris?
+        }
+        else if (numInteracciones == Nivel)
+        {
+            //TODO shader o color rojo
+        }
+        else
+        {
+            //TODO shader o color verde
+        }
+
     }
     /// Mientras el jugador esté al lado de la terminal se muestra la pantalla y se actualiza el texto
     private void OnTriggerStay(Collider other)
     {
-        if (other.gameObject.name.Contains("Player"))
+        if (other.gameObject.name.Contains("Player") && activada)
         {
             testPantalla.SetActive(true);
             if (this.numInteracciones < this.Nivel)
@@ -135,7 +150,7 @@ public class BTerminal : MonoBehaviour
     }
     private void OnTriggerExit(Collider other)
     {
-        if (other.gameObject.name.Contains("Player"))
+        if (other.gameObject.name.Contains("Player") && activada)
         {
             pantalla1.SetActive(false);
             testPantalla.SetActive(false);
@@ -194,5 +209,14 @@ public class BTerminal : MonoBehaviour
     public GameObject GetPlayer()
     {
         return gameManager.GetActviePlayer().gameObject;
+    }
+
+    public bool getActivada()
+    {
+        return activada;
+    }
+    public void setActivada(bool act)
+    {
+        activada = act;
     }
 }

@@ -7,10 +7,10 @@ public class Activable : MonoBehaviour
     class objectState
     {
         public bool active;
-        public Vector3 position;
-        public Vector3 rotation;
+        public float[] position;
+        public float rotation;
 
-        public objectState(bool active, Vector3 position, Vector3 rotation)
+        public objectState(bool active, float[] position, float rotation)
         {
             this.active = active;
             this.position = position;
@@ -24,7 +24,7 @@ public class Activable : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        estadoIni = new objectState(gameObject.activeSelf, transform.position, transform.eulerAngles);
+        estadoIni = new objectState(getActivePower(), getActivePosition(), getActiveRotation());
     }
 
     // Update is called once per frame
@@ -34,7 +34,10 @@ public class Activable : MonoBehaviour
     }
     public void activate(bool estado)
     {
-        gameObject.SetActive(estado);
+        if (name.Contains("Terminal"))
+        {
+            GetComponent<BTerminal>().setActivada(estado);
+        }
     }
     public void activate(float valor)
     {
@@ -61,7 +64,14 @@ public class Activable : MonoBehaviour
 
     public bool getActivePower()
     {
-        return gameObject.activeSelf;
+        if (name.Contains("Terminal"))
+        {
+            return GetComponent<BTerminal>().getActivada();
+        }
+        else
+        {
+            return false;
+        }
     }
     public float getActiveRotation()
     {
@@ -94,14 +104,15 @@ public class Activable : MonoBehaviour
     {
         int coste = 0;
 
-        if(gameObject.activeSelf != estadoIni.active)
+        if(getActivePower() != estadoIni.active)
         {
             coste++;
         }
 
-        coste += (int)Mathf.Abs(transform.eulerAngles.z - estadoIni.rotation.z) / 90;
+        coste += (int)Mathf.Abs(getActiveRotation() - estadoIni.rotation) / 90;
 
-        coste += (int)Mathf.Abs(transform.position.x - estadoIni.position.x) + (int)Mathf.Abs(transform.position.y - estadoIni.position.y) + (int)Mathf.Abs(transform.position.z - estadoIni.position.z);
+        float[] pos = getActivePosition();
+        coste += (int)Mathf.Abs(pos[0] - estadoIni.position[0]) + (int)Mathf.Abs(pos[1] - estadoIni.position[1]);
 
         return coste;
     }
