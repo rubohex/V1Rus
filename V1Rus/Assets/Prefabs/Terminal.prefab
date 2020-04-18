@@ -1031,7 +1031,6 @@ GameObject:
   - component: {fileID: 2933559153333140920}
   - component: {fileID: 559705522}
   - component: {fileID: 8513653627103516312}
-  - component: {fileID: 1923340946}
   m_Layer: 0
   m_Name: Terminal
   m_TagString: Untagged
@@ -1118,18 +1117,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tHack: 0
 --- !u!114 &8513653627103516312
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4978695485263253521}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6c2ecd5ee1e7a4f49bd43dfa1be7290f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &1923340946
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1446,19 +1433,9 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -157825318150610632, guid: ebaa4b3b492eeef419dedcc395afe7c7,
         type: 3}
-      propertyPath: m_Materials.Array.size
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: -157825318150610632, guid: ebaa4b3b492eeef419dedcc395afe7c7,
-        type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
       objectReference: {fileID: 2100000, guid: a7ec5be0c59ac8a4fb95cf61392e7b01, type: 2}
-    - target: {fileID: -157825318150610632, guid: ebaa4b3b492eeef419dedcc395afe7c7,
-        type: 3}
-      propertyPath: m_Materials.Array.data[1]
-      value: 
-      objectReference: {fileID: 2100000, guid: c5a6e8289cfcab64385119ec87bb3b33, type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ebaa4b3b492eeef419dedcc395afe7c7, type: 3}
 --- !u!4 &1041795436005809173 stripped
