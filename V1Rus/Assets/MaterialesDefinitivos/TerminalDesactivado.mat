@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Holographic_Blue 1
+  m_Name: TerminalDesactivado
   m_Shader: {fileID: 4800000, guid: 51e29faa684d1b64b886073318d9386d, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
@@ -19,6 +19,10 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
+    - _DisolutionTexture:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _MainTex:
         m_Texture: {fileID: 2800000, guid: 2331a5a0008d09b428d80d3f554b6ef6, type: 3}
         m_Scale: {x: 1, y: 1}
@@ -28,6 +32,7 @@ Material:
         m_Scale: {x: 5, y: 5}
         m_Offset: {x: 0, y: 0}
     m_Floats:
+    - _DisolutionValue: 0
     - _Fade: 1
     - _FresMult: 1
     - _FresMultOut: 0.5
@@ -39,6 +44,6 @@ Material:
     - _Inter: {r: 0.1, g: 200, b: 100, a: 40}
     - _InterScale: {r: 0.1, g: 200, b: 100, a: 0}
     - _TintColor: {r: 0.2352941, g: 0.7784991, b: 1, a: 1}
-    - _bLayerColorA: {r: 0, g: 0.099393584, b: 0.29412377, a: 0.5019608}
-    - _bLayerColorB: {r: 0, g: 0.6609568, b: 0.720592, a: 0.5019608}
-    - _bLayerColorC: {r: 0.5661817, g: 0.99999994, b: 0.73073345, a: 0.5019608}
+    - _bLayerColorA: {r: 0.21698111, g: 0.21698111, b: 0.21698111, a: 0.5019608}
+    - _bLayerColorB: {r: 1, g: 0.5, b: 0.5, a: 0.5019608}
+    - _bLayerColorC: {r: 1, g: 0.6132076, b: 0.6132076, a: 0.5019608}
