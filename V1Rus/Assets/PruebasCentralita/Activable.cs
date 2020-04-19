@@ -19,19 +19,11 @@ public class Activable : MonoBehaviour
     }
     objectState estadoIni;
 
-    string planeRef = "YZ";
-
-    // Start is called before the first frame update
     void Start()
     {
         estadoIni = new objectState(getActivePower(), getActivePosition(), getActiveRotation());
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
     public void activate(bool estado)
     {
         if (name.Contains("Terminal"))
@@ -45,21 +37,10 @@ public class Activable : MonoBehaviour
     }
     public void activate(float[] pos)
     {
-        Vector3 newPos = Vector3.zero;
-
-        switch (planeRef)
+        if (name.Contains("Muro"))
         {
-            case "XY":
-                newPos = new Vector3(pos[0], pos[1], transform.position.z);
-                break;
-            case "XZ":
-                newPos = new Vector3(pos[0], transform.position.y, pos[1]);
-                break;
-            case "YZ":
-                newPos = new Vector3(transform.position.x, pos[0], pos[1]);
-                break;
+            GetComponent<activateMuro>().setPos(pos);
         }
-        transform.position = newPos;
     }
 
     public bool getActivePower()
@@ -73,31 +54,21 @@ public class Activable : MonoBehaviour
             return false;
         }
     }
+
     public float getActiveRotation()
     {
         return transform.eulerAngles.z;
     }
+
     public float[] getActivePosition()
     {
         float[] pos = { 0, 0 };
 
-        switch (planeRef)
+        if (name.Contains("Muro"))
         {
-            case "XY":
-                pos[0] = transform.position.x;
-                pos[1] = transform.position.y;
-                break;
-            case "XZ":
-                pos[0] = transform.position.x;
-                pos[1] = transform.position.z;
-                break;
-            case "YZ":
-                pos[0] = transform.position.y;
-                pos[1] = transform.position.z;
-                break;
+            pos = GetComponent<activateMuro>().getPos();
         }
-
-        return pos;
+            return pos;
     }
 
     public int getCoste()

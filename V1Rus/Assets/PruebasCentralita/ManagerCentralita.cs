@@ -43,24 +43,6 @@ public class ManagerCentralita : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        /*
-        if (UnityEngine.Input.GetMouseButtonDown(0))
-        {
-            RaycastHit hit;
-            Ray ray = Camera.main.ScreenPointToRay(UnityEngine.Input.mousePosition);
-            if (Physics.Raycast(ray, out hit))
-            {
-                if(hit.collider.gameObject == gameObject && costeTotal() <= accionesMax)
-                {
-                    centralita.SetActive(!centralita.activeSelf);
-                    if (centralita.activeSelf)
-                    {
-                        setUpcentralita();
-                    }
-                }
-            }
-        }
-        */
         if (centralita.activeSelf)
         {
             if (costeTotal() > accionesMax)
@@ -182,7 +164,7 @@ public class ManagerCentralita : MonoBehaviour
         print(costeTotal());
     }
 
-    void setUpcentralita()
+    void setUpCentralita()
     {
         UnityEngine.Random.InitState(seed);
 
@@ -212,9 +194,9 @@ public class ManagerCentralita : MonoBehaviour
             {
                 trozoTot = trozoPower;
             }
-            else if (g.name.Contains("Sphere"))
+            else if (g.name.Contains("Muro"))
             {
-                trozoTot = trozoPower + trozoPosition;
+                trozoTot = trozoPosition;
             }
             else if(g.name.Contains("Capsule"))
             {
@@ -305,9 +287,8 @@ public class ManagerCentralita : MonoBehaviour
             {
                 file.getElementById(g.name + "Power").addEventListener("change", changedValuePower);
             }
-            else if (g.name.Contains("Sphere"))
+            else if (g.name.Contains("Muro"))
             {
-                file.getElementById(g.name + "Power").addEventListener("change", changedValuePower);
                 file.getElementById(g.name + "Position").addEventListener("change", changedValuePosition);
             }
             else if (g.name.Contains("Capsule"))
@@ -340,7 +321,7 @@ public class ManagerCentralita : MonoBehaviour
         if (other.gameObject.name.Contains("Player"))
         {
             centralita.SetActive(true);
-            setUpcentralita();
+            setUpCentralita();
         }
     }
     private void OnTriggerExit(Collider other)

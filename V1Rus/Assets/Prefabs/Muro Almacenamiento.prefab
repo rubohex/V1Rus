@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 4075049316038084274}
   - component: {fileID: 2208898982727229251}
   - component: {fileID: 3353291620461647927}
+  - component: {fileID: 523693987}
   m_Layer: 0
   m_Name: Muro Almacenamiento
   m_TagString: Untagged
@@ -95,3 +96,15 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+--- !u!114 &523693987
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 313579039716961573}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6275092853c17eb4babbee0f054a58a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
