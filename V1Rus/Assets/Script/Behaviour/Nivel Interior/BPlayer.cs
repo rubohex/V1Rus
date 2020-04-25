@@ -238,8 +238,8 @@ public class BPlayer : MonoBehaviour
             }
             else if (previousHit != -1 && path.Count > 1)
             {
-                        board.RemoveMaterial(path[path.Count - 1], selectedMaterial);
-        path.ForEach(tile => board.RemoveMaterial(tile,cursorMaterial));
+                board.RemoveMaterial(path[path.Count - 1], selectedMaterial);
+                path.ForEach(tile => board.RemoveMaterial(tile,cursorMaterial));
                 previousHit = -1;
                 path.Clear();
             }
@@ -361,6 +361,12 @@ public class BPlayer : MonoBehaviour
                 yield return StartCoroutine(RotateOverTimeCoroutine(this.gameObject, rotationTime, transform.rotation, Quaternion.LookRotation(lookAt-transform.position, transform.up)));
             }
 
+            // Miramos si hay un enemigo en dicha casilla
+            if (board.isEnemyPos(objectiveIndex))
+            {
+                StartCoroutine(gameManager.ResetBoard());
+            }
+
             // Obtenemos tambien el coste de dicha casilla
             float cost = board.CostToEnter(tileIndex, objectiveIndex, recogerCable);
 
@@ -429,28 +435,28 @@ public class BPlayer : MonoBehaviour
     /// <param name="start"> Vector3 marca la posicion inicial </param>
     /// <param name="target"> Vector3 marca la posicion final </param>
     private IEnumerator MoveOverTimeCoroutine(GameObject targetObject, float transitionDuration, Vector3 start, Vector3 target)
+    {
+
+        // Iniciamos el timer a 0
+        float timer = 0.0f;
+
+        // Mientras el tiempo sea menor que la duracion de la transicion repetimos
+        while (timer < transitionDuration)
         {
+            // Aumentamos el tiempo en funcion de el Time.deltaTime
+            timer += Time.deltaTime;
+            // Calculamos el porcentaje del tiempo que llevamos
+            float t = timer / transitionDuration;
+            // Transformamos el porcentaje segun una funcion para que la transicion sea suave
+            t = t * t * t * (t * (6f * t - 15f) + 10f);
 
-            // Iniciamos el timer a 0
-            float timer = 0.0f;
-
-            // Mientras el tiempo sea menor que la duracion de la transicion repetimos
-            while (timer < transitionDuration)
-            {
-                // Aumentamos el tiempo en funcion de el Time.deltaTime
-                timer += Time.deltaTime;
-                // Calculamos el porcentaje del tiempo que llevamos
-                float t = timer / transitionDuration;
-                // Transformamos el porcentaje segun una funcion para que la transicion sea suave
-                t = t * t * t * (t * (6f * t - 15f) + 10f);
-
-                // Hacemos un Lerp en funcion de la posicion inicial y finla y el porcentaje de tiempo
-                targetObject.transform.position = Vector3.Lerp(start, target, t);
-
-                yield return null;
-            }
+            // Hacemos un Lerp en funcion de la posicion inicial y finla y el porcentaje de tiempo
+            targetObject.transform.position = Vector3.Lerp(start, target, t);
 
             yield return null;
+        }
+
+        yield return null;
 
     }
 

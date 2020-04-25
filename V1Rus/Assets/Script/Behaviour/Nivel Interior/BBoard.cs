@@ -618,6 +618,16 @@ public class BBoard : MonoBehaviour
         enemiesPos.Remove(oldPos);
         enemiesPos.Add(newPos);
     }
+
+    /// <summary>
+    /// Inidica si la casilla contiene un enemigo
+    /// </summary>
+    /// <param name="index"> Indice de la casilla </param>
+    /// <returns></returns>
+    public bool isEnemyPos(int index)
+    {
+        return enemiesPos.Contains(index);
+    }
     #endregion
 
     #region BOARD LOGIC

@@ -434,6 +434,12 @@ public class BEnemy : MonoBehaviour
             // Obtenemos el indice del tablero al que nos moveremos
             boardIndex = board.PositionToIndex(path[pathIndex]);
 
+            //Comprobamos si vamos a chocarnos con un jugador
+            if (board.GetPlayer().GetIndex() == boardIndex)
+            {
+                StartCoroutine(gameManager.ResetBoard());
+            }
+
             // Actualizamos la posicion del enemigo
             board.UpdateEnemy(board.PositionToIndex(transform.position), boardIndex);
 
