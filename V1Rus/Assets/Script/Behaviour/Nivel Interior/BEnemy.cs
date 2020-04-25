@@ -1,4 +1,5 @@
-﻿using PowerUI;
+﻿using Loonim;
+using PowerUI;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -75,6 +76,9 @@ public class BEnemy : MonoBehaviour
     /// Tablero del nivel
     private BBoard board;
 
+    /// Variable para ver si la vision esta activada o no
+    private bool activeVision;
+
     /// Variable para indicar si la partida ha acabado o no
     private bool gameOver;
 
@@ -85,6 +89,7 @@ public class BEnemy : MonoBehaviour
     {
         rotationTime = enemyInfo.rotationTime;
         moveTime = enemyInfo.moveTime;
+        activeVision = true;
     }
 
     public void SetupEnemy(BGameManager gameManager)
@@ -126,11 +131,15 @@ public class BEnemy : MonoBehaviour
 
     public void SetupEnemyVision()
     {
-        // Calculamos la zona de vision
-        ComputeVisionSet();
+        if (activeVision)
+        {
+            // Calculamos la zona de vision
+            ComputeVisionSet();
 
-        // Cambiamos los materiales de las casillas de vision del enemigo
-        ChangeVisionRangeMaterial(visionMaterial);
+            // Cambiamos los materiales de las casillas de vision del enemigo
+            ChangeVisionRangeMaterial(visionMaterial);
+
+        }
     }
 
     /// <summary>
@@ -185,6 +194,23 @@ public class BEnemy : MonoBehaviour
 
         // Informamos al manager de que este enemigo se ha desactivado
         gameManager.DisableEnemy(this);
+    }
+
+    /// <summary>
+    /// Funcion para activar o desactivar la vision del enemigo
+    /// </summary>
+    /// <param name="vision"> Activar o desactivar vision</param>
+    public void ActivateEnemyVision(bool vision)
+    {
+        if (vision)
+        {
+            SetupEnemyVision();
+        }
+        else
+        {
+            ResetVisionRange();
+        }
+        activeVision = vision;
     }
 
     #endregion
@@ -446,11 +472,7 @@ public class BEnemy : MonoBehaviour
             // Una vez terminada la rotacion iniciamos una corutina para que el jugador se mueva
             yield return StartCoroutine(MoveOverTimeCoroutine(gameObject, moveTime, transform.position, board.IndexToPosition(boardIndex, gameObject)));
 
-            // Calculamos el nuevo campo de vision
-            ComputeVisionSet();
-
-            // Pintamos las casillas del campo de vision
-            ChangeVisionRangeMaterial(visionMaterial);
+            SetupEnemyVision();
         }
      
         yield return null;
