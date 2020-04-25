@@ -136,6 +136,29 @@ public class BGameManager : MonoBehaviour
     }
     #endregion
 
+    #region CONTROL
+
+    /// <summary>
+    /// Funcion encargada de desactivar al enemigo eliminandolo del array de activos
+    /// </summary>
+    /// <param name="enemigo"> Enemigo a desactivar</param>
+    public void DisableEnemy(BEnemy enemigo)
+    {
+        activeEnemies.Remove(enemigo);
+    }
+
+    /// <summary>
+    /// Funcion encargada de activar al enemigo metiendolo en array de enemigos activos
+    /// </summary>
+    /// <param name="enemigo"> Enemigo a activar</param>
+    public void EnableEnemy(BEnemy enemigo)
+    {
+        activeEnemies.Add(enemigo);
+    }
+
+
+    #endregion
+
     #region CORUTINES
 
     public IEnumerator SwapActiveBoard()
@@ -160,6 +183,23 @@ public class BGameManager : MonoBehaviour
         yield return null;
     }
 
+    // Falta implementar la UI
+    public IEnumerator ResetBoard()
+    {
+        yield return StartCoroutine(DisolveObjects());
+
+        // Terminamos el ultimo Board Activo
+        activeBoard.EndBoard();
+
+        activeBoard.SetupBoard(this);
+
+        UpdateActive();
+
+        StartCoroutine(LoadObjects());
+
+        yield return null;
+    }
+
     /// <summary>
     /// Llama a todos los enemigo sy le sindica que deben hacer su turno y espera hasta que todos acaben de hacerlo
     /// </summary>
@@ -168,12 +208,24 @@ public class BGameManager : MonoBehaviour
     {
         RunInfo info = new RunInfo();
 
+        if (BTile.ETileState.EVision == activeBoard.GetTileState(activePlayer.GetIndex()))
+        {
+            StartCoroutine(ResetBoard());
+        }
+
         foreach (BEnemy enemy in activeEnemies)
         {
             info = enemy.NextMovement().ParallelCoroutine("enemies");
         }
 
         yield return new WaitUntil(() => info.count <= 0);
+
+        if (BTile.ETileState.EVision == activeBoard.GetTileState(activePlayer.GetIndex()))
+        {
+            StartCoroutine(ResetBoard());
+        }
+
+        yield return null;
     }
 
     /// <summary>

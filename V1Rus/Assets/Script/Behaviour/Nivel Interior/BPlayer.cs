@@ -229,7 +229,8 @@ public class BPlayer : MonoBehaviour
                     else if (previousHit != -1)
                     {
                         // Cambiamos el material de la anterior casillas
-                        path.ForEach(tile => board.ResetMaterial(tile));
+                        board.RemoveMaterial(path[path.Count - 1], selectedMaterial);
+                        path.ForEach(tile => board.RemoveMaterial(tile, cursorMaterial));
                         previousHit = -1;
                         path.Clear();
                     }
@@ -237,7 +238,8 @@ public class BPlayer : MonoBehaviour
             }
             else if (previousHit != -1 && path.Count > 1)
             {
-                path.ForEach(tile => board.ResetMaterial(tile));
+                        board.RemoveMaterial(path[path.Count - 1], selectedMaterial);
+        path.ForEach(tile => board.RemoveMaterial(tile,cursorMaterial));
                 previousHit = -1;
                 path.Clear();
             }
@@ -249,7 +251,8 @@ public class BPlayer : MonoBehaviour
     /// </summary>
     public void DestroyPath()
     {
-        path.ForEach(tile => board.ResetMaterial(tile));
+        board.RemoveMaterial(path[path.Count - 1], selectedMaterial);
+        path.ForEach(tile => board.RemoveMaterial(tile,cursorMaterial));
 
         path.Clear();
     }
@@ -299,7 +302,6 @@ public class BPlayer : MonoBehaviour
             textAp.color = Color.red;
         }
     }
-
 
     #endregion
 

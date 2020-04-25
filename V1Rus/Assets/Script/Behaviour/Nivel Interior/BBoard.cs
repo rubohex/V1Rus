@@ -298,8 +298,8 @@ public class BBoard : MonoBehaviour
         // Obtenemos todos los enemigos y los guardamos en la lista
         foreach (BEnemy enemy in GetComponentsInChildren<BEnemy>())
         {
-            enemiesPos.Add(enemy.GetEnemyIndex());
             enemy.SetupEnemy(manager);
+            enemiesPos.Add(enemy.GetEnemyIndex());
         }
 
         // Spawneamos el target de la camara y lo colocamos en el centro
@@ -345,11 +345,18 @@ public class BBoard : MonoBehaviour
 
         locations.Clear();
 
+        foreach (BTile tile in tiles.Values)
+        {
+            tile.BackToOriginal();
+        }
+
         tiles.Clear();
 
         edges.Clear();
 
         walls.Clear();
+
+        enemiesPos.Clear();
 
         indexDirections.Clear();
     }
@@ -1136,6 +1143,64 @@ public class BBoard : MonoBehaviour
             return null;
         }
     }
+    #endregion
+
+    #region TILE STATES
+
+    /// <summary>
+    /// Cambia el Estado de la casilla en la posicion index
+    /// </summary>
+    /// <param name="index"> Indice de la casilla</param>
+    /// <param name="state"> Nuevo material de la casilla</param>
+    public void ChangeTileState(int index, BTile.ETileState state)
+    {
+        if (tiles.ContainsKey(index))
+        {
+            tiles[index].ChangeState(state);
+        }
+    }
+
+    /// <summary>
+    /// Devuelve el estado de la casilla en la posicion index
+    /// </summary>
+    /// <param name="index">Indice de la casilla</param>
+    public void ResetState(int index)
+    {
+        if (tiles.ContainsKey(index))
+        {
+            tiles[index].ResetState();
+        }
+    }
+
+    /// <summary>
+    /// Elimina el material que recibe por parametro de la lista de materiales de la casilla
+    /// </summary>
+    /// <param name="index">Indice de la casilla</param>
+    public void RemoveState(int index, BTile.ETileState state)
+    {
+        if (tiles.ContainsKey(index))
+        {
+            tiles[index].RemoveState(state);
+        }
+    }
+
+    /// <summary>
+    /// Conseguimos el estado de la casilla seleccionada
+    /// </summary>
+    /// <param name="index">Indice de la casilla deseada</param>
+    /// <returns> Estado de la casilla</returns>
+    public BTile.ETileState GetTileState(int index)
+    {
+        if (tiles.ContainsKey(index))
+        {
+            return tiles[index].currentState;
+        }
+        else
+        {
+            return BTile.ETileState.Empty;
+        }
+    }
+
     #endregion
 
     #endregion

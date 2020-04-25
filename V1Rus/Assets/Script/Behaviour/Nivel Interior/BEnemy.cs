@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using PowerUI;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -73,6 +74,10 @@ public class BEnemy : MonoBehaviour
 
     /// Tablero del nivel
     private BBoard board;
+
+    /// Variable para indicar si la partida ha acabado o no
+    private bool gameOver;
+
     #endregion
 
     #region AWAKE START UPDATE
@@ -114,11 +119,13 @@ public class BEnemy : MonoBehaviour
         // Definimos que el enemigo no se esta moviendo
         isMoving = false;
 
+        // Definimos que la partida no se ha acabado todavia
+        gameOver = false;
+
     }
 
     public void SetupEnemyVision()
     {
-
         // Calculamos la zona de vision
         ComputeVisionSet();
 
@@ -133,13 +140,52 @@ public class BEnemy : MonoBehaviour
     {
         // Eliminamos el campo de vision y lo vaciamos
         ResetVisionRange();
-        visionTiles.Clear();
 
         // Vaciamos el path
         path.Clear();
 
+        //Marcamos el gameOVer
+        setGameOver(true);
     }
 
+
+    #endregion
+
+    #region CONTROL
+
+    /// <summary>
+    /// Funcion que indica si la partida se ha acabado
+    /// </summary>
+    /// <param name="gOver"> Booleano que se asignara a gameOver </param>
+    public void setGameOver(bool gOver)
+    {
+        gameOver = gOver;
+    }
+
+    /// <summary>
+    /// Funcion encargada de activar al enemigo. Sera llamada desde la centralita
+    /// </summary>
+    public void EnableEnemy()
+    {
+        // Cambiamos los materiales de las casillas de vision del enemigo
+        ChangeVisionRangeMaterial(visionMaterial);
+
+        // Informamos al manager de que este enemigo se ha activado
+        gameManager.EnableEnemy(this);
+    }
+
+    /// <summary>
+    /// Funcion encargada de desactivar al enemigo.
+    /// </summary>
+    public void DisableEnemy()
+    {
+        // Eliminamos el campo de vision y lo vaciamos
+        ResetVisionRange();
+        visionTiles.Clear();
+
+        // Informamos al manager de que este enemigo se ha desactivado
+        gameManager.DisableEnemy(this);
+    }
 
     #endregion
 
@@ -236,6 +282,7 @@ public class BEnemy : MonoBehaviour
         foreach (int tile in visionTiles)
         {
             board.ChangeTileMaterial(tile, newMaterial);
+            board.ChangeTileState(tile, BTile.ETileState.EVision);
         }
     }
 
@@ -246,9 +293,8 @@ public class BEnemy : MonoBehaviour
     {
         foreach (int tile in visionTiles)
         {
-
-           board.RemoveMaterial(tile,visionMaterial);
-
+            board.RemoveMaterial(tile,visionMaterial);
+            board.RemoveState(tile,BTile.ETileState.EVision);
         }
     }
 
@@ -365,38 +411,41 @@ public class BEnemy : MonoBehaviour
     /// </summary>
     public IEnumerator NextMovement()
     {
-        // Cambiamos el material de las celdas de vision
-        ResetVisionRange();
-
-        // Obtenemos el vector al que miraremos
-        Vector3 lookAt = path[ComputeNextPathIndex(pathIndex)];
-
-        // Actualizamos la variable para indicar que el enemigo esta rotando
-        isMoving = true;
-
-        // Iniciamos una corutina que se encargara de hacer rotar al enemigo
-        if (Vector3.Distance(transform.position + transform.forward, lookAt) > 0.001f)
+        if (!gameOver)
         {
-            yield return StartCoroutine(RotateOverTimeCoroutine(this.gameObject, rotationTime, transform.rotation, Quaternion.LookRotation(lookAt - path[pathIndex], boardUP)));
+            // Cambiamos el material de las celdas de vision
+            ResetVisionRange();
+
+            // Obtenemos el vector al que miraremos
+            Vector3 lookAt = path[ComputeNextPathIndex(pathIndex)];
+
+            // Actualizamos la variable para indicar que el enemigo esta rotando
+            isMoving = true;
+
+            // Iniciamos una corutina que se encargara de hacer rotar al enemigo
+            if (Vector3.Distance(transform.position + transform.forward, lookAt) > 0.001f)
+            {
+                yield return StartCoroutine(RotateOverTimeCoroutine(this.gameObject, rotationTime, transform.rotation, Quaternion.LookRotation(lookAt - path[pathIndex], boardUP)));
+            }
+
+            // Obtenemos el Indice al que queremos movernos
+            pathIndex = ComputeNextPathIndex(pathIndex);
+
+            // Obtenemos el indice del tablero al que nos moveremos
+            boardIndex = board.PositionToIndex(path[pathIndex]);
+
+            // Actualizamos la posicion del enemigo
+            board.UpdateEnemy(board.PositionToIndex(transform.position), boardIndex);
+
+            // Una vez terminada la rotacion iniciamos una corutina para que el jugador se mueva
+            yield return StartCoroutine(MoveOverTimeCoroutine(gameObject, moveTime, transform.position, board.IndexToPosition(boardIndex, gameObject)));
+
+            // Calculamos el nuevo campo de vision
+            ComputeVisionSet();
+
+            // Pintamos las casillas del campo de vision
+            ChangeVisionRangeMaterial(visionMaterial);
         }
-
-        // Obtenemos el Indice al que queremos movernos
-        pathIndex = ComputeNextPathIndex(pathIndex);
-
-        // Obtenemos el indice del tablero al que nos moveremos
-        boardIndex = board.PositionToIndex(path[pathIndex]);
-
-        // Actualizamos la posicion del enemigo
-        board.UpdateEnemy(board.PositionToIndex(transform.position), boardIndex);
-
-        // Una vez terminada la rotacion iniciamos una corutina para que el jugador se mueva
-        yield return StartCoroutine(MoveOverTimeCoroutine(gameObject, moveTime, transform.position, board.IndexToPosition(boardIndex, gameObject)));
-
-        // Calculamos el nuevo campo de vision
-        ComputeVisionSet();
-
-        // Pintamos las casillas del campo de vision
-        ChangeVisionRangeMaterial(visionMaterial);
      
         yield return null;
     }
