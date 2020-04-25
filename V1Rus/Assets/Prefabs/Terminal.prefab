@@ -1022,8 +1022,8 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 1.2, y: 2, z: 1}
-  m_Center: {x: 0, y: 1, z: 0}
+  m_Size: {x: 1.2, y: 2, z: 1.2}
+  m_Center: {x: 0, y: 1, z: 0.1}
 --- !u!114 &2933559153333140920
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1325,11 +1325,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 4978695485263253525}
     m_Modifications:
-    - target: {fileID: -927199367670048503, guid: f7b4b7e06a14f1a4b805ace6422a9626,
-        type: 3}
-      propertyPath: m_Name
-      value: TerminalBueno
-      objectReference: {fileID: 0}
     - target: {fileID: -4216859302048453862, guid: f7b4b7e06a14f1a4b805ace6422a9626,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -1384,6 +1379,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -927199367670048503, guid: f7b4b7e06a14f1a4b805ace6422a9626,
+        type: 3}
+      propertyPath: m_Name
+      value: TerminalBueno
       objectReference: {fileID: 0}
     - target: {fileID: -157825318150610632, guid: f7b4b7e06a14f1a4b805ace6422a9626,
         type: 3}
