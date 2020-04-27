@@ -38,7 +38,7 @@ public class BMapPlayer : MonoBehaviour
     /// Tiempo que lleva desplazandose en el movimiento del muelle
     float currentLerpTime;
 
-    
+
 
     // Diccionario con los objetivos (Event Points) por defecto en cada dirección
     public Dictionary<GameObject, int> Targets = new Dictionary<GameObject, int>();
@@ -52,7 +52,7 @@ public class BMapPlayer : MonoBehaviour
 
     #endregion
 
-    #region METHODS
+    #region Awake, Start, Update
 
     private void Awake()
     {
@@ -93,7 +93,7 @@ public class BMapPlayer : MonoBehaviour
                 }
                 else
                 {
-                    
+
                     selectedEventPoint = targetEventPoint;
                     currentPath = currentEventpoint.GetComponent<BEventPoint>().MyList[Targets[selectedEventPoint]].Path;
                 }
@@ -110,15 +110,22 @@ public class BMapPlayer : MonoBehaviour
                 }
                 else
                 {
-                    Move(currentPath[pathPos-1].transform.position, currentPath[pathPos].transform.position);
+                    Move(currentPath[pathPos - 1].transform.position, currentPath[pathPos].transform.position);
                 }
             }
+        }
+        else
+        {
+            this.transform.position = currentEventpoint.transform.position;
+            currentLerpTime = 0f;
+            pathPos = 0;
         }
 
     }
 
     #endregion
 
+    #region METHODS
 
     void Move(Vector3 startPos, Vector3 endPos)
     {
@@ -154,12 +161,14 @@ public class BMapPlayer : MonoBehaviour
     private Dictionary<GameObject, int> GetTargets(List<BEventPoint.MyClass> ItemGroups)
     {
         int j = 0;
-        Dictionary<GameObject, int>  targets = new Dictionary<GameObject, int>();
+        Dictionary<GameObject, int> targets = new Dictionary<GameObject, int>();
         foreach (BEventPoint.MyClass i in ItemGroups)
         {
-            targets.Add(i.Path[i.Path.Length - 1],j);
+            targets.Add(i.Path[i.Path.Length - 1], j);
             j += 1;
         }
         return targets;
     }
+
+    #endregion
 }
