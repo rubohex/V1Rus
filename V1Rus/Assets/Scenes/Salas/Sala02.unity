@@ -166,7 +166,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 61e439aaec90323479b32b84bd604c84, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cameraInfo: {fileID: 11400000, guid: 5d89bc63331ea0f4aa35e7899ccd3e0d, type: 2}
 --- !u!114 &65172727
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -949,6 +948,10 @@ PrefabInstance:
       propertyPath: textAp
       value: 
       objectReference: {fileID: 761630622}
+    - target: {fileID: 553295812, guid: ec3356b094921f847a151481851f1713, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ec3356b094921f847a151481851f1713, type: 3}
 --- !u!1001 &207608730
@@ -1367,6 +1370,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   boardInfo: {fileID: 11400000, guid: 8e1f0de2719226e4d89cc5d27a22b022, type: 2}
+  playerInfo: {fileID: 0}
+  cameraInfo: {fileID: 0}
   Tile: {fileID: 7668470989950785439, guid: d9933f9260440634bb88fe4efd9dda24, type: 3}
   dataParticle: {fileID: 1701537868353255867, guid: ae5cd76f331be6b40a8dbc51e986335d,
     type: 3}
