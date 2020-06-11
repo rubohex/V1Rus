@@ -330,6 +330,10 @@ public class BBoard : MonoBehaviour
         {
             terminal.SetupTerminal(manager);
         }
+        foreach (BBaliza baliza in GetComponentsInChildren<BBaliza>())
+        {
+            baliza.SetupBaliza(manager);
+        }
     }
 
     /// <summary>
