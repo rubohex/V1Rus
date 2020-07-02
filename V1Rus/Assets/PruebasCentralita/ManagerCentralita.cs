@@ -10,6 +10,8 @@ using System.Text.RegularExpressions;
 
 public class ManagerCentralita : MonoBehaviour
 {
+    public GameObject canvasCentralita;
+    /*
     public GameObject[] objetos;
     public GameObject centralita;
 
@@ -330,6 +332,44 @@ public class ManagerCentralita : MonoBehaviour
         {
             centralita.SetActive(false);
 
+        }
+    }
+    */
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.name.Contains("Player"))
+        {
+            canvasCentralita.SetActive(true);
+            setSelected();
+        }
+    }
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.gameObject.name.Contains("Player"))
+        {
+            canvasCentralita.SetActive(false);
+        }
+    }
+
+    private void setSelected()
+    {
+        GameObject[] objects = GetComponent<objectReference>().reference;
+        foreach(GameObject g in objects)
+        {
+            string nombre = g.name;
+            Transform linea = transform.Find("CanvasCentralita/WindowCentralita/Content/Code/Content/ScrollArea/CodeContainer/TextContainer/CentralitaManager" + nombre + "/Line1");
+
+            if (g.GetComponent<Activable>().getActivePower())
+            {
+                linea.transform.Find("33.ON").gameObject.SetActive(true);
+                linea.transform.Find("33.OFF").gameObject.SetActive(false);
+            }
+            else
+            {
+                linea.transform.Find("33.ON").gameObject.SetActive(false);
+                linea.transform.Find("33.OFF").gameObject.SetActive(true);
+            }
         }
     }
 }
