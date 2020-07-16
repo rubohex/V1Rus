@@ -117,17 +117,6 @@ public class BPlayer : MonoBehaviour
         if (canPlay)
         {
             //UpdateUI();
-            // Control del giro a la izquierda
-            if (Input.GetKeyDown(rotateLeft) && !isMoving)
-            {
-                StartCoroutine(RotateOverTimeCoroutine(this.gameObject, rotationTime, transform.rotation, Quaternion.LookRotation(-transform.right, transform.up)));
-            }
-
-            // Control del giro a la derecha
-            if (Input.GetKeyDown(rotateRight) && !isMoving)
-            {
-                StartCoroutine(RotateOverTimeCoroutine(this.gameObject, rotationTime, transform.rotation, Quaternion.LookRotation(transform.right, transform.up)));
-            }
 
             if (Input.GetMouseButtonDown(0) && !isMoving && !EventSystem.current.IsPointerOverGameObject())
             {
@@ -137,53 +126,6 @@ public class BPlayer : MonoBehaviour
 
                     StartCoroutine(MakePath());
                 }
-            }
-
-            // Control movimiento
-            if (Input.GetKeyDown(move) && !isMoving)
-            {
-                // Vector de posicion de la casilla objetivo
-                Vector3 objectivePos = board.IndexToPosition(tileIndex) + transform.forward;
-                // Obtenemos el indice de la casilla a la que queremos ir a partir de la casilla acutal y la casilla a la que miramos
-                int objectiveIndex = board.PositionToIndex(objectivePos);
-
-                // Obtenemos tambien el coste de dicha casilla
-                float cost = board.CostToEnter(tileIndex, objectiveIndex, recogerCable);
-
-                // Obsevamos que el coste es distinto de cero
-                //maxAP == 0 sería considerado AP infinito(sala del boss)
-                if (cost != Mathf.Infinity && (cost <= Ap || maxAP == 0))
-                {
-                    // Informamos de que nos estamos moviendo
-                    isMoving = true;
-
-                    // Llamamos a la corutina para que se encargue del movimiento
-                    StartCoroutine(MoveOverTimeCoroutine(this.gameObject, moveTime, transform.position, board.IndexToPosition(objectiveIndex, gameObject)));
-
-                    // Miramos si la casilla en la que entramos tiene particuals de datos o no esto lo podemos ver con el coste
-                    if (cost > 0)
-                    {
-                        // Spawneamos las particulas
-                        board.SpawnParticle(tileIndex, recogerCable);
-                    }
-                    else if (cost < 0 && recogerCable)
-                    {
-                        // Eliminamos la particula
-                        board.DespawnParticle(objectiveIndex);
-                    }
-
-                    // Cambiamos a casilla en la que estamos y el coste
-                    tileIndex = objectiveIndex;
-                    if (maxAP != 0)
-                    {
-                        ChangeAP((int)-cost);
-                    }
-
-                    gameManager.EnemyTurn();
-                }
-
-                // Temporal
-                RestartPath();
             }
 
             //Temporal activacion de recogerDatos hasta que tengamos la habilidad util para pruebas

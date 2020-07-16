@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Playables;
 
 public class BGameManager : MonoBehaviour
 {
@@ -51,13 +52,13 @@ public class BGameManager : MonoBehaviour
         activeBoard = debugArray[iter].GetComponent<BBoard>();
 
         // Hacemos el Setup del Board y de todos sus componentes
-        activeBoard.SetupBoard(this);
+        activeBoard.SetupBoard(this,false);
 
         // Actualizamos nuestras variables
-        UpdateActive();
+        UpdateActive(false);
 
-        // Llamamos a la coorutina encargada de mostrar todos los objetos
-        StartCoroutine(LoadObjects());
+        // Llamamos a la corutina encargada de mostrar todos los objetos
+        StartCoroutine(LoadObjects(false));
 
         boardCompleted = false;
     }
@@ -68,7 +69,18 @@ public class BGameManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Tab) || boardCompleted)
         {
             boardCompleted = false;
-            StartCoroutine(SwapActiveBoard());
+
+            iter += 1;
+            iter = iter % debugArray.Length;
+
+            StartCoroutine(SwapActiveBoard(debugArray[iter].GetComponent<BBoard>(),false));
+        }
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            boardCompleted = false;
+
+            StartCoroutine(SwapActiveBoard(activeBoard, true));
         }
     }
 
@@ -77,29 +89,37 @@ public class BGameManager : MonoBehaviour
         if (boardCompleted)
         {
             boardCompleted = false;
-            StartCoroutine(SwapActiveBoard());
+            StartCoroutine(SwapActiveBoard(debugArray[iter].GetComponent<BBoard>(),false));
         }
     }
     /// <summary>
     /// Actualiza todos los objetos que estan activos actualmente en escena
     /// </summary>
-    private void UpdateActive()
+    private void UpdateActive(bool playableLevel)
     {
-        // Guardamos los enemigos
+        
         activeEnemies.Clear();
-        activeEnemies.AddRange(activeBoard.GetBoardEnemies());
-
-        // Guardamos los enemigos
+        
         activeWalls.Clear();
-        activeWalls.AddRange(activeBoard.GetBoardWalls());
-
-        // Guardamos los enemigos
+        
         activeTerminals.Clear();
-        activeTerminals.AddRange(activeBoard.GetBoardTerminals());
-
-        // Guardamos los enemigos
+        
         activeDoors.Clear();
-        activeDoors.AddRange(activeBoard.GetBoardDoors());
+        
+
+        if (playableLevel) {
+            // Guardamos los enemigos
+            activeEnemies.AddRange(activeBoard.GetBoardEnemies());
+
+            // Guardamos los muros
+            activeWalls.AddRange(activeBoard.GetBoardWalls());
+
+            // Guardamos las terminales
+            activeTerminals.AddRange(activeBoard.GetBoardTerminals());
+
+            // Guardamos las puertas
+            activeDoors.AddRange(activeBoard.GetBoardDoors());
+        }
 
         // Guardamos el jugador
         activePlayer = activeBoard.GetPlayer();
@@ -161,7 +181,7 @@ public class BGameManager : MonoBehaviour
 
     #region CORUTINES
 
-    public IEnumerator SwapActiveBoard()
+    public IEnumerator SwapActiveBoard(BBoard newBoard, bool playableLevel)
     {
 
         yield return StartCoroutine(DisolveObjects());
@@ -169,16 +189,13 @@ public class BGameManager : MonoBehaviour
         // Terminamos el ultimo Board Activo
         activeBoard.EndBoard();
 
-        iter += 1;
-        iter = iter % debugArray.Length;
+        activeBoard = newBoard; 
 
-        activeBoard = debugArray[iter].GetComponent<BBoard>();
+        activeBoard.SetupBoard(this, playableLevel);
 
-        activeBoard.SetupBoard(this);
+        UpdateActive(playableLevel);
 
-        UpdateActive();
-
-        StartCoroutine(LoadObjects());
+        StartCoroutine(LoadObjects(playableLevel));
 
         yield return null;
     }
@@ -191,11 +208,11 @@ public class BGameManager : MonoBehaviour
         // Terminamos el ultimo Board Activo
         activeBoard.EndBoard();
 
-        activeBoard.SetupBoard(this);
+        activeBoard.SetupBoard(this,true);
 
-        UpdateActive();
+        UpdateActive(true);
 
-        StartCoroutine(LoadObjects());
+        StartCoroutine(LoadObjects(true));
 
         yield return null;
     }
@@ -317,7 +334,7 @@ public class BGameManager : MonoBehaviour
     /// Coorutina encargada de hacer la animacion de disolucion de objetos como carga
     /// </summary>
     /// <returns></returns>
-    private IEnumerator LoadObjects()
+    private IEnumerator LoadObjects(bool playableLevel)
     {
         RunInfo info = new RunInfo();
 
@@ -325,45 +342,51 @@ public class BGameManager : MonoBehaviour
         Material playermaterial = activePlayer.GetComponent<Renderer>().material;
         info = LoadObject(playermaterial, "_DisolutionValue").ParallelCoroutine("loadDisolve");
 
-        // Seguidamente de todas las puertas y las temrinales
-        foreach (BPuerta puerta in activeDoors)
+        if (playableLevel)
         {
-            if (!puerta.GetAbierta())
+            // Seguidamente de todas las puertas y las temrinales
+            foreach (BPuerta puerta in activeDoors)
             {
-                Material doorMaterial = puerta.GetComponentInChildren<Renderer>().material;
-                info = LoadObject(doorMaterial, "_DisolutionValue").ParallelCoroutine("loadDisolve");
+                if (!puerta.GetAbierta())
+                {
+                    Material doorMaterial = puerta.GetComponentInChildren<Renderer>().material;
+                    info = LoadObject(doorMaterial, "_DisolutionValue").ParallelCoroutine("loadDisolve");
+                }
+            }
+
+            foreach (BTerminal terminal in activeTerminals)
+            {
+                Material terminalMaterial = terminal.GetComponentInChildren<Renderer>().material;
+                info = LoadObject(terminalMaterial, "_DisolutionValue").ParallelCoroutine("loadDisolve");
+            }
+
+            // Hacemos lo mismo con los enemigos y con los muros
+            foreach (BMuro muro in activeWalls)
+            {
+                Material wallMaterial = muro.GetComponentInChildren<Renderer>().material;
+                info = LoadObject(wallMaterial, "_DisolutionValue").ParallelCoroutine("loadDisolve");
+            }
+
+            foreach (BEnemy enemy in activeEnemies)
+            {
+                Material enemyMaterial = enemy.GetComponentInChildren<Renderer>().material;
+                info = LoadObject(enemyMaterial, "_DisolutionValue").ParallelCoroutine("loadDisolve");
             }
         }
-
-        foreach (BTerminal terminal in activeTerminals)
-        {
-            Material terminalMaterial = terminal.GetComponentInChildren<Renderer>().material;
-            info = LoadObject(terminalMaterial, "_DisolutionValue").ParallelCoroutine("loadDisolve");
-        }
-
-        // Hacemos lo mismo con los enemigos y con los muros
-        foreach (BMuro muro in activeWalls)
-        {
-            Material wallMaterial = muro.GetComponentInChildren<Renderer>().material;
-            info = LoadObject(wallMaterial, "_DisolutionValue").ParallelCoroutine("loadDisolve");
-        }
-
-        foreach (BEnemy enemy in activeEnemies)
-        {
-            Material enemyMaterial = enemy.GetComponentInChildren<Renderer>().material;
-            info = LoadObject(enemyMaterial, "_DisolutionValue").ParallelCoroutine("loadDisolve");
-        }
+        
 
         yield return new WaitUntil(() => info.count <= 0);
 
         activePlayer.setPlay(true);
 
-
-        foreach (BEnemy enemy in activeEnemies)
+        if (playableLevel)
         {
-            enemy.SetupEnemyVision();
+            foreach (BEnemy enemy in activeEnemies)
+            {
+                enemy.SetupEnemyVision();
+            }
         }
-
+        
         yield return null;
     }
 

@@ -114,7 +114,8 @@ public class BBoard : MonoBehaviour
     /// Funcion encargada de hacer el Setup del Board iniciando todas sus estructuras logicas
     /// </summary>
     /// <param name="manager">Manager del cubo</param>
-    public void SetupBoard(BGameManager manager)
+    /// <param name="playableLevel">Indica si el nivel es de paso o de juego</param>
+    public void SetupBoard(BGameManager manager, bool playableLevel)
     {
         // GUardamos el manager
         gameManager = manager;
@@ -275,8 +276,10 @@ public class BBoard : MonoBehaviour
         // Ponemos a 0 los bordes del tablero
         SetBorderEdges();
 
+
         // Obtenemos la posicion y rotacion para instanciar al jugador
         Vector3 playerPos = GetPlayerSpawnPos(boardInfo.player.GetComponent<Renderer>().bounds.size.y);
+        
         Quaternion playerRot = GetPlayerSpawnRot();
 
         // Instanciamos al jugador
@@ -290,16 +293,41 @@ public class BBoard : MonoBehaviour
         // Hacemos el setup del jugador
         player.SetupPlayer(manager, playerInfo, endIndex);
 
-
-
         // Obtenemos la roatacion de los elementos del tablero para cuando spawneemos particulas
         spawnRotation = player.transform.rotation;
 
-        // Obtenemos todos los enemigos y los guardamos en la lista
-        foreach (BEnemy enemy in GetComponentsInChildren<BEnemy>())
+        if (playableLevel)
         {
-            enemy.SetupEnemy(manager);
-            enemiesPos.Add(enemy.GetEnemyIndex());
+            // Obtenemos todos los enemigos y los guardamos en la lista
+            foreach (BEnemy enemy in GetComponentsInChildren<BEnemy>())
+            {
+                enemy.SetupEnemy(manager);
+                enemiesPos.Add(enemy.GetEnemyIndex());
+            }
+
+            // Iniciamos las puertas del nivel
+            foreach (BPuerta puerta in GetComponentsInChildren<BPuerta>())
+            {
+                puerta.SetupDoor(manager);
+            }
+
+            foreach (BTerminal terminal in GetComponentsInChildren<BTerminal>())
+            {
+                terminal.SetupTerminal(manager);
+            }
+
+            foreach (BBaliza baliza in GetComponentsInChildren<BBaliza>())
+            {
+                baliza.SetupBaliza(manager);
+            }
+        }
+        else
+        {
+            // Obtenemos todos los enemigos y los desactivamos
+            foreach (BEnemy enemy in GetComponentsInChildren<BEnemy>())
+            {
+                enemy.EndEnemy();
+            }
         }
 
         // Spawneamos el target de la camara y lo colocamos en el centro
@@ -320,20 +348,6 @@ public class BBoard : MonoBehaviour
 
         // Ejecutamos el Setup
         camera.SetupCamera(manager, cameraInfo);
-
-        // Iniciamos las puertas del nivel
-        foreach (BPuerta puerta in GetComponentsInChildren<BPuerta>())
-        {
-            puerta.SetupDoor(manager);
-        }
-        foreach (BTerminal terminal in GetComponentsInChildren<BTerminal>())
-        {
-            terminal.SetupTerminal(manager);
-        }
-        foreach (BBaliza baliza in GetComponentsInChildren<BBaliza>())
-        {
-            baliza.SetupBaliza(manager);
-        }
     }
 
     /// <summary>

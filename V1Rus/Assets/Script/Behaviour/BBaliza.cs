@@ -6,7 +6,6 @@ using UnityEngine.UI;
 public class BBaliza : MonoBehaviour
 {
 
-
     #region Atributos
 
     /// <summary>
@@ -28,8 +27,6 @@ public class BBaliza : MonoBehaviour
 
     private BBoard boardScript;
     #endregion
-
-
 
     public void SetupBaliza(BGameManager manager)
     {
@@ -94,7 +91,7 @@ public class BBaliza : MonoBehaviour
     {
         pantalla1.SetActive(false);
         testPantalla.SetActive(false);
-        StartCoroutine(gameManager.SwapActiveBoard());
+        //StartCoroutine(gameManager.SwapActiveBoard(true));
     }
 
 }

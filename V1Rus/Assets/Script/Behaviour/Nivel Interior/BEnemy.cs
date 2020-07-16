@@ -104,13 +104,16 @@ public class BEnemy : MonoBehaviour
         boardUP = board.GetBoardUp();
 
         // Posicion inicial del jugador en el waypoint 0
-        transform.position = board.GetEnemySpawnPos(wayPoints[0].position, GetComponent<Renderer>().bounds.size);
+        transform.position = board.GetEnemySpawnPos(wayPoints[0].position, GetEnemyBounds().size);
 
         // Obtenemos el camino que tendra que recorrer el enemigo
         CreatePath();
 
         // Rotacion inicial mirando hacia el waypoint 1
         transform.rotation = Quaternion.LookRotation(path[1] - path[0], boardUP);
+
+        // Activamos la colision
+        GetComponent<CapsuleCollider>().enabled = true;
 
         // Obtenemos el indice del tablero en el que estamos
         boardIndex = board.PositionToIndex(transform.position);
@@ -152,6 +155,9 @@ public class BEnemy : MonoBehaviour
 
         // Vaciamos el path
         path.Clear();
+
+        // Desactivamos la colision
+        GetComponent<CapsuleCollider>().enabled = false;
 
         //Marcamos el gameOVer
         setGameOver(true);
@@ -225,6 +231,21 @@ public class BEnemy : MonoBehaviour
         return boardIndex;
     }
     #endregion
+
+    /// <summary>
+    /// Devuelve las bounds del enemigo. Es necesario ya que esta compuesto pro varios meshes
+    /// </summary>
+    /// <returns></returns>
+    public Bounds GetEnemyBounds()
+    {
+        Bounds total = new Bounds(transform.position, Vector3.zero);
+        Renderer[] renderers = GetComponentsInChildren<Renderer>();
+        foreach (Renderer render in renderers)
+        {
+            total.Encapsulate(render.bounds);
+        }
+        return total;
+    }
 
     #region PATH
 
